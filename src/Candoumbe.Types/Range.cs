@@ -16,7 +16,8 @@ namespace Candoumbe.Types;
 public abstract class Range<TBound> : IEquatable<Range<TBound>>, IComparable<Range<TBound>>
     where TBound : IComparable<TBound>
 #else
-public abstract record Range<TBound>(TBound Start, TBound End) : IComparable<Range<TBound>> where TBound : IComparable<TBound>
+public abstract record Range<TBound>(TBound Start, TBound End)
+    : IComparable<Range<TBound>> where TBound : IComparable<TBound>
 #endif
 {
 #if !NET5_0_OR_GREATER

@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
 
 using Xunit;
 using Xunit.Abstractions;
@@ -404,5 +405,82 @@ public class MultiDateTimeRangeTests
 
         // Assert
         range.IsEmpty().Should().BeTrue();
+    }
+
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_an_instance_that_is_not_null_When_adding_a_DateOnlyRange_that_is_infinite_Then_IsInfinite_should_return_true(NonEmptyArray<DateOnlyRange> ranges)
+    {
+        // Arrange
+        MultiDateOnlyRange range = new(ranges.Get);
+
+        // Act
+        range.Add(DateOnlyRange.Infinite);
+
+        // Assert
+        range.IsInfinite().Should().BeTrue();
+        range.Ranges.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public void Given_an_instance_that_contains_no_DateOnlyRange_Then_IsEmpty_should_return_true()
+    {
+        // Arrange
+        MultiDateOnlyRange range = new();
+
+        // Assert
+        range.IsEmpty().Should().BeTrue();
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_an_instance_that_is_not_null_Then_ToString_should_produce_expected_output(MultiDateTimeRange range)
+    {
+        // Arrange
+        string expected;
+        if (range.IsInfinite())
+        {
+            expected = "{infinite}";
+        }
+        else if (range.IsEmpty())
+        {
+            expected = "{empty}";
+        }
+        else
+        {
+            StringBuilder sb = new StringBuilder();
+            int i = 0;
+            foreach (DateTimeRange item in range.Ranges)
+            {
+                if (i > 0)
+                {
+                    sb.Append(',');
+                }
+
+                sb.Append(item);
+                i++;
+            }
+
+            expected = sb.Insert(0, '{').Append('}').ToString();
+        }
+
+        // Act
+        string actual = range.ToString();
+
+        // Assert
+        actual.Should().Be(expected);
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_current_instance_is_infinite_When_Adding_any_other_value_Then_result_should_be_infinite(DateTimeRange other)
+    {
+        // Arrange
+        MultiDateTimeRange current = MultiDateTimeRange.Infinite;
+
+        // Act
+        MultiDateTimeRange actual = current + other;
+
+        // Assert
+        actual.Should().Be(MultiDateTimeRange.Infinite);
+        actual.Ranges.Should().HaveCount(1);
     }
 }

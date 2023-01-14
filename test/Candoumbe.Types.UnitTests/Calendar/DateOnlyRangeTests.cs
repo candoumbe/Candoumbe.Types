@@ -201,6 +201,17 @@ public class DateOnlyRangeTests
                 new DateOnlyRange(DateOnly.FromDateTime(14.July(1789)), DateOnly.FromDateTime(5.April(1950))),
                 true
             };
+
+            /* 
+             * first:         |--------|
+             * other is null :
+             */
+            yield return new object[]
+            {
+                new DateOnlyRange(DateOnly.FromDateTime(1.April(1832)), DateOnly.FromDateTime(5.April(1945))),
+                null,
+                false
+            };
         }
     }
 
@@ -227,10 +238,10 @@ public class DateOnlyRangeTests
 
         // Assert
         actual.Should()
-              .BeTrue($"AllTime range overlaps every other {nameof(DateOnlyRange)}s");
+              .BeTrue($"{nameof(DateOnlyRange.Infinite)} range overlaps every other {nameof(DateOnlyRange)}s");
     }
 
-    public static IEnumerable<object[]> UnionCases
+    public static IEnumerable<object[]> MergeCases
     {
         get
         {
@@ -309,8 +320,8 @@ public class DateOnlyRangeTests
     }
 
     [Theory]
-    [MemberData(nameof(UnionCases))]
-    public void Given_two_instances_Union_should_behave_as_expected(DateOnlyRange current, DateOnlyRange other, DateOnlyRange expected)
+    [MemberData(nameof(MergeCases))]
+    public void Given_two_instances_Merge_should_behave_as_expected(DateOnlyRange current, DateOnlyRange other, DateOnlyRange expected)
     {
         // Act
         DateOnlyRange actual = current.Merge(other);
@@ -321,7 +332,7 @@ public class DateOnlyRangeTests
     }
 
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public void Given_non_empty_TimeOnlyRange_When_merging_with_empty_range_Union_should_returns_the_non_empty_range(DateOnlyRange range, DateOnly date)
+    public void Given_non_empty_TimeOnlyRange_When_merging_with_empty_range_Merge_should_returns_the_non_empty_range(DateOnlyRange range, DateOnly date)
     {
         // Arrange
         DateOnlyRange empty = new(date, date);
@@ -334,7 +345,7 @@ public class DateOnlyRangeTests
     }
 
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public void Given_non_empty_TimeOnlyRange_When_merging_with_an_other_TimeOnlyRange_that_does_not_overlaps_nor_is_contiguous_Union_should_throw_InvalidOperationException(DateOnly date)
+    public void Given_non_empty_TimeOnlyRange_When_merging_with_an_other_TimeOnlyRange_that_does_not_overlaps_nor_is_contiguous_Merge_should_throw_InvalidOperationException(DateOnly date)
     {
         // Arrange
         DateOnlyRange left = new(date.AddDays(1), Faker.Date.FutureDateOnly(refDate: date.AddDays(2)));
@@ -473,7 +484,7 @@ public class DateOnlyRangeTests
     }
 
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public void Given_DateOnlyRange_is_infinite_When_value_anything_Overlaps_should_returns_Yes(DateOnly date)
+    public void Given_DateOnlyRange_is_infinite_When_value_anything_Then_Overlaps_should_returns_true(DateOnly date)
     {
         // Act
         bool actual = DateOnlyRange.Infinite.Overlaps(date);
@@ -483,7 +494,7 @@ public class DateOnlyRangeTests
     }
 
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public void Given_DateOnlyRange_is_not_empty_and_not_infinite_When_value_is_between_Start_and_End_Contains_should_returns_Yes(DateOnly date)
+    public void Given_DateOnlyRange_is_not_empty_and_not_infinite_When_value_is_between_Start_and_End_Then_Contains_should_returns_true(DateOnly date)
     {
         // Arrange
         DateOnly start = Faker.PickRandom(Faker.Date.RecentDateOnly(refDate: date),
@@ -506,7 +517,7 @@ public class DateOnlyRangeTests
     }
 
     [Fact]
-    public void Given_DateOnlyRange_is_not_empty_and_not_infinite_When_value_is_not_between_Start_and_End_Contains_should_returns_No()
+    public void Given_DateOnlyRange_is_not_empty_and_not_infinite_When_value_is_not_between_Start_and_End_Then_Contains_should_returns_false()
     {
         // Arrange
         DateOnly start = DateOnly.FromDateTime(12.July(2012));

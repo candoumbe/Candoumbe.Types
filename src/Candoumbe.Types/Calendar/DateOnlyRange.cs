@@ -66,19 +66,18 @@ public record DateOnlyRange : Range<DateOnly>
     public DateOnlyRange Merge(DateOnlyRange other)
     {
         DateOnlyRange result = Empty;
-        if (IsInfinite() || other == Infinite)
+
+        if (other.IsEmpty())
         {
-            result = Infinite;
+            result = this;
+        }
+        else if (Overlaps(other) || IsContiguousWith(other))
+        {
+            result = (this with { Start = GetMinimum(Start, other.Start), End = GetMaximum(End, other.End) });
         }
         else
         {
-            result = IsEmpty()
-                ? other
-                : other.IsEmpty()
-                            ? this
-                            : Overlaps(other) || IsContiguousWith(other)
-                                        ? (this with { Start = GetMinimum(Start, other.Start), End = GetMaximum(End, other.End) })
-                                        : throw new InvalidOperationException($"Cannot build a {nameof(DateOnlyRange)} as union of '{this}' and {other}");
+            throw new InvalidOperationException($"Cannot build a {nameof(DateOnlyRange)} as union of '{this}' and {other}");
         }
 
         return result;
@@ -94,7 +93,7 @@ public record DateOnlyRange : Range<DateOnly>
     /// <param name="right"></param>
     private static DateOnly GetMinimum(DateOnly left, DateOnly right) => left.CompareTo(right) switch
     {
-        < 0 => left,
+        <= 0 => left,
         _ => right
     };
 
@@ -121,15 +120,7 @@ public record DateOnlyRange : Range<DateOnly>
     {
         DateOnlyRange result = Empty;
 
-        if (IsInfinite())
-        {
-            result = other;
-        }
-        else if (other.IsInfinite())
-        {
-            result = this;
-        }
-        else if (Overlaps(other))
+        if (Overlaps(other))
         {
             result = this with { Start = GetMaximum(Start, other.Start), End = GetMinimum(End, other.End) };
         }

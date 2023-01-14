@@ -75,11 +75,6 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
         }
 #endif
 
-        if (IsInfinite())
-        {
-            return;
-        }
-
         if (range.IsInfinite())
         {
             _ranges.Clear();
@@ -172,7 +167,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
                                                     && other.Ranges.All(range => Overlaps(range))
                                                     && _ranges.All(range => other.Overlaps(range))
 #else
-                                                    && other.Ranges.AsParallel().All(range => Overlaps(range))
+                                                    && other.Ranges.AsParallel().All(Overlaps)
                                                     && _ranges.AsParallel().All(range => other.Overlaps(range))
 
 #endif
@@ -181,18 +176,29 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
     ///<inheritdoc/>
     public override string ToString()
     {
-        StringBuilder sb = new();
+        string representation = "{empty}";
 
-        foreach (DateTimeRange item in _ranges)
+        if (IsInfinite())
         {
-            if (sb.Length > 0)
+            representation = "{infinite}";
+        }
+        else if (!IsEmpty())
+        {
+            StringBuilder sb = new();
+
+            foreach (DateTimeRange item in _ranges)
             {
-                sb.Append(',');
+                if (sb.Length > 0)
+                {
+                    sb.Append(',');
+                }
+                sb.Append(item);
             }
-            sb.Append(item);
+
+            representation = sb.Insert(0, "{").Append('}').ToString();
         }
 
-        return sb.Insert(0, "[").Append(']').ToString();
+        return representation;
     }
 
     /// <summary>
@@ -284,8 +290,8 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
         if (other is not null)
         {
             equals = ReferenceEquals(this, other)
-                     || IsEmpty() && other.IsEmpty()
-                     || Overlaps(other) && other.Overlaps(this);
+                     || (IsEmpty() && other.IsEmpty())
+                     || (Overlaps(other) && other.Overlaps(this));
         }
         return equals;
     }

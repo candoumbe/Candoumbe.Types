@@ -27,7 +27,7 @@ namespace Candoumbe.Types.UnitTests.Calendar;
 public class TimeOnlyRangeTests
 {
     private readonly ITestOutputHelper _outputHelper;
-    private static readonly Faker faker = new();
+    private static readonly Faker Faker = new();
 
     public TimeOnlyRangeTests(ITestOutputHelper outputHelper)
     {
@@ -50,7 +50,7 @@ public class TimeOnlyRangeTests
     {
         // Arrange
         TimeOnly end = reference;
-        TimeOnly start = faker.Date.RecentTimeOnly(mins: (int)(reference - TimeOnly.MinValue).TotalMinutes, refTime: reference);
+        TimeOnly start = Faker.Date.RecentTimeOnly(mins: (int)(reference - TimeOnly.MinValue).TotalMinutes, refTime: reference);
 
         TimeOnlyRange first = new(start, end);
 
@@ -573,8 +573,8 @@ public class TimeOnlyRangeTests
     public void Given_TimeOnlyRange_is_not_empty_and_not_infinite_When_value_is_between_Start_and_End_Overlaps_should_returns_Yes(TimeOnly value)
     {
         // Arrange
-        TimeOnly start = faker.Date.RecentTimeOnly(refTime: value);
-        TimeOnly end = faker.Date.SoonTimeOnly(refTime: value);
+        TimeOnly start = Faker.Date.RecentTimeOnly(refTime: value);
+        TimeOnly end = Faker.Date.SoonTimeOnly(refTime: value);
 
         TimeOnlyRange timeRange = (start == end) switch
         {
@@ -598,8 +598,8 @@ public class TimeOnlyRangeTests
 
         TimeOnlyRange timeRange = new(start, end);
 
-        TimeOnly value = faker.PickRandom(faker.Date.RecentTimeOnly(refTime: start.AddMinutes(-1)),
-                                          faker.Date.SoonTimeOnly(refTime: end.AddMinutes(1)));
+        TimeOnly value = Faker.PickRandom(Faker.Date.RecentTimeOnly(refTime: start.AddMinutes(-1)),
+                                          Faker.Date.SoonTimeOnly(refTime: end.AddMinutes(1)));
 
         // Act
         bool result = timeRange.Overlaps(value);

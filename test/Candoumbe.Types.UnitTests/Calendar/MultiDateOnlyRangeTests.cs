@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
 
 using Xunit;
 using Xunit.Abstractions;
@@ -155,6 +156,37 @@ public class MultiDateOnlyRangeTests
         }
     }
 
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_a_non_null_instance_When_adding_a_null_DateOnlyRange_Then_Add_should_throw_ArgumentNullException(MultiDateOnlyRange multiDateOnlyRange)
+    {
+        // Act
+        Action addingNull = () => multiDateOnlyRange.Add(null);
+
+        // Assert
+        addingNull.Should().Throw<ArgumentNullException>("cannot add null value")
+                  .Where(ex => !string.IsNullOrWhiteSpace(ex.ParamName));
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_an_array_of_DateOnlyRanges_When_building_a_new_instance_Then_Constructor_should_order_them_from_(NonEmptyArray<DateOnlyRange> ranges)
+    {
+        // Arranges
+        DateOnlyRange[] values = ranges.Get;
+
+        // Act
+        MultiDateOnlyRange multiDateOnlyRange = new(values);
+
+        // Assert
+        multiDateOnlyRange.Ranges.Should()
+                                 .OnlyHaveUniqueItems("the constructor handles duplicates").And
+                                 .BeInAscendingOrder(x => x.Start, "the constructor reorders values added if necessary");
+        foreach (DateOnlyRange range in values)
+        {
+            multiDateOnlyRange.Overlaps(range).Should()
+                                              .BeTrue("the instance must covers every ranges that was used to build it");
+        }
+    }
+
     [Theory]
     [MemberData(nameof(ConstructorCases))]
     public void Given_non_empty_array_of_DateOnlyRange_Constructor_should_merge_them(DateOnlyRange[] dateOnlyRanges, Expression<Func<IEnumerable<DateOnlyRange>, bool>> rangeExpectation)
@@ -164,11 +196,13 @@ public class MultiDateOnlyRangeTests
 
         // Assert
         range.Ranges.Should()
-                    .Match(rangeExpectation);
+                    .Match(rangeExpectation).And
+                    .OnlyHaveUniqueItems("the constructor handles duplicates").And
+                    .BeInAscendingOrder(x => x.Start, "the constructor reorders values added if necessary");
     }
 
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public void Given_two_date_only_ranges_that_overlaps_each_other_When_adding_them_using_Add_Then_should_pack_into_one_Range_only(NonNull<DateOnlyRange> leftSource, NonNull<DateOnlyRange> rightSource)
+    public void Given_two_date_only_ranges_that_overlaps_each_other_When_adding_them_using_Add_Then_should_merge_them_into_one_Range_only(NonNull<DateOnlyRange> leftSource, NonNull<DateOnlyRange> rightSource)
     {
         // Arrange
         DateOnlyRange left = leftSource.Item;
@@ -203,21 +237,21 @@ public class MultiDateOnlyRangeTests
         };
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) }, Replay = "(16035462008899407285,4231346714582972547)")]
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
     public void Given_an_instance_that_one_range_eq_Infinite_When_adding_any_other_range_Should_result_in_a_noop_call(NonEmptyArray<DateOnlyRange> ranges)
     {
         // Arrange
         MultiDateOnlyRange sut = new(DateOnlyRange.Infinite);
 
         // Act
-        ranges.Item.ForEach(range => sut.Add(range));
+        ranges.Item.ForEach(sut.Add);
 
         // Assert
         sut.IsEmpty().Should().BeFalse();
         sut.IsInfinite().Should().BeTrue($"The initial {nameof(MultiDateOnlyRange)} already contains infinite");
         sut.Ranges.Should()
                   .HaveCount(1, "The only range is infinite").And
-                  .Contain(range => range == DateOnlyRange.Infinite);
+                  .Contain(range => range.IsInfinite());
     }
 
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
@@ -393,29 +427,83 @@ public class MultiDateOnlyRangeTests
 
         // Assert
         result.Should().Be(MultiDateOnlyRange.Infinite);
+        result.Ranges.Should().HaveCount(1, "");
     }
 
-    [Fact]
-    public void Given_non_null_instance_When_adding_a_DateOnlyRange_that_is_infinite_Then_IsInfinite_should_return_true()
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_an_instance_that_is_not_null_When_adding_a_DateOnlyRange_that_is_infinite_Then_IsInfinite_should_return_true(NonEmptyArray<DateOnlyRange> ranges)
     {
         // Arrange
-        MultiDateOnlyRange range = new();
+        MultiDateOnlyRange range = new(ranges.Get);
 
         // Act
         range.Add(DateOnlyRange.Infinite);
 
         // Assert
         range.IsInfinite().Should().BeTrue();
+        range.Ranges.Should().HaveCount(1);
     }
 
     [Fact]
-    public void Given_non_null_instance_Then_IsEmpty_should_return_true()
+    public void Given_an_instance_that_contains_no_DateOnlyRange_Then_IsEmpty_should_return_true()
     {
         // Arrange
         MultiDateOnlyRange range = new();
 
         // Assert
         range.IsEmpty().Should().BeTrue();
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_an_instance_that_is_not_null_Then_ToString_should_produce_expected_output(MultiDateOnlyRange range)
+    {
+        // Arrange
+        string expected = string.Empty;
+        if (range.IsInfinite())
+        {
+            expected = "{infinite}";
+        }
+        else if (range.IsEmpty())
+        {
+            expected = "{empty}";
+        }
+        else
+        {
+            StringBuilder sb = new StringBuilder();
+            int i = 0;
+            foreach (DateOnlyRange item in range.Ranges)
+            {
+                if (i > 0)
+                {
+                    sb.Append(',');
+                }
+
+                sb.Append(item);
+                i++;
+            }
+
+            expected = sb.Insert(0, '{').Append('}').ToString();
+        }
+
+        // Act
+        string actual = range.ToString();
+
+        // Assert
+        actual.Should().Be(expected);
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_current_instance_is_infinite_When_Adding_any_other_value_Then_result_should_be_infinite(DateOnlyRange other)
+    {
+        // Arrange
+        MultiDateOnlyRange current = MultiDateOnlyRange.Infinite;
+
+        // Act
+        MultiDateOnlyRange actual = current + other;
+
+        // Assert
+        actual.Should().Be(MultiDateOnlyRange.Infinite);
+        actual.Ranges.Should().HaveCount(1);
     }
 }
 
