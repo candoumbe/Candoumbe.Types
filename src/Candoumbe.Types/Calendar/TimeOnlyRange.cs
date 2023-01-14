@@ -104,13 +104,9 @@ public record TimeOnlyRange : Range<TimeOnly>
     public TimeOnlyRange Merge(TimeOnlyRange other)
     {
         TimeOnlyRange result = Empty;
-        if (IsAllDay() || other.IsAllDay())
+        if (other.IsAllDay())
         {
             result = AllDay;
-        }
-        else if (IsEmpty())
-        {
-            result = other;
         }
         else if (other.IsEmpty())
         {
@@ -211,15 +207,7 @@ public record TimeOnlyRange : Range<TimeOnly>
     public TimeOnlyRange Intersect(TimeOnlyRange other)
     {
         TimeOnlyRange intersection = Empty;
-        if (IsAllDay())
-        {
-            intersection = other;
-        }
-        else if (IsAllDay())
-        {
-            intersection = this;
-        }
-        else if (!IsEmpty() && !other.IsEmpty() && Overlaps(other))
+        if (!IsEmpty() && !other.IsEmpty() && Overlaps(other))
         {
             TimeOnlyRange left = this;
             TimeOnlyRange right = other;

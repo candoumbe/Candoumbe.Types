@@ -10,7 +10,8 @@ using System.Numerics;
 namespace Candoumbe.Types.Calendar;
 
 /// <summary>
-/// A <see cref="DateTime"/> range
+/// The implementation of <see cref="Range{DateTime}"/> that can be used to model a <see cref="DateTime"/> interval that
+/// spans from <see cref="Range{DateTime}.Start"/> to <see cref="Range{DateTime}.End"/> (inclusive). 
 /// </summary>
 #if !NET5_0_OR_GREATER
 public class DateTimeRange : Range<DateTime>, IEquatable<DateTimeRange>
@@ -19,12 +20,22 @@ public record DateTimeRange : Range<DateTime>
 #endif
 #if NET7_0_OR_GREATER
     , IAdditionOperators<DateTimeRange, DateTimeRange, DateTimeRange>
+    , IAdditiveIdentity<DateTimeRange, DateTimeRange>
 #endif
 {
     /// <summary>
     /// A <see cref="DateTimeRange"/> that cannot contains other <see cref="DateTimeRange"/> range.
     /// </summary>
-    public static readonly DateTimeRange Empty = new(DateTime.MinValue, DateTime.MinValue);
+    public static DateTimeRange Empty => new(DateTime.MinValue, DateTime.MinValue);
+
+#if NET7_0_OR_GREATER
+    ///<inheritdoc/>
+#else
+    /// <summary>
+    /// Gets the additive identity for <see cref="DateTimeRange"/>
+    /// </summary>
+#endif
+    public static DateTimeRange AdditiveIdentity => Empty;
 
     /// <summary>
     /// A <see cref="DateTimeRange"/> that overlaps any other <see cref="DateTimeRange"/> (except <see cref="Empty"/>)
@@ -71,15 +82,7 @@ public record DateTimeRange : Range<DateTime>
     public DateTimeRange Merge(DateTimeRange other)
     {
         DateTimeRange result = Empty;
-        if (IsInfinite() || other.IsInfinite())
-        {
-            result = Infinite;
-        }
-        else if (IsEmpty())
-        {
-            result = other;
-        }
-        else if (other.IsEmpty())
+        if (other.IsEmpty())
         {
             result = this;
         }
@@ -136,15 +139,7 @@ public record DateTimeRange : Range<DateTime>
     {
         DateTimeRange result = Empty;
 
-        if (IsInfinite())
-        {
-            result = other;
-        }
-        else if (other.IsInfinite())
-        {
-            result = this;
-        }
-        else if (Overlaps(other))
+        if (Overlaps(other))
         {
 #if NET5_0_OR_GREATER
             result = this with { Start = GetMaximum(Start, other.Start), End = GetMinimum(End, other.End) };
@@ -159,7 +154,7 @@ public record DateTimeRange : Range<DateTime>
     /// <summary>
     /// Checks if the current instance spans over or is contiguous with any other <see cref="DateTimeRange"/>
     /// </summary>
-    /// <returns></returns>
+    /// <returns><see langword="true"/> if the current instance span over any other <see cref="DateTimeRange"/> and <see langword="false"/> otherwise.</returns>
     public bool IsInfinite() => (Start, End) == (Infinite.Start, Infinite.End);
 
 #if !NET5_0_OR_GREATER
@@ -182,16 +177,20 @@ public record DateTimeRange : Range<DateTime>
 
     ///<inheritdoc/>
     public override bool Overlaps(Range<DateTime> other)
-        => IsInfinite() && other.IsEmpty() || IsEmpty() && (DateTime.MinValue, DateTime.MaxValue) == (other.Start, other.End) || base.Overlaps(other);
+        => (IsInfinite() && other.IsEmpty())
+           || (IsEmpty() && Infinite.Equals(other))
+           || base.Overlaps(other);
 
 #if !NET5_0_OR_GREATER
-
     ///<inheritdoc/>
     public override bool Equals(object obj) => Equals(obj as DateTimeRange);
 #endif
 
     ///<inheritdoc/>
     public override int GetHashCode()
+#if NET6_0_OR_GREATER
+        => HashCode.Combine(Start, End);
+#else
     {
         int hashCode = -1245466969;
         hashCode = hashCode * -1521134295 + base.GetHashCode();
@@ -199,6 +198,8 @@ public record DateTimeRange : Range<DateTime>
         hashCode = hashCode * -1521134295 + End.GetHashCode();
         return hashCode;
     }
+#endif
+
 
     ///<inheritdoc/>
     public virtual bool Equals(DateTimeRange other) => other is not null &&
