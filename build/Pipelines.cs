@@ -18,13 +18,14 @@ using System.Linq;
     AutoGenerate = true,
     FetchDepth = 0,
     InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IPublish.Pack), nameof(IPublish.Publish) },
-    CacheKeyFiles = new[] { "**/*.csproj", "**/*/stryker-config.json", "**/*/xunit.runner.json" },
+    CacheKeyFiles = new[] { "src/**/*.csproj", "stryker-config.json", "test/**/*/xunit.runner.json" },
     OnPushBranches = new[] { "feature/*", "release/*", "hotfix/*" },
     EnableGitHubToken = true,
     ImportSecrets = new[] { nameof(NugetApiKey) },
     PublishArtifacts = true
 )]
 public class Pipelines : NukeBuild,
+    IHaveSolution,
     IHaveSourceDirectory,
     IHaveTestDirectory,
     IHaveChangeLog,
