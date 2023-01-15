@@ -17,11 +17,15 @@ using System.Linq;
 [GitHubActions("integration", GitHubActionsImage.UbuntuLatest,
     AutoGenerate = true,
     FetchDepth = 0,
-    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IPublish.Pack), nameof(IPublish.Publish) },
+    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IUnitTest.UnitTests), nameof(IPublish.Pack) },
     CacheKeyFiles = new[] { "src/**/*.csproj", "stryker-config.json", "test/**/*/xunit.runner.json" },
     OnPushBranches = new[] { "feature/*", "release/*", "hotfix/*" },
     EnableGitHubToken = true,
-    ImportSecrets = new[] { nameof(NugetApiKey) },
+    ImportSecrets = new[]
+    {
+        nameof(NugetApiKey),
+        nameof(IReportCoverage.CodecovToken)
+    },
     PublishArtifacts = true
 )]
 public class Pipelines : NukeBuild,
@@ -100,5 +104,5 @@ public class Pipelines : NukeBuild,
     };
 
     ///<inheritdoc/>
-    bool IReportCoverage.ReportToCodeCov => false;
+    bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;
 }
