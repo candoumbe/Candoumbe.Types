@@ -8,7 +8,6 @@ using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
-using Nuke.Common.Tools.Codecov;
 using Nuke.Common.Utilities.Collections;
 
 using System;
@@ -103,9 +102,4 @@ public class Pipelines : NukeBuild,
             canBeUsed: () => this is ICreateGithubRelease createRelease && createRelease.GitHubToken is not null
         ),
     };
-
-    ///<inheritdoc/>
-    bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;
-
-    Configure<CodecovSettings> IReportCoverage.CodecovSettings => _ => _.SetFramework("netcoreapp3.1");
 }
