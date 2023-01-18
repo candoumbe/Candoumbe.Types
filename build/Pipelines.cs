@@ -87,7 +87,7 @@ public class Pipelines : NukeBuild,
     Configure<Arguments> IMutationTest.StrykerArgumentsSettings => args => args.Add("--output {0}", this.Get<IMutationTest>().MutationTestResultDirectory);
 
     ///<inheritdoc/>
-    IEnumerable<AbsolutePath> IPack.PackableProjects => this.Get<IHaveSourceDirectory>().SourceDirectory.GlobFiles("*.csproj");
+    IEnumerable<AbsolutePath> IPack.PackableProjects => this.Get<IHaveSourceDirectory>().SourceDirectory.GlobFiles("**/*.csproj");
 
     ///<inheritdoc/>
     IEnumerable<PublishConfiguration> IPublish.PublishConfigurations => new PublishConfiguration[]
