@@ -1,7 +1,7 @@
 #  Candoumbe.Types <!-- omit in toc -->
 
 [![GitHub Workflow Status (main)](https://img.shields.io/github/workflow/status/candoumbe/types/delivery/main?label=main)](https://github.com/candoumbe/types/actions/workflows/integration.yml)
-[![codecov](https://codecov.io/gh/candoumbe/DataFilters/branch/develop/graph/badge.svg?token=FHSC41A4X3)](https://codecov.io/gh/candoumbe/types)
+[![codecov](https://codecov.io/gh/candoumbe/Candoumbe.Types/branch/main/graph/badge.svg?token=OqnDfQKaRy)](https://codecov.io/gh/candoumbe/Candoumbe.Types)
 [![GitHub raw issues](https://img.shields.io/github/issues-raw/candoumbe/types)](https://github.com/candoumbe/types/issues)
 [![Nuget](https://img.shields.io/nuget/vpre/candoumbe.types)](https://nuget.org/packages/candoumbe.types)
 

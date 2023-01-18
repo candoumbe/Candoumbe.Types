@@ -10,24 +10,18 @@ namespace Candoumbe.Types.Numerics
     /// A numeric type which value is garantied to never be less than <c>0</c>
     /// </summary>
     public record PositiveInteger : IEquatable<PositiveInteger>, IComparable<PositiveInteger>
-#if NET7_0
+#if NET7_0_OR_GREATER
         , IAdditionOperators<PositiveInteger, PositiveInteger, PositiveInteger>
         , ISubtractionOperators<PositiveInteger, PositiveInteger, PositiveInteger>
         , IMultiplyOperators<PositiveInteger, PositiveInteger, PositiveInteger>
         , IComparisonOperators<PositiveInteger, PositiveInteger, bool>
-        , IAdditiveIdentity<PositiveInteger, PositiveInteger>
+        , IMinMaxValue<PositiveInteger>
         , IMultiplicativeIdentity<PositiveInteger, PositiveInteger>
 
 #endif
     {
-#if NET7_0_OR_GREATER
-        ///<inheritdoc/>
-#else
-        /// <summary>
-        /// The additive identity of the current type
-        /// </summary> 
-#endif
-        public static PositiveInteger AdditiveIdentity => Zero;
+
+
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -45,12 +39,11 @@ namespace Candoumbe.Types.Numerics
 
         public static PositiveInteger One => new(1);
 
-
         private PositiveInteger(int value)
         {
-            if (value < 0)
+            if (value < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(value)} must be a positive or zero integer.");
+                throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(value)} must be greater than 1.");
             }
             Value = value;
         }
@@ -60,6 +53,25 @@ namespace Candoumbe.Types.Numerics
         /// </summary>
         /// <remarks>The value is garantied to be &gt; or equal to <c>0</c></remarks>
         public int Value { get; }
+
+#if NET7_0_OR_GREATER
+        ///<inheritdoc/>
+#else
+        /// <summary>
+        /// Gets the maximum value for the current type
+        /// </summary>
+#endif
+        public static PositiveInteger MaxValue => From(int.MaxValue);
+
+#if NET7_0_OR_GREATER
+        ///<inheritdoc/>
+#else
+        /// <summary>
+        /// Gets the minimum value for the current type
+        /// </summary>
+#endif
+        public static PositiveInteger MinValue => One;
+
 
         /// <summary>
         /// Builds a new <see cref="PositiveInteger"/> with the given <paramref name="value"/>.
@@ -90,13 +102,14 @@ namespace Candoumbe.Types.Numerics
         /// <param name="left">The left value</param>
         /// <param name="right">The right value</param>
         /// <returns>the result of the difference of <paramref name="right"/> from <paramref name="left"/>.</returns>
+
 #endif
         public static PositiveInteger operator -(PositiveInteger left, PositiveInteger right)
-            => new PositiveInteger((left.Value - right.Value) switch
+            => (left.Value - right.Value) switch
             {
-                < 0 => 0,
-                int result => result
-            });
+                < 1 => One,
+                int result => From(result)
+            };
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
