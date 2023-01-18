@@ -8,6 +8,7 @@ using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
+using Nuke.Common.Tools.Codecov;
 using Nuke.Common.Utilities.Collections;
 
 using System;
@@ -17,14 +18,19 @@ using System.Linq;
 [GitHubActions("integration", GitHubActionsImage.UbuntuLatest,
     AutoGenerate = true,
     FetchDepth = 0,
-    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IPublish.Pack), nameof(IPublish.Publish) },
-    CacheKeyFiles = new[] { "**/*.csproj", "**/*/stryker-config.json", "**/*/xunit.runner.json" },
+    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IUnitTest.UnitTests), nameof(IPublish.Pack) },
+    CacheKeyFiles = new[] { "src/**/*.csproj", "stryker-config.json", "test/**/*/xunit.runner.json" },
     OnPushBranches = new[] { "feature/*", "release/*", "hotfix/*" },
     EnableGitHubToken = true,
-    ImportSecrets = new[] { nameof(NugetApiKey) },
+    ImportSecrets = new[]
+    {
+        nameof(NugetApiKey),
+        nameof(IReportCoverage.CodecovToken)
+    },
     PublishArtifacts = true
 )]
 public class Pipelines : NukeBuild,
+    IHaveSolution,
     IHaveSourceDirectory,
     IHaveTestDirectory,
     IHaveChangeLog,
@@ -81,7 +87,7 @@ public class Pipelines : NukeBuild,
     Configure<Arguments> IMutationTest.StrykerArgumentsSettings => args => args.Add("--output {0}", this.Get<IMutationTest>().MutationTestResultDirectory);
 
     ///<inheritdoc/>
-    IEnumerable<AbsolutePath> IPack.PackableProjects => this.Get<IHaveSourceDirectory>().SourceDirectory.GlobFiles("*.csproj");
+    IEnumerable<AbsolutePath> IPack.PackableProjects => this.Get<IHaveSourceDirectory>().SourceDirectory.GlobFiles("**/*.csproj");
 
     ///<inheritdoc/>
     IEnumerable<PublishConfiguration> IPublish.PublishConfigurations => new PublishConfiguration[]
@@ -99,5 +105,17 @@ public class Pipelines : NukeBuild,
     };
 
     ///<inheritdoc/>
-    bool IReportCoverage.ReportToCodeCov => false;
+    bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;
+
+    ///<inheritdoc/>
+    Configure<CodecovSettings> IReportCoverage.CodecovSettings => _ => _.SetFramework("netcoreapp3.1");
+
+
+    protected override void OnBuildCreated()
+    {
+        if (IsServerBuild)
+        {
+            Environment.SetEnvironmentVariable("DOTNET_ROLL_FORWARD", "LatestMajor");
+        }
+    }
 }

@@ -37,20 +37,17 @@ jobs:
           path: |
             .nuke/temp
             ~/.nuget/packages
-          key: ${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/*/stryker-config.json', '**/*/xunit.runner.json') }}
-      - name: Run './build.cmd Compile Pack Publish'
-        run: ./build.cmd Compile Pack Publish
+          key: ${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'stryker-config.json', 'test/**/*/xunit.runner.json') }}
+      - name: Run './build.cmd Compile UnitTests Pack'
+        run: ./build.cmd Compile UnitTests Pack
         env:
           NugetApiKey: ${{ secrets.NUGET_API_KEY }}
+          CodecovToken: ${{ secrets.CODECOV_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v3
         with:
           name: unit-tests
           path: output/artifacts/tests-results/unit-tests
-      - uses: actions/upload-artifact@v3
-        with:
-          name: packages
-          path: output/artifacts/packages
       - uses: actions/upload-artifact@v3
         with:
           name: coverage-report
@@ -59,3 +56,7 @@ jobs:
         with:
           name: coverage-history
           path: output/artifacts/reports/coverage-history
+      - uses: actions/upload-artifact@v3
+        with:
+          name: packages
+          path: output/artifacts/packages
