@@ -156,6 +156,22 @@ public class DateTimeRangeTests
                  .Be(DateTime.MaxValue);
     }
 
+    [Property]
+    public void Given_DateTimeRange_When_another_DateTimeRange_does_not_overlaps_nor_is_contiguous_Then_Merge_should_throw_InvalidOperationException()
+    {
+        // Arrange
+        DateTimeRange current = new DateTimeRange(1.January(2019), 10.January(2019));
+        DateTimeRange other = new DateTimeRange(11.January(2019), 15.January(2019));
+
+        // Act
+        Action action = () => current.Merge(other);
+
+        // Assert
+        action.Should()
+              .Throw<InvalidOperationException>("the two dates do not overlap").Which.Message
+              .Should().NotBeNullOrEmpty("the message can be usefull for troubleshooting purposes");
+    }
+
     public static IEnumerable<object[]> OverlapsCases
     {
         get
