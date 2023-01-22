@@ -9,23 +9,25 @@
 #
 #     - To trigger manual generation invoke:
 #
-#         nuke --generate-configuration GitHubActions_integration --host GitHubActions
+#         nuke --generate-configuration GitHubActions_nightly --host GitHubActions
 #
 # </auto-generated>
 # ------------------------------------------------------------------------------
 
-name: integration
+name: nightly
 
 on:
   push:
-    branches-ignore:
-      - main
+    branches:
+      - develop
   pull_request:
     paths:
       - '!docs/*'
       - '!README.md'
       - '!CHANGELOG.md'
       - '!LICENSE'
+  schedule:
+    - cron: '0 0 * * * *'
 
 jobs:
   ubuntu-latest:
@@ -42,16 +44,21 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'test/**/*.csproj', 'stryker-config.json', 'test/**/*/xunit.runner.json') }}
-      - name: Run './build.cmd Compile UnitTests Pack Publish'
-        run: ./build.cmd Compile UnitTests Pack Publish
+      - name: Run './build.cmd Compile Tests Pack'
+        run: ./build.cmd Compile Tests Pack
         env:
           NugetApiKey: ${{ secrets.NUGET_API_KEY }}
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
+          StrykerDashboardApiKey: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v3
         with:
           name: unit-tests
           path: output/artifacts/tests-results/unit-tests
+      - uses: actions/upload-artifact@v3
+        with:
+          name: mutation-tests
+          path: output/artifacts/tests-results/mutation-tests
       - uses: actions/upload-artifact@v3
         with:
           name: coverage-report

@@ -15,23 +15,82 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-[GitHubActions("delivery", GitHubActionsImage.UbuntuLatest,
+[GitHubActions("integration", GitHubActionsImage.UbuntuLatest,
     AutoGenerate = true,
     FetchDepth = 0,
-    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IUnitTest.UnitTests), nameof(IPublish.Pack), nameof(ICreateGithubRelease.AddGithubRelease) },
+    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IUnitTest.UnitTests), nameof(IPublish.Pack), nameof(IPublish.Publish) },
     CacheKeyFiles = new[] {
         "src/**/*.csproj",
         "test/**/*.csproj",
         "stryker-config.json",
         "test/**/*/xunit.runner.json" },
-    OnPushBranches = new[] { "feature/*", "release/*", "hotfix/*" },
+    OnPushBranchesIgnore = new[] { IGitFlowWithPullRequest.MainBranchName },
     EnableGitHubToken = true,
     ImportSecrets = new[]
     {
         nameof(NugetApiKey),
         nameof(IReportCoverage.CodecovToken)
     },
-    PublishArtifacts = true
+    PublishArtifacts = true,
+    OnPullRequestExcludePaths = new[]
+    {
+        "docs/*",
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE"
+    }
+)]
+[GitHubActions("nightly", GitHubActionsImage.UbuntuLatest,
+    AutoGenerate = true,
+    FetchDepth = 0,
+    OnCronSchedule = "0 0 * * * *",
+    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(Tests), nameof(IPublish.Pack) },
+    OnPushBranches = new[] { IGitFlowWithPullRequest.DevelopBranchName },
+    CacheKeyFiles = new[] {
+        "src/**/*.csproj",
+        "test/**/*.csproj",
+        "stryker-config.json",
+        "test/**/*/xunit.runner.json" },
+    EnableGitHubToken = true,
+    ImportSecrets = new[]
+    {
+        nameof(NugetApiKey),
+        nameof(IReportCoverage.CodecovToken),
+        nameof(IMutationTest.StrykerDashboardApiKey)
+    },
+    PublishArtifacts = true,
+    OnPullRequestExcludePaths = new[]
+    {
+        "docs/*",
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE"
+    }
+)]
+[GitHubActions("delivery", GitHubActionsImage.UbuntuLatest,
+    AutoGenerate = true,
+    FetchDepth = 0,
+    InvokedTargets = new[] { nameof(IPublish.Pack), nameof(IPublish.Publish), nameof(ICreateGithubRelease.AddGithubRelease) },
+    CacheKeyFiles = new[] {
+        "src/**/*.csproj",
+        "test/**/*.csproj",
+        "stryker-config.json",
+        "test/**/*/xunit.runner.json" },
+    OnPushBranches = new[] { IGitFlowWithPullRequest.MainBranchName },
+    EnableGitHubToken = true,
+    ImportSecrets = new[]
+    {
+        nameof(NugetApiKey),
+        nameof(IReportCoverage.CodecovToken)
+    },
+    PublishArtifacts = true,
+    OnPullRequestExcludePaths = new[]
+    {
+        "docs/*",
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE"
+    }
 )]
 public class Pipelines : NukeBuild,
     IHaveSolution,
@@ -47,7 +106,7 @@ public class Pipelines : NukeBuild,
     IPack,
     IPublish,
     ICreateGithubRelease,
-    IGitHubFlowWithPullRequest,
+    IGitFlowWithPullRequest,
     IHaveSecret
 {
 
@@ -107,6 +166,15 @@ public class Pipelines : NukeBuild,
             canBeUsed: () => this is ICreateGithubRelease createRelease && createRelease.GitHubToken is not null
         ),
     };
+
+    public Target Tests => _ => _
+        .TryDependsOn<IUnitTest>(x => x.UnitTests)
+        .TryDependsOn<IMutationTest>(x => x.MutationTests)
+        .Description("Run all tests")
+        .Executes(() =>
+        {
+            // Nothing to set here
+        });
 
     ///<inheritdoc/>
     bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;
