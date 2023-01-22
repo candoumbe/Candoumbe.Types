@@ -15,11 +15,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-[GitHubActions("integration", GitHubActionsImage.UbuntuLatest,
+[GitHubActions("delivery", GitHubActionsImage.UbuntuLatest,
     AutoGenerate = true,
     FetchDepth = 0,
-    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IUnitTest.UnitTests), nameof(IPublish.Pack) },
-    CacheKeyFiles = new[] { "src/**/*.csproj", "stryker-config.json", "test/**/*/xunit.runner.json" },
+    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IUnitTest.UnitTests), nameof(IPublish.Pack), nameof(ICreateGithubRelease.AddGithubRelease) },
+    CacheKeyFiles = new[] {
+        "src/**/*.csproj",
+        "test/**/*.csproj",
+        "stryker-config.json",
+        "test/**/*/xunit.runner.json" },
     OnPushBranches = new[] { "feature/*", "release/*", "hotfix/*" },
     EnableGitHubToken = true,
     ImportSecrets = new[]
