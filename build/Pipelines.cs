@@ -43,7 +43,7 @@ using System.Linq;
 [GitHubActions("nightly", GitHubActionsImage.UbuntuLatest,
     AutoGenerate = true,
     FetchDepth = 0,
-    OnCronSchedule = "0 0 * * * *",
+    OnCronSchedule = "0 0 * * *",
     InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(Tests), nameof(IPublish.Pack) },
     OnPushBranches = new[] { IGitFlowWithPullRequest.DevelopBranchName },
     CacheKeyFiles = new[] {
