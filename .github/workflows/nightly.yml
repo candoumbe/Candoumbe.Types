@@ -27,7 +27,7 @@ on:
       - '!CHANGELOG.md'
       - '!LICENSE'
   schedule:
-    - cron: '0 0 * * * *'
+    - cron: '0 0 * * *'
 
 jobs:
   ubuntu-latest:
