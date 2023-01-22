@@ -75,7 +75,7 @@
         },
         "Issues": {
           "type": "array",
-          "description": "Issues that will be closed once the pull request is merged",
+          "description": "Issues that will be closed once the pull request is completed",
           "items": {
             "type": "string"
           }
@@ -125,6 +125,7 @@
               "AddGithubRelease",
               "Changelog",
               "Clean",
+              "Coldfix",
               "Compile",
               "Feature",
               "Hotfix",
@@ -132,8 +133,10 @@
               "MutationTests",
               "Pack",
               "Publish",
+              "Release",
               "ReportCoverage",
               "Restore",
+              "Tests",
               "UnitTests"
             ]
           }
@@ -154,6 +157,7 @@
               "AddGithubRelease",
               "Changelog",
               "Clean",
+              "Coldfix",
               "Compile",
               "Feature",
               "Hotfix",
@@ -161,8 +165,10 @@
               "MutationTests",
               "Pack",
               "Publish",
+              "Release",
               "ReportCoverage",
               "Restore",
+              "Tests",
               "UnitTests"
             ]
           }
