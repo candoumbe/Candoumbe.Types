@@ -11,8 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="6.3.0" />
-    <PackageReference Include="Candoumbe.Pipelines" Version="0.3.0-coldfix-enable-s0001" />
+    <PackageReference Include="Candoumbe.Pipelines" Version="0.3.0-alpha0058" />
   </ItemGroup>
 
   <ItemGroup>
