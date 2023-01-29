@@ -11,7 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Candoumbe.Pipelines" Version="0.3.0-alpha0058" />
+    <PackageReference Include="Nuke.Common" Version="6.3.0" />
+    <PackageReference Include="Candoumbe.Pipelines" Version="0.3.0-alpha0011" />
   </ItemGroup>
 
   <ItemGroup>
