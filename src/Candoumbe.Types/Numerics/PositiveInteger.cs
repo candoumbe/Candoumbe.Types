@@ -22,7 +22,6 @@ namespace Candoumbe.Types.Numerics
     {
 
 
-
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
 #else
@@ -37,6 +36,9 @@ namespace Candoumbe.Types.Numerics
         /// </summary>
         public static PositiveInteger Zero => new(0);
 
+        /// <summary>
+        /// The one value
+        /// </summary>
         public static PositiveInteger One => new(1);
 
         private PositiveInteger(int value)
@@ -72,7 +74,6 @@ namespace Candoumbe.Types.Numerics
 #endif
         public static PositiveInteger MinValue => One;
 
-
         /// <summary>
         /// Builds a new <see cref="PositiveInteger"/> with the given <paramref name="value"/>.
         /// </summary>
@@ -102,7 +103,6 @@ namespace Candoumbe.Types.Numerics
         /// <param name="left">The left value</param>
         /// <param name="right">The right value</param>
         /// <returns>the result of the difference of <paramref name="right"/> from <paramref name="left"/>.</returns>
-
 #endif
         public static PositiveInteger operator -(PositiveInteger left, PositiveInteger right)
             => (left.Value - right.Value) switch
@@ -183,5 +183,4 @@ namespace Candoumbe.Types.Numerics
                 : Value.CompareTo(other.Value);
         }
     }
-
 }
