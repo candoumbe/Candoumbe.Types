@@ -70,7 +70,7 @@ public class NonNegativeIntegerTests
     public void Given_desiredValue_is_negative_When_calling_Create_Then_ArgumentOutOfRangeException_should_be_thrown(NegativeInt negativeInt)
     {
         // Act
-        Action createNonNegativeInteger = () => NonNegativeInteger.Create(negativeInt.Item);
+        Action createNonNegativeInteger = () => NonNegativeInteger.From(negativeInt.Item);
 
         // Assert
         createNonNegativeInteger.Should().Throw<ArgumentOutOfRangeException>();
@@ -80,7 +80,7 @@ public class NonNegativeIntegerTests
     public void Given_any_NonNegativeInteger_When_adding_AdditiveIdentity_Then_result_should_be_initial_value(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         NonNegativeInteger result = initialValue + NonNegativeInteger.AdditiveIdentity;
@@ -93,8 +93,8 @@ public class NonNegativeIntegerTests
     public void Given_two_NonNegativeInteger_When_adding_them_together_Then_result_should_be_their_sum(NonNegativeInt leftValueGenerator, NonNegativeInt rightValueGenerator)
     {
         // Arrange
-        NonNegativeInteger left = NonNegativeInteger.Create(leftValueGenerator.Item);
-        NonNegativeInteger right = NonNegativeInteger.Create(rightValueGenerator.Item);
+        NonNegativeInteger left = NonNegativeInteger.From(leftValueGenerator.Item);
+        NonNegativeInteger right = NonNegativeInteger.From(rightValueGenerator.Item);
 
         // Act
         NonNegativeInteger result = left + right;
@@ -111,7 +111,7 @@ public class NonNegativeIntegerTests
     public void Given_left_NonNegativeInteger_and_right_is_an_integer_When_Adding_right_from_left_Then_result_should_be_NonNegativeInteger(NonNegativeInt leftValueGenerator, int right)
     {
         // Arrange
-        NonNegativeInteger left = NonNegativeInteger.Create(leftValueGenerator.Item);
+        NonNegativeInteger left = NonNegativeInteger.From(leftValueGenerator.Item);
 
         // Act
         NonNegativeInteger result = left + right;
@@ -128,8 +128,8 @@ public class NonNegativeIntegerTests
     public void Given_left_and_right_NonNegativeInteger_When_substracting_right_from_left_Then_result_should_be_their_difference(NonNegativeInt leftValueGenerator, NonNegativeInt rightValueGenerator)
     {
         // Arrange
-        NonNegativeInteger left = NonNegativeInteger.Create(leftValueGenerator.Item);
-        NonNegativeInteger right = NonNegativeInteger.Create(rightValueGenerator.Item);
+        NonNegativeInteger left = NonNegativeInteger.From(leftValueGenerator.Item);
+        NonNegativeInteger right = NonNegativeInteger.From(rightValueGenerator.Item);
 
         // Act
         NonNegativeInteger result = left - right;
@@ -146,7 +146,7 @@ public class NonNegativeIntegerTests
     public void Given_left_NonNegativeInteger_and_right_is_an_integer_When_substracting_right_from_left_Then_result_should_be_NonNegativeInteger(NonNegativeInt leftValueGenerator, int right)
     {
         // Arrange
-        NonNegativeInteger left = NonNegativeInteger.Create(leftValueGenerator.Item);
+        NonNegativeInteger left = NonNegativeInteger.From(leftValueGenerator.Item);
 
         // Act
         NonNegativeInteger result = left - right;
@@ -164,7 +164,7 @@ public class NonNegativeIntegerTests
     {
         // Arrange
         int expected = nonNegativeInt.Item;
-        NonNegativeInteger nonNegativeInteger = NonNegativeInteger.Create(expected);
+        NonNegativeInteger nonNegativeInteger = NonNegativeInteger.From(expected);
 
         // Act
         int actual = nonNegativeInteger;
@@ -179,8 +179,8 @@ public class NonNegativeIntegerTests
     public void Two_NonNegativeInteger_are_equal_when_their_value_are_equal(NonNegativeInt leftValueGenerator, NonNegativeInt rightValueGenerator)
     {
         // Arrange
-        NonNegativeInteger left = NonNegativeInteger.Create(leftValueGenerator.Item);
-        NonNegativeInteger right = NonNegativeInteger.Create(rightValueGenerator.Item);
+        NonNegativeInteger left = NonNegativeInteger.From(leftValueGenerator.Item);
+        NonNegativeInteger right = NonNegativeInteger.From(rightValueGenerator.Item);
 
         // Act
         bool actual = left == right;
@@ -193,7 +193,7 @@ public class NonNegativeIntegerTests
     public void Given_left_is_NonNegativeInteger_and_right_is_an_int_When_left_value_equal_right_Then_left_and_right_should_be_equal(NonNegativeInt leftValueGenerator, int right)
     {
         // Arrange
-        NonNegativeInteger left = NonNegativeInteger.Create(leftValueGenerator.Item);
+        NonNegativeInteger left = NonNegativeInteger.From(leftValueGenerator.Item);
 
         // Act
         bool actual = left == right;
@@ -206,7 +206,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_adding_one_Then_the_result_should_be_greater_than_initialValue(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         NonNegativeInteger actual = initialValue + 1;
@@ -223,7 +223,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_subtracting_one_Then_the_result_should_be_less_than_initialValue(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger left = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger left = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         NonNegativeInteger actual = left - 1;
@@ -240,7 +240,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_implicitly_casting_to_a_long_Then_value_should_be_equal_to_initialValue(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         long actual = initialValue;
@@ -253,7 +253,7 @@ public class NonNegativeIntegerTests
     public Property Given_a_NonNegativeInteger_When_implicitly_casting_to_a_ulong_Then_value_should_be_equal_to_initialValue(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         ulong actual = initialValue;
@@ -266,7 +266,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_Abs_Then_result_should_be_the_value(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         NonNegativeInteger actual = NonNegativeInteger.Abs(initialValue);
@@ -279,7 +279,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsCanonical_Then_result_should_be_true(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsCanonical(initialValue);
@@ -292,7 +292,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsOddInteger_on_it_Then_result_should_be_true_when_inner_integer_is_odd(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsOddInteger(initialValue);
@@ -305,7 +305,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsEvenInteger_on_it_Then_result_should_be_true_when_inner_integer_is_even(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsEvenInteger(initialValue);
@@ -318,7 +318,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsComplexNumber_on_it_Then_result_should_be_false(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsComplexNumber(initialValue);
@@ -331,7 +331,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsFinite_on_it_Then_result_should_be_true(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsFinite(initialValue);
@@ -344,7 +344,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsImaginary_on_it_Then_result_should_be_false(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsImaginaryNumber(initialValue);
@@ -357,7 +357,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsInfinity_on_it_Then_result_should_be_false(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsInfinity(initialValue);
@@ -370,7 +370,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsInteger_on_it_Then_result_should_be_true(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsInteger(initialValue);
@@ -383,7 +383,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsNaN_on_it_Then_result_should_be_false(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsNaN(initialValue);
@@ -396,7 +396,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsNegative_on_it_Then_result_should_be_false(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsNegative(initialValue);
@@ -409,7 +409,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsPositiveInfinity_on_it_Then_result_should_be_false(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsPositiveInfinity(initialValue);
@@ -422,7 +422,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsPositive_on_it_Then_result_should_be_true(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsPositive(initialValue);
@@ -435,7 +435,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsRealNumber_on_it_Then_result_should_be_true(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsRealNumber(initialValue);
@@ -448,7 +448,7 @@ public class NonNegativeIntegerTests
     public void Given_a_NonNegativeInteger_When_calling_IsZero_on_it_Then_result_should_be_same_as_initialValue_eq_NonNegativeIntegerZero(NonNegativeInt initialValueGenerator)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
 
         // Act
         bool actual = NonNegativeInteger.IsZero(initialValue);
@@ -461,8 +461,8 @@ public class NonNegativeIntegerTests
     public void Given_two_NonNegativeInteger_When_calling_MaxMagnitude_Then_result_should_return_the_greater_of_the_two(NonNegativeInt xValueGenerator, NonNegativeInt yValueGenerator)
     {
         // Arrange
-        NonNegativeInteger x = NonNegativeInteger.Create(xValueGenerator.Item);
-        NonNegativeInteger y = NonNegativeInteger.Create(yValueGenerator.Item);
+        NonNegativeInteger x = NonNegativeInteger.From(xValueGenerator.Item);
+        NonNegativeInteger y = NonNegativeInteger.From(yValueGenerator.Item);
 
         // Act
         NonNegativeInteger actual = NonNegativeInteger.MaxMagnitude(x, y);
@@ -479,8 +479,8 @@ public class NonNegativeIntegerTests
     public void Given_two_NonNegativeInteger_When_calling_MaxMagnitudeNumber_Then_result_should_return_the_greater_of_the_two(NonNegativeInt xValueGenerator, NonNegativeInt yValueGenerator)
     {
         // Arrange
-        NonNegativeInteger x = NonNegativeInteger.Create(xValueGenerator.Item);
-        NonNegativeInteger y = NonNegativeInteger.Create(yValueGenerator.Item);
+        NonNegativeInteger x = NonNegativeInteger.From(xValueGenerator.Item);
+        NonNegativeInteger y = NonNegativeInteger.From(yValueGenerator.Item);
 
         // Act
         NonNegativeInteger actual = NonNegativeInteger.MaxMagnitudeNumber(x, y);
@@ -497,8 +497,8 @@ public class NonNegativeIntegerTests
     public void Given_two_NonNegativeInteger_When_calling_MinMagnitude_Then_result_should_return_the_smaller_of_the_two(NonNegativeInt xValueGenerator, NonNegativeInt yValueGenerator)
     {
         // Arrange
-        NonNegativeInteger x = NonNegativeInteger.Create(xValueGenerator.Item);
-        NonNegativeInteger y = NonNegativeInteger.Create(yValueGenerator.Item);
+        NonNegativeInteger x = NonNegativeInteger.From(xValueGenerator.Item);
+        NonNegativeInteger y = NonNegativeInteger.From(yValueGenerator.Item);
 
         // Act
         NonNegativeInteger actual = NonNegativeInteger.MinMagnitude(x, y);
@@ -515,8 +515,8 @@ public class NonNegativeIntegerTests
     public void Given_two_NonNegativeInteger_When_calling_MinMagnitudeNumber_Then_result_should_return_the_smaller_of_the_two(NonNegativeInt xValueGenerator, NonNegativeInt yValueGenerator)
     {
         // Arrange
-        NonNegativeInteger x = NonNegativeInteger.Create(xValueGenerator.Item);
-        NonNegativeInteger y = NonNegativeInteger.Create(yValueGenerator.Item);
+        NonNegativeInteger x = NonNegativeInteger.From(xValueGenerator.Item);
+        NonNegativeInteger y = NonNegativeInteger.From(yValueGenerator.Item);
 
         // Act
         NonNegativeInteger actual = NonNegativeInteger.MinMagnitudeNumber(x, y);
@@ -533,7 +533,7 @@ public class NonNegativeIntegerTests
     public void Given_a_string_representing_a_NonNegativeInteger_and_the_format_When_calling_Parse_Then_the_result_should_be_equal_to_the_original_value(NonNegativeInt initialValueGenerator, CultureInfo culture)
     {
         // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.Create(initialValueGenerator.Item);
+        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
         string initial = initialValue.ToString();
 
         // Act

@@ -41,7 +41,7 @@ namespace Candoumbe.Types.Numerics
         /// <param name="value">The desired value</param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is &lt; 0</exception>
-        public static NonNegativeInteger Create(int value)
+        public static NonNegativeInteger From(int value)
         {
             if (value < 0)
             {
@@ -54,7 +54,7 @@ namespace Candoumbe.Types.Numerics
         /// <summary>
         /// The zero
         /// </summary>
-        public static NonNegativeInteger Zero => Create(0);
+        public static NonNegativeInteger Zero => From(0);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -72,7 +72,7 @@ namespace Candoumbe.Types.Numerics
         /// Gets the maximum value of the current type
         /// </summary>
 #endif
-        public static NonNegativeInteger MaxValue => Create(int.MaxValue);
+        public static NonNegativeInteger MaxValue => From(int.MaxValue);
 
         ///<inheritdoc/>
         public static NonNegativeInteger MinValue => Zero;
@@ -100,7 +100,7 @@ namespace Candoumbe.Types.Numerics
         /// <returns>the sum of left and right.</returns>
 #endif
         public static NonNegativeInteger operator +(NonNegativeInteger left, NonNegativeInteger right)
-            => Create(left.Value + right.Value);
+            => From(left.Value + right.Value);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -113,7 +113,7 @@ namespace Candoumbe.Types.Numerics
         /// <returns>the sum of left and right.</returns>
 #endif
         public static NonNegativeInteger operator +(NonNegativeInteger left, int right)
-            => Create((left.Value + right) switch
+            => From((left.Value + right) switch
             {
                 < 0 => 0,
                 int value => value
@@ -144,7 +144,7 @@ namespace Candoumbe.Types.Numerics
         /// <exception cref="ArgumentNullException"><paramref name="left"/> is <see langword="null"/></exception>
 #endif
         public static NonNegativeInteger operator -(NonNegativeInteger left, int right)
-            => Create((left.Value - right) switch
+            => From((left.Value - right) switch
             {
                 < 0 => 0,
                 int value => value
@@ -245,7 +245,7 @@ namespace Candoumbe.Types.Numerics
         /// Determines if <paramref name="value"/> is an even integral number
         /// </summary>
         /// <param name="value">the value to test</param>
-        /// <returns><see langword="false"/></returns>  
+        /// <returns><see langword="false"/></returns>
 #endif
         public static bool IsComplexNumber(NonNegativeInteger value) => false;
 
@@ -393,7 +393,7 @@ namespace Candoumbe.Types.Numerics
 
 #if NET7_0_OR_GREATER
         /// <inheritdoc/>
-        public static NonNegativeInteger Parse(ReadOnlySpan<char> s, IFormatProvider provider) => Create(int.Parse(s, provider));
+        public static NonNegativeInteger Parse(ReadOnlySpan<char> s, IFormatProvider provider) => From(int.Parse(s, provider));
 
         /// <inheritdoc/>
         public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeInteger result)
@@ -401,7 +401,7 @@ namespace Candoumbe.Types.Numerics
             bool successfullyParsed = false;
             try
             {
-                result = Create(int.Parse(s, provider));
+                result = From(int.Parse(s, provider));
                 successfullyParsed = true;
             }
             catch
@@ -421,7 +421,7 @@ namespace Candoumbe.Types.Numerics
             {
                 throw new OverflowException($@"""{s}"" represents a value that is outside range of {nameof(NonNegativeInteger)} values");
             }
-            return Create((int)value);
+            return From((int)value);
         }
 
         /// <inheritdoc/>
