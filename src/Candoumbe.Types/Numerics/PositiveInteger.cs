@@ -12,8 +12,11 @@ namespace Candoumbe.Types.Numerics
     public record PositiveInteger : IEquatable<PositiveInteger>, IComparable<PositiveInteger>
 #if NET7_0_OR_GREATER
         , IAdditionOperators<PositiveInteger, PositiveInteger, PositiveInteger>
+        , IAdditionOperators<PositiveInteger, NonNegativeInteger, PositiveInteger>
         , ISubtractionOperators<PositiveInteger, PositiveInteger, PositiveInteger>
         , IMultiplyOperators<PositiveInteger, PositiveInteger, PositiveInteger>
+        , IDivisionOperators<PositiveInteger, PositiveInteger, NonNegativeInteger>
+        , IMultiplyOperators<PositiveInteger, NonNegativeInteger, NonNegativeInteger>
         , IComparisonOperators<PositiveInteger, PositiveInteger, bool>
         , IMinMaxValue<PositiveInteger>
         , IMultiplicativeIdentity<PositiveInteger, PositiveInteger>
@@ -85,7 +88,19 @@ namespace Candoumbe.Types.Numerics
         /// <param name="right">The right value</param>
         /// <returns>the sum of <paramref name="left"/> and <paramref name="right"/>.</returns>
 #endif
-        public static PositiveInteger operator +(PositiveInteger left, PositiveInteger right) => new PositiveInteger(left.Value + right.Value);
+        public static PositiveInteger operator +(PositiveInteger left, PositiveInteger right) => From(left.Value + right.Value);
+
+#if NET7_0_OR_GREATER
+        ///<inheritdoc/>
+#else
+        /// <summary>
+        /// Adds two values together and computes their sum
+        /// </summary>
+        /// <param name="left">The left value</param>
+        /// <param name="right">The right value</param>
+        /// <returns>the sum of <paramref name="left"/> and <paramref name="right"/>.</returns>
+#endif
+        public static PositiveInteger operator +(PositiveInteger left, NonNegativeInteger right) => From(left.Value + right.Value);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -115,7 +130,33 @@ namespace Candoumbe.Types.Numerics
         /// <returns>The result of <paramref name="left"/> multiplied by <paramref name="right"/>.</returns>
 #endif
         public static PositiveInteger operator *(PositiveInteger left, PositiveInteger right)
-            => new PositiveInteger(left.Value * right.Value);
+            => From(left.Value * right.Value);
+
+#if NET7_0_OR_GREATER
+        ///<inheritdoc/>
+#else
+        /// <summary>
+        /// Divides two values together to compute their fraction.
+        /// </summary>
+        /// <param name="left">The left value</param>
+        /// <param name="right">The right value</param>
+        /// <returns>The result of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
+#endif
+        public static NonNegativeInteger operator /(PositiveInteger left, PositiveInteger right)
+            => NonNegativeInteger.From(left.Value / right.Value);
+
+#if NET7_0_OR_GREATER
+        ///<inheritdoc/>
+#else
+        /// <summary>
+        /// Multiplies two values together to compute their product.
+        /// </summary>
+        /// <param name="left">The left value</param>
+        /// <param name="right">The right value</param>
+        /// <returns>The result of <paramref name="left"/> multiplied by <paramref name="right"/>.</returns>
+#endif
+        public static NonNegativeInteger operator *(PositiveInteger left, NonNegativeInteger right)
+            => From(left.Value * right.Value);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -190,5 +231,11 @@ namespace Candoumbe.Types.Numerics
 
         ///<inheritdoc/>
         public static implicit operator uint(PositiveInteger x) => (uint)x.Value;
+
+        /// <summary>
+        /// Implicitely cast to <see cref="NonNegativeInteger"/> type
+        /// </summary>
+        /// <param name="x"></param>
+        public static implicit operator NonNegativeInteger(PositiveInteger x) => NonNegativeInteger.From(x.Value);
     }
 }

@@ -8,7 +8,7 @@ namespace Candoumbe.Types.Numerics
     /// <summary>
     /// A numeric type that can only hold an <see langword="int" /> value &gt;= <c>0</c>.
     /// </summary>
-    public readonly struct NonNegativeInteger : IEquatable<NonNegativeInteger>
+    public readonly record struct NonNegativeInteger : IEquatable<NonNegativeInteger>
 #if NET7_0_OR_GREATER
         , IAdditiveIdentity<NonNegativeInteger, NonNegativeInteger>
         , IMinMaxValue<NonNegativeInteger>
@@ -18,13 +18,21 @@ namespace Candoumbe.Types.Numerics
         , ISubtractionOperators<NonNegativeInteger, int, NonNegativeInteger>
         , IEqualityOperators<NonNegativeInteger, NonNegativeInteger, bool>
         , IEqualityOperators<NonNegativeInteger, int, bool>
-        , IUnsignedNumber<NonNegativeInteger>
+        , IMultiplyOperators<NonNegativeInteger, NonNegativeInteger, NonNegativeInteger>
+        , IMultiplyOperators<NonNegativeInteger, PositiveInteger, NonNegativeInteger>
+        
 #endif
     {
         /// <summary>
         /// The underlying <see langword="int"/> value
         /// </summary>
-        public int Value { get; }
+        public int Value
+        {
+            get;
+#if NET6_0_OR_GREATER
+            init;
+#endif
+        }
 
         private NonNegativeInteger(int value)
         {
@@ -75,9 +83,6 @@ namespace Candoumbe.Types.Numerics
         public static int Radix => throw new NotImplementedException();
         /// <inheritdoc/>
         public static NonNegativeInteger MultiplicativeIdentity => throw new NotImplementedException();
-
-        ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(Value, (obj as NonNegativeInteger?)?.Value);
 
         ///<inheritdoc/>
         public bool Equals(NonNegativeInteger other) => Equals(Value, other.Value);
@@ -173,17 +178,41 @@ namespace Candoumbe.Types.Numerics
         /// <param name="value">The value to cast</param>
         public static implicit operator uint(NonNegativeInteger value) => (uint)value.Value;
 
-        ///<inheritdoc/>
-        public static bool operator ==(NonNegativeInteger left, NonNegativeInteger right) => left.Value == right.Value;
 
         ///<inheritdoc/>
         public static bool operator ==(NonNegativeInteger left, int right) => left.Value == right;
 
         ///<inheritdoc/>
-        public static bool operator !=(NonNegativeInteger left, NonNegativeInteger right) => !(left == right);
-
-        ///<inheritdoc/>
         public static bool operator !=(NonNegativeInteger left, int right) => !(left.Value == right);
+
+#if NET7_0_OR_GREATER
+        ///<inheritdoc/>
+#else
+        /// <summary>
+        /// Multiplies <paramref name="left"/> by <paramref name="right"/>.
+        /// </summary>
+        /// <param name="left">The value to multiply by <paramref name="right"/></param>
+        /// <param name="right">The value to multiply by <paramref name="left"/>.</param>
+        /// <returns>the result of the multiplication.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="left"/> is <see langword="null"/></exception>
+        /// <exception cref="OverflowException">The result of <paramref name="left"/> <c>*</c> <paramref name="right"/> falls outside of <see cref="NonNegativeInteger"/> values.</exception>
+#endif
+        public static NonNegativeInteger operator *(NonNegativeInteger left, NonNegativeInteger right) => From(left.Value * right.Value);
+
+#if NET7_0_OR_GREATER
+        ///<inheritdoc/>
+#else
+        /// <summary>
+        /// Multiplies <paramref name="left"/> by <paramref name="right"/> and computes their product.
+        /// </summary>
+        /// <param name="left">The value to multiply by <paramref name="right"/></param>
+        /// <param name="right">The value to multiply by <paramref name="left"/>.</param>
+        /// <returns>the product.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="left"/> is <see langword="null"/></exception>
+        /// <exception cref="OverflowException">The result of <paramref name="left"/> <c>*</c> <paramref name="right"/> falls outside of <see cref="NonNegativeInteger"/> values.</exception>
+#endif
+        public static NonNegativeInteger operator *(NonNegativeInteger left, PositiveInteger right) => From(left.Value * right.Value);
+
         /// <inheritdoc/>
         public static NonNegativeInteger operator --(NonNegativeInteger value)
         {
@@ -199,16 +228,7 @@ namespace Candoumbe.Types.Numerics
         {
             throw new NotImplementedException();
         }
-        /// <inheritdoc/>
-        public static NonNegativeInteger operator *(NonNegativeInteger left, NonNegativeInteger right)
-        {
-            throw new NotImplementedException();
-        }
-        /// <inheritdoc/>
-        public static NonNegativeInteger operator -(NonNegativeInteger value)
-        {
-            throw new NotImplementedException();
-        }
+
         /// <inheritdoc/>
         public static NonNegativeInteger operator +(NonNegativeInteger value)
         {
@@ -450,43 +470,5 @@ namespace Candoumbe.Types.Numerics
 
             return parsingDone;
         }
-
-#if NET7_0_OR_GREATER
-        /// <inheritdoc/>
-        static bool INumberBase<NonNegativeInteger>.TryConvertFromChecked<TOther>(TOther value, out NonNegativeInteger result)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc/>
-        static bool INumberBase<NonNegativeInteger>.TryConvertFromSaturating<TOther>(TOther value, out NonNegativeInteger result)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc/>
-        static bool INumberBase<NonNegativeInteger>.TryConvertFromTruncating<TOther>(TOther value, out NonNegativeInteger result)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc/>
-        static bool INumberBase<NonNegativeInteger>.TryConvertToChecked<TOther>(NonNegativeInteger value, out TOther result)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc/>
-        static bool INumberBase<NonNegativeInteger>.TryConvertToSaturating<TOther>(NonNegativeInteger value, out TOther result)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc/>
-        static bool INumberBase<NonNegativeInteger>.TryConvertToTruncating<TOther>(NonNegativeInteger value, out TOther result)
-        {
-            throw new NotImplementedException();
-        }
-#endif
     }
 }

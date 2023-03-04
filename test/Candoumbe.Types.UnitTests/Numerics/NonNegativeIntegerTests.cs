@@ -632,7 +632,7 @@ public class NonNegativeIntegerTests
 
         // Assert
         actual.Should().BeTrue();
-    } 
+    }
 #endif
 
     [Property]
@@ -686,4 +686,47 @@ public class NonNegativeIntegerTests
         // Assert
         actual.Should().Be(initial);
     }
+
+    [Property]
+    public void Given_a_NonNegativeInteger_When_adding_a_non_negative_value_Then_result_should_be_gte_the_original_value(PositiveInt positiveIntGenerator, NonNegativeInt nonNegativeIntGenerator)
+    {
+        // Arrange
+        PositiveInteger positiveInteger = PositiveInteger.From(positiveIntGenerator.Item);
+        NonNegativeInteger nonNegativeInteger = NonNegativeInteger.From(nonNegativeIntGenerator.Item);
+
+        // Act
+        NonNegativeInteger actual = nonNegativeInteger + positiveInteger;
+
+        // Assert
+        actual.Should().Be(NonNegativeInteger.From(positiveInteger.Value + nonNegativeInteger.Value));
+    }
+
+    [Property]
+    public void Given_a_NonNegativeInteger_When_multiplying_with_a_PositiveInteger_Then_result_should_be_a_NonNegativeValue(PositiveInt positiveIntGenerator, NonNegativeInt nonNegativeIntGenerator)
+    {
+        // Arrange
+        PositiveInteger positiveInteger = PositiveInteger.From(positiveIntGenerator.Item);
+        NonNegativeInteger nonNegativeInteger = NonNegativeInteger.From(nonNegativeIntGenerator.Item);
+
+        // Act
+        NonNegativeInteger actual = nonNegativeInteger * positiveInteger;
+
+        // Assert
+        actual.Should().Be(NonNegativeInteger.From(positiveInteger.Value * nonNegativeInteger.Value));
+    }
+
+    //[Property]
+    //public void Given_a_NonNegativeInteger_max_value_When_multiplying_with_a_PositiveInteger_that_is_greater_than_one_Then_result_should_be_a_NonNegativeValue()
+    //{
+    //    // Arrange
+    //    PositiveInteger positiveInteger = PositiveInteger.From(Faker.Random.Int(min: 2));
+
+    //    _outputHelper.WriteLine($"Multiplying '{NonNegativeInteger.MaxValue}' by '{positiveInteger}'");
+
+    //    // Act
+    //    Action multiplyingMaxNonNegativeInteger = () => { NonNegativeInteger _ = NonNegativeInteger.MaxValue * positiveInteger; };
+
+    //    // Assert
+    //    multiplyingMaxNonNegativeInteger.Should().Throw<OverflowException>();
+    //}
 }
