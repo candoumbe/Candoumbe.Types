@@ -7,7 +7,7 @@ using System.Numerics;
 namespace Candoumbe.Types.Numerics
 {
     /// <summary>
-    /// A numeric type which value is garantied to never be less than <c>0</c>
+    /// A numeric type which value is garantied to always be greater than <c>0</c>
     /// </summary>
     public record PositiveInteger : IEquatable<PositiveInteger>, IComparable<PositiveInteger>
 #if NET7_0_OR_GREATER
@@ -20,26 +20,19 @@ namespace Candoumbe.Types.Numerics
 
 #endif
     {
-
-
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
 #else
         /// <summary>
         /// The multiplicative identity of the current type
-        /// </summary> 
+        /// </summary>
 #endif
         public static PositiveInteger MultiplicativeIdentity => One;
 
         /// <summary>
-        /// The zero value
-        /// </summary>
-        public static PositiveInteger Zero => new(0);
-
-        /// <summary>
         /// The one value
         /// </summary>
-        public static PositiveInteger One => new(1);
+        public static PositiveInteger One => From(1);
 
         private PositiveInteger(int value)
         {
@@ -79,7 +72,7 @@ namespace Candoumbe.Types.Numerics
         /// </summary>
         /// <param name="value"></param>
         /// <returns>a <see cref="PositiveInteger"/> which initial value is <paramref name="value"/>.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> &lt; <c>1</c>.</exception>
         public static PositiveInteger From(int value) => new PositiveInteger(value);
 
 #if NET7_0_OR_GREATER
