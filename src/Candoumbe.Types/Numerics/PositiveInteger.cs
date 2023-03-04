@@ -175,5 +175,20 @@ namespace Candoumbe.Types.Numerics
                 ? throw new ArgumentNullException(nameof(other), $"{nameof(other)} cannot be null")
                 : Value.CompareTo(other.Value);
         }
+
+        ///<inheritdoc/>
+        public static implicit operator int(PositiveInteger x) => x.Value;
+
+        ///<inheritdoc/>
+        public static implicit operator long(PositiveInteger x) => x.Value;
+
+        ///<inheritdoc/>
+        public static implicit operator ulong(PositiveInteger x) => (ulong)x.Value;
+
+        ///<inheritdoc/>
+        public static implicit operator decimal(PositiveInteger x) => x.Value;
+
+        ///<inheritdoc/>
+        public static implicit operator uint(PositiveInteger x) => (uint)x.Value;
     }
 }
