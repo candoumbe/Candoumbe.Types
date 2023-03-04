@@ -9,13 +9,7 @@ using FsCheck.Fluent;
 using FsCheck.Xunit;
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Linq;
 
 using Xunit;
 using Xunit.Abstractions;
@@ -29,7 +23,7 @@ public class NonNegativeIntegerTests
 {
     private static readonly Faker Faker = new();
     private readonly ITestOutputHelper _outputHelper;
-    private static readonly string[] StandardNumericFormats = {"c", "d", "e", "f", "g", "n", "p", "r", "x"};
+    private static readonly string[] StandardNumericFormats = { "c", "d", "e", "f", "g", "n", "p", "r", "x" };
 
     public NonNegativeIntegerTests(ITestOutputHelper outputHelper)
     {
@@ -547,7 +541,7 @@ public class NonNegativeIntegerTests
     public void Given_a_string_representing_a_value_outside_NonNegativeInteger_Ranges_When_calling_Parse_Then_OverflowException_should_be_thrown(CultureInfo culture)
     {
         // Arrange
-        long value = Faker.PickRandom( new [] { 
+        long value = Faker.PickRandom(new[] {
             Faker.Random.Long(max: ((long)NonNegativeInteger.MinValue) - 1),
             Faker.Random.Long(min: ((long)NonNegativeInteger.MaxValue) + 1)
         });
@@ -640,4 +634,56 @@ public class NonNegativeIntegerTests
         actual.Should().BeTrue();
     } 
 #endif
+
+    [Property]
+    public void Given_a_NonNegativeInteger_When_implicitely_casting_to_int32_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    {
+        // Arrange
+        NonNegativeInteger initial = NonNegativeInteger.From(initialValueGenerator.Item);
+
+        // Act
+        int actual = initial;
+
+        // Assert
+        actual.Should().Be(initial.Value);
+    }
+
+    [Property]
+    public void Given_a_NonNegativeInteger_When_implicitely_casting_to_long_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    {
+        // Arrange
+        NonNegativeInteger initial = NonNegativeInteger.From(initialValueGenerator.Item);
+
+        // Act
+        long actual = initial;
+
+        // Assert
+        actual.Should().Be(initial.Value);
+    }
+
+    [Property]
+    public void Given_a_NonNegativeInteger_When_implicitely_casting_to_decimal_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    {
+        // Arrange
+        NonNegativeInteger initial = NonNegativeInteger.From(initialValueGenerator.Item);
+
+        // Act
+        decimal actual = initial;
+
+        // Assert
+        actual.Should().Be(initial);
+    }
+
+    [Property]
+    public void Given_a_NonNegativeInteger_When_implicitely_casting_to_uint_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    {
+        // Arrange
+        NonNegativeInteger initial = NonNegativeInteger.From(initialValueGenerator.Item);
+
+        // Act
+        uint actual = initial;
+
+        // Assert
+        actual.Should().Be(initial);
+    }
 }

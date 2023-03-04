@@ -1,11 +1,7 @@
-﻿using FluentValidation.Validators;
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics;
-using System.Text;
 
 namespace Candoumbe.Types.Numerics
 {
@@ -43,12 +39,9 @@ namespace Candoumbe.Types.Numerics
         /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is &lt; 0</exception>
         public static NonNegativeInteger From(int value)
         {
-            if (value < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(value)} cannot be negative");
-            }
-
-            return new NonNegativeInteger(value);
+            return value < 0
+                ? throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(value)} cannot be negative")
+                : new NonNegativeInteger(value);
         }
 
         /// <summary>
@@ -157,10 +150,28 @@ namespace Candoumbe.Types.Numerics
         public static implicit operator int(NonNegativeInteger value) => value.Value;
 
         /// <summary>
-        /// Implicit cast to <see langword="ulong"/>
+        /// Implicit cast to <see langword="long"/>
+        /// </summary>
+        /// <param name="value">The value to cast</param>
+        public static implicit operator long(NonNegativeInteger value) => value.Value;
+
+        /// <summary>
+        /// Implicit cast to <see langword="ulong"/> type
         /// </summary>
         /// <param name="value">The value to cast</param>
         public static implicit operator ulong(NonNegativeInteger value) => (ulong)value.Value;
+
+        /// <summary>
+        /// Implicit cast to <see langword="decimal"/> type
+        /// </summary>
+        /// <param name="value">The value to cast</param>
+        public static implicit operator decimal(NonNegativeInteger value) => value.Value;
+
+        /// <summary>
+        /// Implicit cast to <see langword="decimal"/> type
+        /// </summary>
+        /// <param name="value">The value to cast</param>
+        public static implicit operator uint(NonNegativeInteger value) => (uint)value.Value;
 
         ///<inheritdoc/>
         public static bool operator ==(NonNegativeInteger left, NonNegativeInteger right) => left.Value == right.Value;
@@ -417,11 +428,9 @@ namespace Candoumbe.Types.Numerics
         public static NonNegativeInteger Parse(string s, IFormatProvider provider)
         {
             long value = long.Parse(s, provider);
-            if (value < MinValue || value > MaxValue)
-            {
-                throw new OverflowException($@"""{s}"" represents a value that is outside range of {nameof(NonNegativeInteger)} values");
-            }
-            return From((int)value);
+            return value < MinValue || value > MaxValue
+                ? throw new OverflowException($@"""{s}"" represents a value that is outside range of {nameof(NonNegativeInteger)} values")
+                : From((int)value);
         }
 
         /// <inheritdoc/>
