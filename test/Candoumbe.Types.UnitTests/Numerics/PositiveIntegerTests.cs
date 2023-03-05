@@ -189,4 +189,32 @@ public class PositiveIntegerTests
         // Assert
         actual.Should().Be(initial);
     }
+
+    [Property]
+    public void Given_a_PositiveInteger_When_adding_a_non_negative_value_Then_result_should_be_gte_the_original_value(PositiveInt positiveIntGenerator, NonNegativeInt nonNegativeIntGenerator)
+    {
+        // Arrange
+        PositiveInteger positiveInteger = PositiveInteger.From(positiveIntGenerator.Item);
+        NonNegativeInteger nonNegativeInteger = NonNegativeInteger.From(nonNegativeIntGenerator.Item);
+
+        // Act
+        PositiveInteger actual = positiveInteger + nonNegativeInteger;
+
+        // Assert
+        actual.Should().Be(PositiveInteger.From(positiveInteger.Value + nonNegativeInteger.Value));
+    }
+
+    [Property]
+    public void Given_a_PositiveInteger_When_dividing_by_a_PositiveInteger_Then_result_should_be_NonNegativeInteger(PositiveInt leftGenerator, PositiveInt rightGenerator)
+    {
+        // Arrange
+        PositiveInteger left = PositiveInteger.From(leftGenerator.Item);
+        PositiveInteger right = PositiveInteger.From(rightGenerator.Item);
+
+        // Act
+        NonNegativeInteger actual = left / right;
+
+        // Assert
+        actual.Should().Be(NonNegativeInteger.From(left.Value / right.Value));
+    }
 }
