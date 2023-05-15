@@ -13,3 +13,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 Major version zero (0.y.z) is for initial development. **Anything MAY change at any time**.
 
 The public API SHOULD NOT be considered stable.
+
+## Ranges
+
+`Candoumbe.Types.Ranges` namespace contains types describe intervals
+
+## Numerics
+
+`Candoumbe.Types.Numerics` namespace contains various numerics types
+
+- [`PositiveInteger`](class-types-numerics-positive-int) : a numeric type that can only contains 
+strictly positive integers. The `PositiveInteger.Value` is garantied to be between `1` and `int.MaxValue`
+
+
+[class-types-numerics-positive-int]:./src/Candoumbe.Types/Numerics/PositiveInteger.cs
