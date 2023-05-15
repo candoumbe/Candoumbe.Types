@@ -10,10 +10,20 @@ using FsCheck;
 using FsCheck.Xunit;
 
 using System;
+using System.Collections.Generic;
+
+using Xunit;
+using Xunit.Abstractions;
 
 public class PositiveIntegerTests
 {
     private readonly static Faker Faker = new();
+    private readonly ITestOutputHelper _outputHelper;
+
+    public PositiveIntegerTests(ITestOutputHelper outputHelper)
+    {
+        _outputHelper = outputHelper;
+    }
 
     [Property]
     public void Given_PositiveIntegers_When_Addition_Then_ShouldReturnCorrectResult(int left, int right)
@@ -25,28 +35,30 @@ public class PositiveIntegerTests
         PositiveInteger positiveB = PositiveInteger.From(right);
 
         // Act
-        PositiveInteger result = positiveA + positiveB;
+        PositiveInteger result = checked(positiveA + positiveB);
 
         // Assert
         result.Value.Should().Be(left + right);
     }
 
     [Property]
-    public void Given_PositiveIntegers_When_Subtraction_Then_ShouldReturnCorrectResult(int left, int right)
+    public void Given_two_PositiveIntegers_When_doing_Subtraction_with_unchecked_Then_ShouldReturnCorrectResult(PositiveInt leftValueGenerator, PositiveInt rightValueGenerator)
     {
         // Arrange
-        left = Math.Max(1, left);
-        right = Math.Max(1, right);
-        PositiveInteger positiveA = PositiveInteger.From(left);
-        PositiveInteger positiveB = PositiveInteger.From(right);
+        PositiveInteger left = PositiveInteger.From(Math.Max(1, leftValueGenerator.Item));
+        PositiveInteger right = PositiveInteger.From(Math.Max(1, rightValueGenerator.Item));
+
+        _outputHelper.WriteLine($"{nameof(left)} : '{left}'");
+        _outputHelper.WriteLine($"{nameof(right)} : '{right}'");
 
         // Act
-        PositiveInteger result = positiveA - positiveB;
+        PositiveInteger result = unchecked(left - right);
 
         // Assert
-        object _ = (left - right) switch
+        object _ = (leftValueGenerator.Item - rightValueGenerator.Item) switch
         {
-            < 1 => result.Value.Should().Be(PositiveInteger.MinValue.Value, $"a positive integer can never hold a value less than {PositiveInteger.MinValue.Value}"),
+            int value when value >= 1 => result.Should().Be(PositiveInteger.From(value), $"a positive integer can never hold a value less than {PositiveInteger.MinValue.Value}"),
+            int value when value < 1 => result.Should().Be(PositiveInteger.From(PositiveInteger.MaxValue.Value - Math.Abs(value)), $"a positive integer can never hold a value less than {PositiveInteger.MinValue.Value}"),
             int value => result.Value.Should().Be(value)
         };
     }
@@ -61,7 +73,7 @@ public class PositiveIntegerTests
         PositiveInteger positiveB = PositiveInteger.From(right);
 
         // Act
-        PositiveInteger result = positiveA * positiveB;
+        PositiveInteger result = checked(positiveA * positiveB);
 
         // Assert
         result.Value.Should().Be(left * right);
@@ -216,5 +228,74 @@ public class PositiveIntegerTests
 
         // Assert
         actual.Should().Be(NonNegativeInteger.From(left.Value / right.Value));
+    }
+
+    [Property]
+    public void Given_a_PositiveInteger_is_MaxValue_and_checked_state_When_adding_a_PositiveInteger_Then_OverflowException_should_be_thrown(PositiveInt rightGenerator)
+    {
+        // Arrange
+        PositiveInteger left = PositiveInteger.MaxValue;
+        PositiveInteger right = PositiveInteger.From(rightGenerator.Item);
+
+        // Act
+        Action addingPositiveValueUsingCheckedKeyword = () => _ = checked(left + right);
+
+        // Assert
+        addingPositiveValueUsingCheckedKeyword.Should().Throw<OverflowException>($"the result is outside of [{PositiveInteger.MinValue} - {PositiveInteger.MaxValue}] range");
+    }
+
+    [Property]
+    public void Given_a_PositiveInteger_is_MinValue_and_checked_state_When_subtracting_any_PositiveInteger_Then_OverflowException_should_be_thrown(PositiveInt rightGenerator)
+    {
+        // Arrange
+        PositiveInteger left = PositiveInteger.MinValue;
+        PositiveInteger right = PositiveInteger.From(rightGenerator.Item);
+
+        _outputHelper.WriteLine($"{nameof(left)}: '{left}'");
+        _outputHelper.WriteLine($"{nameof(right)}: '{right}'");
+
+        // Act
+        Action subtractingPositiveValueUsingCheckedKeyword = () => _ = checked(left - right);
+
+        // Assert
+        subtractingPositiveValueUsingCheckedKeyword.Should().Throw<OverflowException>($"the result would be outside of [{PositiveInteger.MinValue} - {PositiveInteger.MaxValue}] range");
+    }
+
+    public static IEnumerable<object[]> SubtractionInCheckedContextCases
+    {
+        get
+        {
+            yield return new object[]
+            {
+                PositiveInteger.MinValue,
+                PositiveInteger.MinValue,
+                PositiveInteger.MaxValue
+            };
+
+            yield return new object[]
+            {
+                PositiveInteger.One,
+                PositiveInteger.One,
+                PositiveInteger.MaxValue
+            };
+
+            yield return new object[]
+            {
+                PositiveInteger.One,
+                PositiveInteger.From(2),
+                PositiveInteger.From(PositiveInteger.MaxValue.Value - 1)
+            };
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(SubtractionInCheckedContextCases))]
+    public void Given_two_PositiveInteger_When_substracting_Then_result_should_be_expected(PositiveInteger left, PositiveInteger right, PositiveInteger expected)
+    {
+        // Act
+        PositiveInteger actual = unchecked(left - right);
+
+        // Assert
+        actual.Should().Be(expected);
     }
 }
