@@ -5,13 +5,24 @@ using System.Numerics;
 
 namespace Candoumbe.Types.Numerics
 {
+
+#if NET7_0_OR_GREATER
+#endif
+
     /// <summary>
     /// A numeric type which value is garantied to always be greater than <c>0</c>.
     /// <para>
-    /// This type can be usefull when a value must be strictly greater than <c>0</c>.
+    /// This type can be usefull when a value must be strictly greater than <c>0</c> but using <see langword="uint"/> would make an API harder
+    /// to integrate with existing ecosystem.
     /// </para>
     /// </summary>
-    public record PositiveInteger : IEquatable<PositiveInteger>, IComparable<PositiveInteger>
+    public record PositiveInteger :
+
+#if NET7_0_OR_GREATER
+        IPositiveNumber<int, PositiveInteger>,
+#endif
+
+        IEquatable<PositiveInteger>, IComparable<PositiveInteger>
 #if NET7_0_OR_GREATER
         , IAdditionOperators<PositiveInteger, PositiveInteger, PositiveInteger>
         , IAdditionOperators<PositiveInteger, NonNegativeInteger, PositiveInteger>
@@ -39,6 +50,12 @@ namespace Candoumbe.Types.Numerics
         /// </summary>
         public static PositiveInteger One => From(1);
 
+        /// <summary>
+        /// Gets the underlying <see langword="int"/> value.
+        /// </summary>
+        /// <remarks>The value is garantied to be &gt; <c>0</c></remarks>
+        public int Value { get; }
+
         private PositiveInteger(int value)
         {
             if (value < 1)
@@ -47,12 +64,6 @@ namespace Candoumbe.Types.Numerics
             }
             Value = value;
         }
-
-        /// <summary>
-        /// Gets the underlying value
-        /// </summary>
-        /// <remarks>The value is garantied to be &gt; or equal to <c>0</c></remarks>
-        public int Value { get; }
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -84,7 +95,7 @@ namespace Candoumbe.Types.Numerics
         ///<inheritdoc/>
 #else
         /// <summary>
-        /// Adds two values together and computes their sum
+        /// Adds two <see cref="PositiveInteger"/> values together and computes their sum
         /// </summary>
         /// <param name="left">The left value</param>
         /// <param name="right">The right value</param>
