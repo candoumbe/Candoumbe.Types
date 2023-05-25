@@ -19,7 +19,7 @@ namespace Candoumbe.Types.Numerics
     public record PositiveInteger :
 
 #if NET7_0_OR_GREATER
-        IPositiveNumber<int, PositiveInteger>,
+        PositiveNumberBase<int, PositiveInteger>,
 #endif
 
         IEquatable<PositiveInteger>, IComparable<PositiveInteger>
@@ -163,7 +163,7 @@ namespace Candoumbe.Types.Numerics
         ///<inheritdoc/>
 #else
         /// <summary>
-        /// Substracts <paramref name="right"/> from <paramref name="left"/>.
+        /// Subtracts <paramref name="right"/> from <paramref name="left"/>.
         /// </summary>
         /// <param name="left">The left value</param>
         /// <param name="right">The right value</param>
