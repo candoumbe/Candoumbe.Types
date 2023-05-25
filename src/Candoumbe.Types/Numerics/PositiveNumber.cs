@@ -1,4 +1,5 @@
 ﻿#if NET7_0_OR_GREATER
+using System;
 using System.Numerics;
 #endif
 
@@ -10,15 +11,18 @@ namespace Candoumbe.Types.Numerics
     /// </summary>
     /// <typeparam name="TNumber">The numeric type that the current type will restrict to only positive values.</typeparam>
     /// <typeparam name="TSelf">The positive number type</typeparam>
-    public interface IPositiveNumber<TNumber, TSelf>
-        where TNumber : ISignedNumber<TNumber>
-        where TSelf : IPositiveNumber<TNumber, TSelf>, IMinMaxValue<TSelf>, IComparisonOperators<TSelf, TSelf, bool>
+    public abstract record PositiveNumberBase<TNumber, TSelf> : IComparable<TSelf>
+        where TNumber : ISignedNumber<TNumber>, IComparable<TNumber>
+        where TSelf : PositiveNumberBase<TNumber, TSelf>, IMinMaxValue<TSelf>, IComparisonOperators<TSelf, TSelf, bool>
     {
         /// <summary>
         /// Gets the underlying value
         /// </summary>
         /// <remarks>The value is garantied to be &gt; or equal to <c>0</c></remarks>
         TNumber Value { get; }
+
+        ///<inheritdoc/>
+        public int CompareTo(TSelf other) => Value.CompareTo(other.Value);
     }
 #endif
 }
