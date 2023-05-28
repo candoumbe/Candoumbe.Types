@@ -1,6 +1,7 @@
 ﻿using Bogus;
 
 using Candoumbe.Types.Numerics;
+using Candoumbe.Types.UnitTests.Generators;
 
 using FluentAssertions;
 
@@ -28,16 +29,6 @@ public class NonNegativeIntegerTests
     public NonNegativeIntegerTests(ITestOutputHelper outputHelper)
     {
         _outputHelper = outputHelper;
-    }
-
-    [Fact]
-    public void Given_default_instance_Then_underlying_should_be_zero()
-    {
-        // Act
-        NonNegativeInteger numeric = default;
-
-        // Assert
-        numeric.Value.Should().Be(0);
     }
 
     [Fact]
@@ -620,7 +611,6 @@ public class NonNegativeIntegerTests
     public void Given_a_ReadOnlySpan_representing_a_value_inside_range_of_NonNegativeInteger_values_When_calling_TryParse_Then_should_be_true(CultureInfo culture)
     {
         // Arrange
-        string format = $"{Faker.PickRandom(StandardNumericFormats)}{Faker.PickRandom(1, 9)}";
         long value = Faker.PickRandom(NonNegativeInteger.MinValue, NonNegativeInteger.MaxValue);
 
         ReadOnlySpan<char> initial = value.ToString(culture.NumberFormat).AsSpan();
@@ -634,6 +624,19 @@ public class NonNegativeIntegerTests
         actual.Should().BeTrue();
     }
 #endif
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_an_existing_NonNegativeInteger_When_multiplying_by_one_Then_the_result_should_be_equal_to_the_initial_value(NonNegativeInteger initial)
+    {
+        // Arrange
+        NonNegativeInteger expected = initial;
+
+        // Act
+        NonNegativeInteger actual = initial * NonNegativeInteger.One;
+
+        // Assert
+        actual.Should().Be(expected);
+    }
 
     [Property]
     public void Given_a_NonNegativeInteger_When_implicitely_casting_to_int32_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)

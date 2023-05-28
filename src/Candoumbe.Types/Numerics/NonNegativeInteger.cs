@@ -8,7 +8,9 @@ namespace Candoumbe.Types.Numerics
     /// <summary>
     /// A numeric type that can only hold an <see langword="int" /> value &gt;= <c>0</c>.
     /// </summary>
-    public readonly record struct NonNegativeInteger : IEquatable<NonNegativeInteger>
+    public record NonNegativeInteger :
+        NonNegativeNumberBase<int, NonNegativeInteger>,
+        IEquatable<NonNegativeInteger>
 #if NET7_0_OR_GREATER
         , IAdditiveIdentity<NonNegativeInteger, NonNegativeInteger>
         , IMinMaxValue<NonNegativeInteger>
@@ -20,7 +22,8 @@ namespace Candoumbe.Types.Numerics
         , IEqualityOperators<NonNegativeInteger, int, bool>
         , IMultiplyOperators<NonNegativeInteger, NonNegativeInteger, NonNegativeInteger>
         , IMultiplyOperators<NonNegativeInteger, PositiveInteger, NonNegativeInteger>
-        
+        , IComparisonOperators<NonNegativeInteger, NonNegativeInteger, bool>
+
 #endif
     {
         /// <summary>
@@ -77,15 +80,15 @@ namespace Candoumbe.Types.Numerics
 
         ///<inheritdoc/>
         public static NonNegativeInteger MinValue => Zero;
+
         /// <inheritdoc/>
         public static NonNegativeInteger One => throw new NotImplementedException();
+
         /// <inheritdoc/>
         public static int Radix => throw new NotImplementedException();
+
         /// <inheritdoc/>
         public static NonNegativeInteger MultiplicativeIdentity => throw new NotImplementedException();
-
-        ///<inheritdoc/>
-        public bool Equals(NonNegativeInteger other) => Equals(Value, other.Value);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -178,6 +181,17 @@ namespace Candoumbe.Types.Numerics
         /// <param name="value">The value to cast</param>
         public static implicit operator uint(NonNegativeInteger value) => (uint)value.Value;
 
+        ///<inheritdoc/>
+        public static bool operator <(NonNegativeInteger left, NonNegativeInteger right) => left.Value < right.Value;
+
+        ///<inheritdoc/>
+        public static bool operator >(NonNegativeInteger left, NonNegativeInteger right) => left.Value > right.Value;
+
+        ///<inheritdoc/>
+        public static bool operator >=(NonNegativeInteger left, NonNegativeInteger right) => left.Value >= right.Value;
+
+        ///<inheritdoc/>
+        public static bool operator <=(NonNegativeInteger left, NonNegativeInteger right) => left.Value <= right.Value;
 
         ///<inheritdoc/>
         public static bool operator ==(NonNegativeInteger left, int right) => left.Value == right;

@@ -1,7 +1,5 @@
 ﻿namespace Candoumbe.Types.UnitTests.Numerics;
 
-using Bogus;
-
 using Candoumbe.Types.Numerics;
 
 using FluentAssertions;
@@ -17,7 +15,6 @@ using Xunit.Abstractions;
 
 public class PositiveIntegerTests
 {
-    private readonly static Faker Faker = new();
     private readonly ITestOutputHelper _outputHelper;
 
     public PositiveIntegerTests(ITestOutputHelper outputHelper)

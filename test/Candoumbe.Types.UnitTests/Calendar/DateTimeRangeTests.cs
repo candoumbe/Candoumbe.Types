@@ -160,8 +160,8 @@ public class DateTimeRangeTests
     public void Given_DateTimeRange_When_another_DateTimeRange_does_not_overlaps_nor_is_contiguous_Then_Merge_should_throw_InvalidOperationException()
     {
         // Arrange
-        DateTimeRange current = new DateTimeRange(1.January(2019), 10.January(2019));
-        DateTimeRange other = new DateTimeRange(11.January(2019), 15.January(2019));
+        DateTimeRange current = new(1.January(2019), 10.January(2019));
+        DateTimeRange other = new(11.January(2019), 15.January(2019));
 
         // Act
         Action action = () => current.Merge(other);

@@ -18,7 +18,6 @@ using Xunit.Abstractions;
 
 public class PositiveLongTests
 {
-    private readonly static Faker Faker = new();
     private readonly ITestOutputHelper _outputHelper;
 
     public PositiveLongTests(ITestOutputHelper outputHelper)
@@ -64,7 +63,6 @@ public class PositiveLongTests
                 long value when value < 1 => result.Should().Be(PositiveLong.From(PositiveLong.MaxValue.Value - Math.Abs(value)), $"a positive integer can never hold a value less than {PositiveLong.MinValue.Value}"),
                 long value => result.Value.Should().Be(value)
             };
-
         });
     }
 

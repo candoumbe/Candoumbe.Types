@@ -612,7 +612,7 @@ public class NonNegativeLongTests
     {
         // Arrange
         string format = $"{Faker.PickRandom(StandardNumericFormats)}{Faker.PickRandom(1, 9)}";
-        ulong value = ulong.MaxValue;
+        const ulong value = ulong.MaxValue;
 
         ReadOnlySpan<char> initial = value.ToString(culture.NumberFormat).AsSpan();
 
@@ -705,19 +705,4 @@ public class NonNegativeLongTests
         // Assert
         actual.Should().Be(NonNegativeLong.From(positiveLong.Value * nonNegativeLong.Value));
     }
-
-    //[Property]
-    //public void Given_a_NonNegativeLong_max_value_When_multiplying_with_a_PositiveLong_that_is_greater_than_one_Then_result_should_be_a_NonNegativeValue()
-    //{
-    //    // Arrange
-    //    PositiveLong positiveLong = PositiveLong.From(Faker.Random.Int(min: 2));
-
-    //    _outputHelper.WriteLine($"Multiplying '{NonNegativeLong.MaxValue}' by '{positiveLong}'");
-
-    //    // Act
-    //    Action multiplyingMaxNonNegativeLong = () => { NonNegativeLong _ = NonNegativeLong.MaxValue * positiveLong; };
-
-    //    // Assert
-    //    multiplyingMaxNonNegativeLong.Should().Throw<OverflowException>();
-    //}
 }

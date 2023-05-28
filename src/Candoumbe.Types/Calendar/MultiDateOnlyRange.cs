@@ -30,7 +30,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
 
     private readonly ISet<DateOnlyRange> _ranges;
 
-    /// <summary> 
+    /// <summary>
     /// A <see cref="MultiDateOnlyRange"/> that contains no <see cref="DateOnlyRange"/>.
     /// </summary>
     public static MultiDateOnlyRange Empty => new();

@@ -5,7 +5,6 @@ using System.Numerics;
 
 namespace Candoumbe.Types.Numerics
 {
-
 #if NET7_0_OR_GREATER
 #endif
 

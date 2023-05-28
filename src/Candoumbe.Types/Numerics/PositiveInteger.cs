@@ -5,7 +5,6 @@ using System.Numerics;
 
 namespace Candoumbe.Types.Numerics
 {
-
 #if NET7_0_OR_GREATER
 #endif
 
@@ -17,12 +16,7 @@ namespace Candoumbe.Types.Numerics
     /// </para>
     /// </summary>
     public record PositiveInteger :
-
-#if NET7_0_OR_GREATER
-        PositiveNumberBase<int, PositiveInteger>,
-#endif
-
-        IEquatable<PositiveInteger>, IComparable<PositiveInteger>
+        PositiveNumberBase<int, PositiveInteger>
 #if NET7_0_OR_GREATER
         , IAdditionOperators<PositiveInteger, PositiveInteger, PositiveInteger>
         , IAdditionOperators<PositiveInteger, NonNegativeInteger, PositiveInteger>
@@ -33,7 +27,6 @@ namespace Candoumbe.Types.Numerics
         , IComparisonOperators<PositiveInteger, PositiveInteger, bool>
         , IMinMaxValue<PositiveInteger>
         , IMultiplicativeIdentity<PositiveInteger, PositiveInteger>
-
 #endif
     {
 #if NET7_0_OR_GREATER
@@ -89,7 +82,7 @@ namespace Candoumbe.Types.Numerics
         /// <param name="value"></param>
         /// <returns>a <see cref="PositiveInteger"/> which initial value is <paramref name="value"/>.</returns>
         /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> &lt; <c>1</c>.</exception>
-        public static PositiveInteger From(int value) => new PositiveInteger(value);
+        public static PositiveInteger From(int value) => new(value);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -283,14 +276,6 @@ namespace Candoumbe.Types.Numerics
 
         ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();
-
-        ///<inheritdoc/>
-        public int CompareTo(PositiveInteger other)
-        {
-            return other is null
-                ? throw new ArgumentNullException(nameof(other), $"{nameof(other)} cannot be null")
-                : Value.CompareTo(other.Value);
-        }
 
         /// <summary>
         /// Implicitely cast to <see cref="int"/> type

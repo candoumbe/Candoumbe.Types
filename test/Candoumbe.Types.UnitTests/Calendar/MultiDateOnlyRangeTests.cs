@@ -458,7 +458,7 @@ public class MultiDateOnlyRangeTests
     public void Given_an_instance_that_is_not_null_Then_ToString_should_produce_expected_output(MultiDateOnlyRange range)
     {
         // Arrange
-        string expected = string.Empty;
+        string expected;
         if (range.IsInfinite())
         {
             expected = "{infinite}";
