@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Bogus;
 using Candoumbe.Types.Numerics.UnitTests.Generators;
 using FluentAssertions;
@@ -13,7 +13,6 @@ namespace Candoumbe.Types.Numerics.UnitTests;
 
 public class PositiveIntegerTests
 {
-    private readonly static Faker Faker = new();
     private readonly ITestOutputHelper _outputHelper;
 
     public PositiveIntegerTests(ITestOutputHelper outputHelper)
@@ -51,7 +50,7 @@ public class PositiveIntegerTests
         PositiveInteger result = unchecked(left - right);
 
         // Assert
-        _ = (left - right) switch
+        object _ = (leftValueGenerator.Item - rightValueGenerator.Item) switch
         {
             int value when value >= 1 => result.Should().Be(PositiveInteger.From(value), $"a positive integer can never hold a value less than {PositiveInteger.MinValue.Value}"),
             int value when value < 1 => result.Should().Be(PositiveInteger.From(PositiveInteger.MaxValue.Value - Math.Abs(value)), $"a positive integer can never hold a value less than {PositiveInteger.MinValue.Value}"),

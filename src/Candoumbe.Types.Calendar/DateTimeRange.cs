@@ -11,7 +11,7 @@ namespace Candoumbe.Types.Calendar;
 
 /// <summary>
 /// The implementation of <see cref="Range{DateTime}"/> that can be used to model a <see cref="DateTime"/> interval that
-/// spans from <see cref="Range{DateTime}.Start"/> to <see cref="Range{DateTime}.End"/> (inclusive). 
+/// spans from <see cref="Range{DateTime}.Start"/> to <see cref="Range{DateTime}.End"/> (inclusive).
 /// </summary>
 #if !NET5_0_OR_GREATER
 public class DateTimeRange : Range<DateTime>, IFormattable
@@ -212,9 +212,9 @@ public record DateTimeRange : Range<DateTime>, IFormattable
 #else
     {
         int hashCode = -1245466969;
-        hashCode = hashCode * -1521134295 + base.GetHashCode();
-        hashCode = hashCode * -1521134295 + Start.GetHashCode();
-        hashCode = hashCode * -1521134295 + End.GetHashCode();
+        hashCode = (hashCode * -1521134295) + base.GetHashCode();
+        hashCode = (hashCode * -1521134295) + Start.GetHashCode();
+        hashCode = (hashCode * -1521134295) + End.GetHashCode();
         return hashCode;
     }
 #endif

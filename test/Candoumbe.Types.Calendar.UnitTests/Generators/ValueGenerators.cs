@@ -8,7 +8,7 @@ using FsCheck.Fluent;
 namespace Candoumbe.Types.Calendar.UnitTests.Generators;
 
 /// <summary>
-/// Utility class for generating custom <see cref="Arbitrary{T}"/>
+/// Utility class for generating custom <see cref="Arbitrary{T}"/> used by property based tests.
 /// </summary>
 internal static class ValueGenerators
 {
