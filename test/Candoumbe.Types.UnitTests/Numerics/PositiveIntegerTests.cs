@@ -1,10 +1,12 @@
 ﻿namespace Candoumbe.Types.UnitTests.Numerics;
 
 using Candoumbe.Types.Numerics;
+using Candoumbe.Types.UnitTests.Generators;
 
 using FluentAssertions;
 
 using FsCheck;
+using FsCheck.Fluent;
 using FsCheck.Xunit;
 
 using System;
@@ -295,4 +297,8 @@ public class PositiveIntegerTests
         // Assert
         actual.Should().Be(expected);
     }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public Property Given_an_existing_PositiveInteger_When_multiplying_by_multiplicative_identity_Then_the_result_should_be_equal_to_the_initial_value(PositiveInteger initial)
+        => ((initial * PositiveInteger.MultiplicativeIdentity) == initial).ToProperty();
 }

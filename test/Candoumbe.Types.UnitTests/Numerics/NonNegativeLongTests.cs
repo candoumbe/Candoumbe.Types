@@ -1,6 +1,7 @@
 ﻿using Bogus;
 
 using Candoumbe.Types.Numerics;
+using Candoumbe.Types.UnitTests.Generators;
 
 using FluentAssertions;
 
@@ -625,6 +626,15 @@ public class NonNegativeLongTests
         actual.Should().BeFalse($"The value to parse is outside the range of {nameof(NonNegativeLong)} values");
     }
 #endif
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public Property Given_an_existing_NonNegativeInteger_When_multiplying_by_multiplicative_identity_Then_the_result_should_be_equal_to_the_initial_value(NonNegativeLong initial)
+    => ((initial * NonNegativeLong.MultiplicativeIdentity) == initial).ToProperty();
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_an_existing_NonNegativeInteger_When_adding_additive_identity_Then_the_result_should_be_equal_to_the_initial_value(NonNegativeLong initial)
+        => ((initial + NonNegativeLong.AdditiveIdentity) == initial).ToProperty();
+
 
     [Property]
     public void Given_a_NonNegativeLong_When_implicitely_casting_to_int32_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)

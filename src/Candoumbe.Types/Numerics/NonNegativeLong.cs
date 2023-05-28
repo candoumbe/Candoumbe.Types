@@ -11,7 +11,10 @@ namespace Candoumbe.Types.Numerics
     /// <remarks>
     /// This type is fully interoperable with <see cref="long"/> type.
     /// </remarks>
-    public readonly record struct NonNegativeLong : IEquatable<NonNegativeLong>
+    public record NonNegativeLong :
+        NonNegativeNumberBase<long, NonNegativeLong>,
+        IEquatable<NonNegativeLong>
+
 #if NET7_0_OR_GREATER
         , IAdditiveIdentity<NonNegativeLong, NonNegativeLong>
         , IMinMaxValue<NonNegativeLong>
@@ -23,6 +26,8 @@ namespace Candoumbe.Types.Numerics
         , IEqualityOperators<NonNegativeLong, long, bool>
         , IMultiplyOperators<NonNegativeLong, NonNegativeLong, NonNegativeLong>
         , IMultiplyOperators<NonNegativeLong, PositiveLong, NonNegativeLong>
+        , IComparisonOperators<NonNegativeLong, NonNegativeLong, bool>
+
 
 #endif
     {
@@ -86,10 +91,6 @@ namespace Candoumbe.Types.Numerics
         public static long Radix => throw new NotImplementedException();
         /// <inheritdoc/>
         public static NonNegativeLong MultiplicativeIdentity => throw new NotImplementedException();
-
-        ///<inheritdoc/>
-        public bool Equals(NonNegativeLong other) => Equals(Value, other.Value);
-
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
 #else
@@ -180,6 +181,18 @@ namespace Candoumbe.Types.Numerics
 
         ///<inheritdoc/>
         public static bool operator !=(NonNegativeLong left, long right) => !(left.Value == right);
+
+        ///<inheritdoc/>
+        public static bool operator <(NonNegativeLong left, NonNegativeLong right) => left.Value < right.Value;
+
+        ///<inheritdoc/>
+        public static bool operator >(NonNegativeLong left, NonNegativeLong right) => left.Value > right.Value;
+
+        ///<inheritdoc/>
+        public static bool operator <=(NonNegativeLong left, NonNegativeLong right) => left.Value <= right.Value;
+
+        ///<inheritdoc/>
+        public static bool operator >=(NonNegativeLong left, NonNegativeLong right) => left.Value >= right.Value;
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>

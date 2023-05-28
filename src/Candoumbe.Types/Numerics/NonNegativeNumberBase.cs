@@ -14,7 +14,8 @@ namespace Candoumbe.Types.Numerics
     public abstract record NonNegativeNumberBase<TNumber, TSelf> : IComparable<TSelf>
 #if NET7_0_OR_GREATER
         where TNumber : ISignedNumber<TNumber>, IComparable<TNumber>
-        where TSelf : NonNegativeNumberBase<TNumber, TSelf>, IMinMaxValue<TSelf>, IComparisonOperators<TSelf, TSelf, bool>
+        where TSelf : NonNegativeNumberBase<TNumber, TSelf>, IMinMaxValue<TSelf>, IComparisonOperators<TSelf, TSelf, bool>,
+        IAdditiveIdentity<TSelf, TSelf>
 #else
         where TNumber : IComparable<TNumber>
         where TSelf : NonNegativeNumberBase<TNumber, TSelf>
@@ -24,7 +25,7 @@ namespace Candoumbe.Types.Numerics
         /// Gets the underlying value
         /// </summary>
         /// <remarks>The value is garantied to be &gt; or equal to <c>0</c></remarks>
-        TNumber Value { get; }
+        TNumber Value { get; } = default;
 
         ///<inheritdoc/>
         public int CompareTo(TSelf other) => Value.CompareTo(other.Value);
