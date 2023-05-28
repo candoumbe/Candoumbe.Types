@@ -175,7 +175,6 @@ namespace Candoumbe.Types.Numerics
         /// <param name="value">The value to cast</param>
         public static implicit operator uint(NonNegativeLong value) => (uint)value.Value;
 
-
         ///<inheritdoc/>
         public static bool operator ==(NonNegativeLong left, long right) => left.Value == right;
 
@@ -441,7 +440,13 @@ namespace Candoumbe.Types.Numerics
         }
 #endif
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Parses a <see cref="NonNegativeLong"/> out of a string
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="provider"></param>
+        /// <returns></returns>
+        /// <exception cref="OverflowException"></exception>
         public static NonNegativeLong Parse(string s, IFormatProvider provider)
         {
             try

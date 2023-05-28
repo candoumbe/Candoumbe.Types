@@ -294,7 +294,7 @@ public class MultiTimeOnlyRange : IEquatable<MultiTimeOnlyRange>
         bool equals = false;
         if (other is not null)
         {
-            equals = !ReferenceEquals(this, other) ? Covers(other) && other.Covers(this) : true;
+            equals = ReferenceEquals(this, other) || (Covers(other) && other.Covers(this));
         }
         return equals;
     }

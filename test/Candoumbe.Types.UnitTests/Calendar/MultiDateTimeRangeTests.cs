@@ -407,7 +407,6 @@ public class MultiDateTimeRangeTests
         range.IsEmpty().Should().BeTrue();
     }
 
-
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
     public void Given_an_instance_that_is_not_null_When_adding_a_DateOnlyRange_that_is_infinite_Then_IsInfinite_should_return_true(NonEmptyArray<DateOnlyRange> ranges)
     {
@@ -447,7 +446,7 @@ public class MultiDateTimeRangeTests
         }
         else
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new ();
             int i = 0;
             foreach (DateTimeRange item in range.Ranges)
             {
