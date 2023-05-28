@@ -168,12 +168,25 @@ internal static class ValueGenerators
                      .ToArbitrary();
 
         /// <summary>
-        /// Generates <see cref="PositiveInteger"/>s
+        /// Generates <see cref="NonNegativeInteger"/>s
         /// </summary>
         public static Arbitrary<NonNegativeInteger> NonNegativeIntegers()
             => ArbMap.Default.ArbFor<NonNegativeInt>()
                      .Generator
                      .Select(generator => NonNegativeInteger.From(generator.Item))
                      .ToArbitrary();
+
+
+        /// <summary>
+        /// Generates <see cref="NonNegativeLong"/>s
+        /// </summary>
+        public static Arbitrary<NonNegativeLong> NonNegativeLongs()
+            => ArbMap.Default.ArbFor<long>()
+                     .Generator
+                     .Where(value => value >= 0)
+                     .Select(value => NonNegativeLong.From(value))
+                     .ToArbitrary();
+
+
     }
 }
