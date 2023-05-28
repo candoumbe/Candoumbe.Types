@@ -27,7 +27,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
 {
     private readonly HashSet<DateOnlyRange> _ranges;
 
-    /// <summary> 
+    /// <summary>
     /// A <see cref="MultiDateOnlyRange"/> that contains no <see cref="DateOnlyRange"/>.
     /// </summary>
     public static MultiDateOnlyRange Empty => [];
