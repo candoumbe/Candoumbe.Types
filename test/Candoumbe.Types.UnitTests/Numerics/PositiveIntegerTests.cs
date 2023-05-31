@@ -1,5 +1,7 @@
 ﻿namespace Candoumbe.Types.UnitTests.Numerics;
 
+using Bogus;
+
 using Candoumbe.Types.Numerics;
 using Candoumbe.Types.UnitTests.Generators;
 
@@ -18,6 +20,7 @@ using Xunit.Abstractions;
 public class PositiveIntegerTests
 {
     private readonly ITestOutputHelper _outputHelper;
+    private static readonly Faker Faker = new();
 
     public PositiveIntegerTests(ITestOutputHelper outputHelper)
     {
@@ -25,19 +28,43 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_PositiveIntegers_When_Addition_Then_ShouldReturnCorrectResult(int left, int right)
+    public void Given_input_is_less_than_1_When_calling_From_to_build_an_instance_Then_an_exception_should_be_thrown()
     {
         // Arrange
-        left = Math.Max(1, left);
-        right = Math.Max(1, right);
-        PositiveInteger positiveA = PositiveInteger.From(left);
-        PositiveInteger positiveB = PositiveInteger.From(right);
+        int input = Faker.Random.Int(max: 0);
 
         // Act
-        PositiveInteger result = checked(positiveA + positiveB);
+        Action callingFrom = () => PositiveInteger.From(input);
 
         // Assert
-        result.Value.Should().Be(left + right);
+        callingFrom.Should()
+                   .ThrowExactly<ArgumentOutOfRangeException>($"{input} is out of [{PositiveLong.MinValue} - {PositiveLong.MaxValue}] range of values")
+                   .Where(ex => !string.IsNullOrWhiteSpace(ex.Message), "the message of the exception helps understanding the issue")
+                   .Where(ex => Equals(ex.ActualValue, input), "having the actual value that caused the exception can help when debbuging");
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators.NumericsTypes) })]
+    public void Given_two_positive_integers_When_comparing_them_Then_the_result_should_be_the_same_as_comparing_their_underlying_values(PositiveInteger left, PositiveInteger right)
+    {
+        // Assert
+        (left <= right).Should().Be(left.Value <= right.Value);
+        (left < right).Should().Be(left.Value < right.Value);
+        (left >= right).Should().Be(left.Value >= right.Value);
+        (left > right).Should().Be(left.Value > right.Value);
+        (left == right).Should().Be(left.Value == right.Value);
+        (left != right).Should().Be(left.Value != right.Value);
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators.NumericsTypes) })]
+    public void Given_two_positive_integers_and_in_a_checked_When_adding_those_values_together_Then_the_result_should_be_withing_range_of_positive_values(PositiveInteger left, PositiveInteger right)
+    {
+        // Act
+        PositiveInteger result = checked(left + right);
+
+        // Assert
+        result.Should()
+              .BeInRange(PositiveInteger.MinValue, PositiveInteger.MaxValue);
+        result.Should().Be(checked(right + left));
     }
 
     [Property]
@@ -62,20 +89,16 @@ public class PositiveIntegerTests
         };
     }
 
-    [Property]
-    public void Given_PositiveIntegers_When_Multiplication_Then_ShouldReturnCorrectResult(int left, int right)
+    [Property(Arbitrary = new[] { typeof(ValueGenerators.NumericsTypes) })]
+    public void Given_two_PositiveIntegers_and_checked_context_When_multiplying_them_together_Then_the_result_should_be_correct(PositiveInteger left, PositiveInteger right)
     {
-        // Arrange
-        left = Math.Max(1, left);
-        right = Math.Max(1, right);
-        PositiveInteger positiveA = PositiveInteger.From(left);
-        PositiveInteger positiveB = PositiveInteger.From(right);
-
         // Act
-        PositiveInteger result = checked(positiveA * positiveB);
+        PositiveInteger result = checked(left * right);
 
         // Assert
-        result.Value.Should().Be(left * right);
+        result.Should()
+              .BeInRange(PositiveInteger.MinValue, PositiveInteger.MaxValue)
+              .And.Be(right * left, "The multîplication is commutative");
     }
 
     [Property]
