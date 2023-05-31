@@ -3,7 +3,6 @@
 using System.Numerics;
 #endif
 
-
 namespace Candoumbe.Types.Numerics
 {
     /// <summary>
