@@ -1,20 +1,3 @@
-using Candoumbe.Pipelines.Components;
-using Candoumbe.Pipelines.Components.GitHub;
-using Candoumbe.Pipelines.Components.NuGet;
-
-using Nuke.Common;
-using Nuke.Common.CI;
-using Nuke.Common.CI.GitHubActions;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.Codecov;
-using Nuke.Common.Utilities.Collections;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 [GitHubActions("integration", GitHubActionsImage.UbuntuLatest,
     AutoGenerate = true,
     FetchDepth = 0,
@@ -144,10 +127,11 @@ public class Pipelines : NukeBuild,
     IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetProjects("*.*Tests");
 
     ///<inheritdoc/>
-    IEnumerable<(Project SourceProject, IEnumerable<Project> TestProjects)> IMutationTest.MutationTestsProjects => new[] {
-
-        (this.Get<IHaveSolution>().Solution.GetProject("Candoumbe.Types"), this.Get<IHaveSolution>().Solution.GetProjects("*.*Tests"))
-    };
+    IEnumerable<(Project SourceProject, IEnumerable<Project> TestProjects)> IMutationTest.MutationTestsProjects
+        => new[]
+        {
+            (Source: Solution.GetProject("Candoumbe.Types"), TestProjects: this.Get<IUnitTest>().UnitTestsProjects)
+        };
 
     ///<inheritdoc/>
     IEnumerable<AbsolutePath> IPack.PackableProjects => this.Get<IHaveSourceDirectory>().SourceDirectory.GlobFiles("**/*.csproj");
