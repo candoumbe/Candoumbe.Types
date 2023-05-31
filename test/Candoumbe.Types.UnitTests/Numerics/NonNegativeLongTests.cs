@@ -31,14 +31,18 @@ public class NonNegativeLongTests
         _outputHelper = outputHelper;
     }
 
-    [Fact]
-    public void Given_default_instance_Then_underlying_should_be_zero()
+    [Property(Arbitrary = new[] { typeof(ValueGenerators.NumericsTypes) })]
+    public void Given_default_instance_Then_underlying_should_be_zero(NonNegativeLong initial)
     {
+        // Arrange
+        long expected = initial.Value;
+
         // Act
-        NonNegativeLong numeric = default;
+        NonNegativeLong numeric = NonNegativeLong.From(initial.Value);
 
         // Assert
-        numeric.Value.Should().Be(0);
+        numeric.Should().Be(initial);
+        numeric.Value.Should().Be(expected);
     }
 
     [Fact]

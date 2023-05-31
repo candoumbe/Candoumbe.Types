@@ -27,8 +27,6 @@ namespace Candoumbe.Types.Numerics
         , IMultiplyOperators<NonNegativeLong, NonNegativeLong, NonNegativeLong>
         , IMultiplyOperators<NonNegativeLong, PositiveLong, NonNegativeLong>
         , IComparisonOperators<NonNegativeLong, NonNegativeLong, bool>
-
-
 #endif
     {
         /// <summary>
@@ -407,13 +405,14 @@ namespace Candoumbe.Types.Numerics
         public static NonNegativeLong MinMagnitudeNumber(NonNegativeLong x, NonNegativeLong y) => MinMagnitude(x, y);
 
         /// <inheritdoc/>
-        public static NonNegativeLong Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider) => throw new NotImplementedException();
+        public static NonNegativeLong Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider) => From(long.Parse(s, style, provider));
 
         /// <inheritdoc/>
-        public static NonNegativeLong Parse(string s, NumberStyles style, IFormatProvider provider) => throw new NotImplementedException();
+        public static NonNegativeLong Parse(string s, NumberStyles style, IFormatProvider provider) => Parse(s.AsSpan(), style, provider);
 
         /// <inheritdoc/>
-        public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeLong result) => throw new NotImplementedException();
+        public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeLong result)
+             => throw new NotImplementedException();
 
         /// <inheritdoc/>
         public static bool TryParse([NotNullWhen(true)] string s, NumberStyles style, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeLong result)
