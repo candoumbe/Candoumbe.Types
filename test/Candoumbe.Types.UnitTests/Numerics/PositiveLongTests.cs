@@ -19,11 +19,29 @@ using Xunit.Abstractions;
 public class PositiveLongTests
 {
     private readonly ITestOutputHelper _outputHelper;
+    private readonly static Faker Faker = new();
 
     public PositiveLongTests(ITestOutputHelper outputHelper)
     {
         _outputHelper = outputHelper;
     }
+
+
+    [Property]
+    public void Given_input_is_less_than_1_When_calling_From_to_build_an_instance_Then_an_exception_should_be_thrown()
+    {
+        // Arrange
+        long input = Faker.Random.Long(max: 0);
+
+        // Act
+        Action callingFrom = () => PositiveLong.From(input);
+
+        // Assert
+        callingFrom.Should()
+                   .ThrowExactly<ArgumentOutOfRangeException>($"{input} is out of [{PositiveLong.MinValue} - {PositiveLong.MaxValue}] range of values")
+                   .Where(ex => string.IsNullOrWhiteSpace(ex.Message), "thémessage should be ");
+    }
+
 
     [Property]
     public void Given_PositiveLongs_When_Addition_Then_ShouldReturnCorrectResult(long left, long right)
