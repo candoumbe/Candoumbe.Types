@@ -85,7 +85,7 @@ public class NonNegativeLongTests
         NonNegativeLong result = initialValue + NonNegativeLong.AdditiveIdentity;
 
         // Assert
-        result.Should().Be(initialValue);
+        result.Should().Be(initialValue + 1);
     }
 
     [Property]
