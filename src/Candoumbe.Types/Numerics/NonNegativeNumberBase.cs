@@ -35,23 +35,23 @@ namespace Candoumbe.Types.Numerics
         ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();
 
-        /////<inheritdoc/>
-        //public static bool operator <(NonNegativeNumberBase<TNumber, TSelf> left, TNumber right)
-        //    => left.CompareTo(right) < 0;
+        ///<inheritdoc/>
+        public static bool operator <(NonNegativeNumberBase<TNumber, TSelf> left, TNumber right)
+            => left.Value.CompareTo(right) < 0;
 
-        /////<inheritdoc/>
-        //public static bool operator >(NonNegativeNumberBase<TNumber, TSelf> left, TNumber right)
-        //    => left.CompareTo(right) > 0;
+        ///<inheritdoc/>
+        public static bool operator >(NonNegativeNumberBase<TNumber, TSelf> left, TNumber right)
+            => left.Value.CompareTo(right) > 0;
 
-        /////<inheritdoc/>
-        //public static bool operator >=(NonNegativeNumberBase<TNumber, TSelf> left, TNumber right)
-        //    => left.CompareTo(right) >= 0;
+        ///<inheritdoc/>
+        public static bool operator >=(NonNegativeNumberBase<TNumber, TSelf> left, TNumber right)
+            => left.Value.CompareTo(right) >= 0;
 
-        /////<inheritdoc/>
-        //public static bool operator <=(NonNegativeNumberBase<TNumber, TSelf> left, TNumber right)
-        //    => left.CompareTo(right) <= 0;
+        ///<inheritdoc/>
+        public static bool operator <=(NonNegativeNumberBase<TNumber, TSelf> left, TNumber right)
+            => left.Value.CompareTo(right) <= 0;
 
-#if NET7_0_OR_GREATER
+
 
         ///<inheritdoc/>
         public static bool operator <(NonNegativeNumberBase<TNumber, TSelf> left, TSelf right)
@@ -75,7 +75,6 @@ namespace Candoumbe.Types.Numerics
 
         ///<inheritdoc/>
         public static bool operator !=(NonNegativeNumberBase<TNumber, TSelf> left, TSelf right)
-            => left.Value != right.Value;
-#endif
+            => left.Value.CompareTo(right.Value) != 0;
     }
 }

@@ -83,12 +83,14 @@ namespace Candoumbe.Types.Numerics
 
         ///<inheritdoc/>
         public static NonNegativeLong MinValue => Zero;
+
         /// <inheritdoc/>
-        public static NonNegativeLong One => throw new NotImplementedException();
+        public static NonNegativeLong One => From(1);
+
         /// <inheritdoc/>
         public static long Radix => throw new NotImplementedException();
         /// <inheritdoc/>
-        public static NonNegativeLong MultiplicativeIdentity => throw new NotImplementedException();
+        public static NonNegativeLong MultiplicativeIdentity => One;
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
 #else
