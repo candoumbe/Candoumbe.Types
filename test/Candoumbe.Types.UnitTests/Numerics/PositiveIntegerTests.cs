@@ -43,7 +43,7 @@ public class PositiveIntegerTests
                    .Where(ex => Equals(ex.ActualValue, input), "having the actual value that caused the exception can help when debbuging");
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators.NumericsTypes) })]
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
     public void Given_two_positive_integers_When_comparing_them_Then_the_result_should_be_the_same_as_comparing_their_underlying_values(PositiveInteger left, PositiveInteger right)
     {
         // Assert
@@ -55,7 +55,7 @@ public class PositiveIntegerTests
         (left != right).Should().Be(left.Value != right.Value);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators.NumericsTypes) })]
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
     public void Given_two_positive_integers_and_in_a_checked_When_adding_those_values_together_Then_the_result_should_be_withing_range_of_positive_values(PositiveInteger left, PositiveInteger right)
     {
         // Act
@@ -89,7 +89,7 @@ public class PositiveIntegerTests
         };
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators.NumericsTypes) })]
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
     public void Given_two_PositiveIntegers_and_checked_context_When_multiplying_them_together_Then_the_result_should_be_correct(PositiveInteger left, PositiveInteger right)
     {
         // Act

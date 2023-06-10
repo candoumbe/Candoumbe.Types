@@ -39,9 +39,8 @@ public class PositiveLongTests
         // Assert
         callingFrom.Should()
                    .ThrowExactly<ArgumentOutOfRangeException>($"{input} is out of [{PositiveLong.MinValue} - {PositiveLong.MaxValue}] range of values")
-                   .Where(ex => string.IsNullOrWhiteSpace(ex.Message), "thémessage should be ");
+                   .Where(ex => !string.IsNullOrWhiteSpace(ex.Message), "the message always should be set for diagnostic purpose.");
     }
-
 
     [Property]
     public void Given_PositiveLongs_When_Addition_Then_ShouldReturnCorrectResult(long left, long right)

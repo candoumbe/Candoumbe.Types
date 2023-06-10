@@ -31,7 +31,7 @@ public class NonNegativeLongTests
         _outputHelper = outputHelper;
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators.NumericsTypes) })]
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
     public void Given_default_instance_Then_underlying_should_be_zero(NonNegativeLong initial)
     {
         // Arrange
@@ -75,18 +75,9 @@ public class NonNegativeLongTests
         createNonNegativeLong.Should().Throw<ArgumentOutOfRangeException>();
     }
 
-    [Property]
-    public void Given_any_NonNegativeLong_When_adding_AdditiveIdentity_Then_result_should_be_initial_value(NonNegativeInt initialValueGenerator)
-    {
-        // Arrange
-        NonNegativeLong initialValue = NonNegativeLong.From(initialValueGenerator.Item);
-
-        // Act
-        NonNegativeLong result = initialValue + NonNegativeLong.AdditiveIdentity;
-
-        // Assert
-        result.Should().Be(initialValue + 1);
-    }
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public Property Given_any_NonNegativeLong_When_adding_AdditiveIdentity_Then_result_should_be_initial_value(NonNegativeLong initial)
+        => ((initial + NonNegativeLong.AdditiveIdentity) == initial).ToProperty();
 
     [Property]
     public void Given_two_NonNegativeLong_When_adding_them_together_Then_result_should_be_their_sum(NonNegativeInt leftValueGenerator, NonNegativeInt rightValueGenerator)
