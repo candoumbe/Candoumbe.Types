@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚀 New features
 - Added `NonNegativeInteger` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
 - Added `PositiveInteger` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
+- Added `NonNegativeLong` type ([#70](https://github.com/candoumbe/Candoumbe.Types/issues/70))
+- Added `PositiveLong` type ([#70](https://github.com/candoumbe/Candoumbe.Types/issues/70))
+
+### 🛠️ Technical
+- Code refactoring to be able to add more numeric types ([#70](https://github.com/candoumbe/Candoumbe.Types/issues/70))
 
 ## [0.1.0] / 2023-01-29
 - Initial release

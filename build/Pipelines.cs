@@ -9,6 +9,7 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.Codecov;
+using Nuke.Common.Tools.DotNet;
 
 using System;
 using System.Collections.Generic;

@@ -82,13 +82,13 @@ namespace Candoumbe.Types.Numerics
         public static NonNegativeInteger MinValue => Zero;
 
         /// <inheritdoc/>
-        public static NonNegativeInteger One => throw new NotImplementedException();
+        public static NonNegativeInteger One => From(1);
 
         /// <inheritdoc/>
         public static int Radix => throw new NotImplementedException();
 
         /// <inheritdoc/>
-        public static NonNegativeInteger MultiplicativeIdentity => throw new NotImplementedException();
+        public static NonNegativeInteger MultiplicativeIdentity => One;
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
