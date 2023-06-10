@@ -11,7 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved all types from `Candoumbe.Types.Numerics` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Numerics` NuGet package
 - Moved all types from `Candoumbe.Types.Calendar` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Calendar` NuGet package
 
-
 ## [0.2.0] / 2024-12-03
 ### 🚀 New features
 - Added `NonNegativeInteger` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
@@ -28,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dropped `net7.0` support as it's no longer maintained by Microsoft.
 - Removed `Ranges` property from [`MultiDateTimeRange`](./src/Candoumbe.Types/Calendar/MultiDateTimeRange.cs), [`MultiTimeOnlyRange`](./src/Candoumbe.Types/Calendar/MultiTimeOnlyRange.cs) and [`MultiDateOnlyRange`](./src/Candoumbe.Types/Calendar/MultiDateOnlyRange.cs)
 which is now redundant
+- Added `NonNegativeLong` type ([#70](https://github.com/candoumbe/Candoumbe.Types/issues/70))
+- Added `PositiveLong` type ([#70](https://github.com/candoumbe/Candoumbe.Types/issues/70))
+
+### 🛠️ Technical
+- Code refactoring to be able to add more numeric types ([#70](https://github.com/candoumbe/Candoumbe.Types/issues/70))
 
 ### 🧹 Housekeeping
 - Fixed incorrect package and repository urls which caused report of mutation tests to not be sent.
