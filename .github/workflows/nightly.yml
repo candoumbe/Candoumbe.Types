@@ -37,37 +37,42 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Cache .nuke/temp, ~/.nuget/packages
+      - name: 'Cache: .nuke/temp, ~/.nuget/packages'
         uses: actions/cache@v3
         with:
           path: |
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'test/**/*.csproj', 'stryker-config.json', 'test/**/*/xunit.runner.json') }}
-      - name: Run './build.cmd Compile Tests Pack'
+      - name: 'Run: Compile, Tests, Pack'
         run: ./build.cmd Compile Tests Pack
         env:
           NugetApiKey: ${{ secrets.NUGET_API_KEY }}
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
           StrykerDashboardApiKey: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/upload-artifact@v3
+      - name: 'Publish: unit-tests'
+        uses: actions/upload-artifact@v3
         with:
           name: unit-tests
-          path: output/artifacts/tests-results/unit-tests
-      - uses: actions/upload-artifact@v3
+          path: output/artifacts/tests-results/renovate/candoumbe.pipelines-0.x/unit-tests
+      - name: 'Publish: mutation-tests'
+        uses: actions/upload-artifact@v3
         with:
           name: mutation-tests
-          path: output/artifacts/tests-results/mutation-tests
-      - uses: actions/upload-artifact@v3
+          path: output/artifacts/tests-results/renovate/candoumbe.pipelines-0.x/mutation-tests
+      - name: 'Publish: coverage-report'
+        uses: actions/upload-artifact@v3
         with:
           name: coverage-report
           path: output/artifacts/reports/coverage-report
-      - uses: actions/upload-artifact@v3
+      - name: 'Publish: coverage-history'
+        uses: actions/upload-artifact@v3
         with:
           name: coverage-history
           path: output/artifacts/reports/coverage-history
-      - uses: actions/upload-artifact@v3
+      - name: 'Publish: packages'
+        uses: actions/upload-artifact@v3
         with:
           name: packages
           path: output/artifacts/packages
