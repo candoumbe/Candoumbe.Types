@@ -141,12 +141,12 @@ public class Pipelines : NukeBuild,
     };
 
     ///<inheritdoc/>
-    IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetProjects("*.*Tests");
+    IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.*Tests");
 
     ///<inheritdoc/>
     IEnumerable<(Project SourceProject, IEnumerable<Project> TestProjects)> IMutationTest.MutationTestsProjects => new[] {
 
-        (this.Get<IHaveSolution>().Solution.GetProject("Candoumbe.Types"), this.Get<IHaveSolution>().Solution.GetProjects("*.*Tests"))
+        (this.Get<IHaveSolution>().Solution.GetProject("Candoumbe.Types"), this.Get<IHaveSolution>().Solution.GetAllProjects("*.*Tests"))
     };
 
     ///<inheritdoc/>
