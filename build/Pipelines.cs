@@ -137,7 +137,7 @@ public class Pipelines : NukeBuild,
     IEnumerable<AbsolutePath> IClean.DirectoriesToEnsureExistance => new[]
     {
         this.Get<IHaveArtifacts>().OutputDirectory,
-        this.Get<IHaveArtifacts>().ArtifactsDirectory,
+        this.Get<IHaveArtifacts>().ArtifactsDirectory
     };
 
     ///<inheritdoc/>
@@ -146,7 +146,7 @@ public class Pipelines : NukeBuild,
     ///<inheritdoc/>
     IEnumerable<(Project SourceProject, IEnumerable<Project> TestProjects)> IMutationTest.MutationTestsProjects => new[] {
 
-        (this.Get<IHaveSolution>().Solution.GetProject("Candoumbe.Types"), this.Get<IHaveSolution>().Solution.GetAllProjects("*.*Tests"))
+        (Solution.AllProjects.Single(project => string.Equals(project.Name, "Candoumbe.Types", StringComparison.InvariantCultureIgnoreCase)), this.Get<IHaveSolution>().Solution.GetAllProjects("*Tests"))
     };
 
     ///<inheritdoc/>
