@@ -55,12 +55,12 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: unit-tests
-          path: output/artifacts/tests-results/renovate/candoumbe.pipelines-0.x/unit-tests
+          path: output/artifacts/tests-results/unit-tests
       - name: 'Publish: mutation-tests'
         uses: actions/upload-artifact@v3
         with:
           name: mutation-tests
-          path: output/artifacts/tests-results/renovate/candoumbe.pipelines-0.x/mutation-tests
+          path: output/artifacts/tests-results/mutation-tests
       - name: 'Publish: coverage-report'
         uses: actions/upload-artifact@v3
         with:
