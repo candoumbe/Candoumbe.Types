@@ -156,7 +156,12 @@ namespace Candoumbe.Types.Numerics
         /// <returns>The result of <paramref name="left"/> multiplied by <paramref name="right"/>.</returns>
 #endif
         public static NonNegativeInteger operator *(PositiveInteger left, NonNegativeInteger right)
-            => From(left.Value * right.Value);
+            => right switch
+            {
+                { Value: 0 } => right,
+                { Value: 1 } => left,
+                _ => From(left.Value * right.Value)
+            };
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>

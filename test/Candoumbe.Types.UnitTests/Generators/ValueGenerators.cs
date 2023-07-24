@@ -2,6 +2,7 @@
 // Licenced under GNU General Public Licence, version 3.0"
 
 using Candoumbe.Types.Calendar;
+using Candoumbe.Types.Numerics;
 
 using FsCheck;
 using FsCheck.Fluent;
@@ -149,4 +150,9 @@ internal static class ValueGenerators
 
                                                       return array;
                                                   }).ToArbitrary();
+
+    public static Arbitrary<PositiveInteger> PositiveIntegers() => ArbMap.Default.ArbFor<PositiveInt>()
+                                                                         .Generator
+                                                                         .Select(pos => PositiveInteger.From(pos.Item))
+        .ToArbitrary();
 }

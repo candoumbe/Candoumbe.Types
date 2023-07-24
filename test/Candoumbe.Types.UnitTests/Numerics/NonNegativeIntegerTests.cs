@@ -715,6 +715,20 @@ public class NonNegativeIntegerTests
         actual.Should().Be(NonNegativeInteger.From(positiveInteger.Value * nonNegativeInteger.Value));
     }
 
+    [Property]
+    public void Given_a_NonNegativeInteger_When_multiplying_with_a_PositiveInteger_One_Then_result_should_be_a_NonNegativeValueZero(NonNegativeInt nonNegativeIntGenerator)
+    {
+        // Arrange
+        PositiveInteger positiveInteger = PositiveInteger.One;
+        NonNegativeInteger nonNegativeInteger = NonNegativeInteger.From(nonNegativeIntGenerator.Item);
+
+        // Act
+        NonNegativeInteger actual = nonNegativeInteger * positiveInteger;
+
+        // Assert
+        actual.Should().Be(nonNegativeInteger);
+    }
+
     //[Property]
     //public void Given_a_NonNegativeInteger_max_value_When_multiplying_with_a_PositiveInteger_that_is_greater_than_one_Then_result_should_be_a_NonNegativeValue()
     //{
