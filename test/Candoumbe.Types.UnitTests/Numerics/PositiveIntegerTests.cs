@@ -82,6 +82,19 @@ public class PositiveIntegerTests
     }
 
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_PositiveInteger_When_multiplying_by_NonNegativeInteger_Then_result_should_be_a_NonNegativeInteger_which_value_is_left_times_right(PositiveInteger left, NonNegativeInteger right)
+    {
+        // Arrange
+        NonNegativeInteger expected = NonNegativeInteger.From(left * right);
+
+        // Act
+        NonNegativeInteger actual = left * right;
+
+        // Assert
+        actual.Should().Be(expected);
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
     public void Given_PositiveInteger_When_multiplying_by_NonNegative_identity_Then_result_should_be_the_left_value(PositiveInteger left)
     {
         // Arrange

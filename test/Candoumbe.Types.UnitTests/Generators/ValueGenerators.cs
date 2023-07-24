@@ -153,6 +153,11 @@ internal static class ValueGenerators
 
     public static Arbitrary<PositiveInteger> PositiveIntegers() => ArbMap.Default.ArbFor<PositiveInt>()
                                                                          .Generator
-                                                                         .Select(pos => PositiveInteger.From(pos.Item))
+                                                                         .Select(value => PositiveInteger.From(value.Item))
+        .ToArbitrary();
+
+    public static Arbitrary<NonNegativeInteger> NonNegativeIntegers() => ArbMap.Default.ArbFor<NonNegativeInt>()
+                                                                         .Generator
+                                                                         .Select(value => NonNegativeInteger.From(value.Item))
         .ToArbitrary();
 }
