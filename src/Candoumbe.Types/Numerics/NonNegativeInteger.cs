@@ -216,25 +216,31 @@ namespace Candoumbe.Types.Numerics
 
         /// <inheritdoc/>
         public static NonNegativeInteger operator --(NonNegativeInteger value)
-        {
-            throw new NotImplementedException();
-        }
-        /// <inheritdoc/>
-        public static NonNegativeInteger operator /(NonNegativeInteger left, NonNegativeInteger right)
-        {
-            throw new NotImplementedException();
-        }
-        /// <inheritdoc/>
-        public static NonNegativeInteger operator ++(NonNegativeInteger value)
-        {
-            throw new NotImplementedException();
-        }
+            => value.Value switch
+            {
+                0 => MaxValue,
+                _ => value - One
+            };
 
         /// <inheritdoc/>
-        public static NonNegativeInteger operator +(NonNegativeInteger value)
-        {
-            throw new NotImplementedException();
-        }
+        public static NonNegativeInteger operator /(NonNegativeInteger left, NonNegativeInteger right)
+            => right.Value switch
+            {
+                0 => throw new DivideByZeroException(),
+                1 => left,
+                _ => From(left.Value / right.Value)
+            };
+
+        /// <inheritdoc/>
+        public static NonNegativeInteger operator ++(NonNegativeInteger value)
+            => value.Value switch
+            {
+                int.MaxValue => Zero,
+                _ => value + One
+            };
+
+        /// <inheritdoc/>
+        public static NonNegativeInteger operator +(NonNegativeInteger value) => value;
 
         ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();
@@ -336,21 +342,13 @@ namespace Candoumbe.Types.Numerics
         public static bool IsNegative(NonNegativeInteger value) => false;
 
         /// <inheritdoc/>
-        public static bool IsNegativeInfinity(NonNegativeInteger value) => throw new NotImplementedException();
-        /// <inheritdoc/>
-        public static bool IsNormal(NonNegativeInteger value) => throw new NotImplementedException();
+        public static bool IsNegativeInfinity(NonNegativeInteger value) => false;
 
         /// <inheritdoc/>
         public static bool IsPositive(NonNegativeInteger value) => true;
 
         /// <inheritdoc/>
         public static bool IsPositiveInfinity(NonNegativeInteger value) => false;
-
-        /// <inheritdoc/>
-        public static bool IsRealNumber(NonNegativeInteger value) => true;
-
-        /// <inheritdoc/>
-        public static bool IsSubnormal(NonNegativeInteger value) => throw new NotImplementedException();
 
 #if NET7_0_OR_GREATER
         /// <inheritdoc/>

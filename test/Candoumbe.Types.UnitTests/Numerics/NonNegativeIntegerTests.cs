@@ -1,6 +1,7 @@
 ﻿using Bogus;
 
 using Candoumbe.Types.Numerics;
+using Candoumbe.Types.UnitTests.Generators;
 
 using FluentAssertions;
 
@@ -426,19 +427,6 @@ public class NonNegativeIntegerTests
     }
 
     [Property]
-    public void Given_a_NonNegativeInteger_When_calling_IsRealNumber_on_it_Then_result_should_be_true(NonNegativeInt initialValueGenerator)
-    {
-        // Arrange
-        NonNegativeInteger initialValue = NonNegativeInteger.From(initialValueGenerator.Item);
-
-        // Act
-        bool actual = NonNegativeInteger.IsRealNumber(initialValue);
-
-        // Assert
-        actual.Should().BeTrue();
-    }
-
-    [Property]
     public void Given_a_NonNegativeInteger_When_calling_IsZero_on_it_Then_result_should_be_same_as_initialValue_eq_NonNegativeIntegerZero(NonNegativeInt initialValueGenerator)
     {
         // Arrange
@@ -729,18 +717,74 @@ public class NonNegativeIntegerTests
         actual.Should().Be(nonNegativeInteger);
     }
 
-    //[Property]
-    //public void Given_a_NonNegativeInteger_max_value_When_multiplying_with_a_PositiveInteger_that_is_greater_than_one_Then_result_should_be_a_NonNegativeValue()
-    //{
-    //    // Arrange
-    //    PositiveInteger positiveInteger = PositiveInteger.From(Faker.Random.Int(min: 2));
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_a_NonNegativeInteger_When_PreDecrementing_Then_result_should_be_a_NonNegativeInteger(NonNegativeInteger initial)
+    {
+        // Arrange
+        int initialValue = initial;
+        NonNegativeInteger expected = initial == NonNegativeInteger.Zero
+            ? NonNegativeInteger.MaxValue
+            : NonNegativeInteger.From(--initialValue);
 
-    //    _outputHelper.WriteLine($"Multiplying '{NonNegativeInteger.MaxValue}' by '{positiveInteger}'");
+        // Act
+        NonNegativeInteger actual = --initial;
 
-    //    // Act
-    //    Action multiplyingMaxNonNegativeInteger = () => { NonNegativeInteger _ = NonNegativeInteger.MaxValue * positiveInteger; };
+        // Assert
+        actual.Should().Be(expected);
+    }
 
-    //    // Assert
-    //    multiplyingMaxNonNegativeInteger.Should().Throw<OverflowException>();
-    //}
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_a_NonNegativeInteger_When_PreIncrementing_Then_result_should_be_a_NonNegativeInteger(NonNegativeInteger initial)
+    {
+        // Arrange
+        int initialValue = initial;
+        NonNegativeInteger expected = initial == NonNegativeInteger.MaxValue
+            ? NonNegativeInteger.MinValue
+            : NonNegativeInteger.From(initialValue++);
+
+        // Act
+        NonNegativeInteger actual = initial++;
+
+        // Assert
+        actual.Should().Be(expected);
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_a_NonNegativeInteger_When_Dividing_by_divisor_then_result_should_be_expected(NonNegativeInteger dividend, PositiveInteger divisor)
+    {
+        // Arrange
+        NonNegativeInteger expected = NonNegativeInteger.From(dividend.Value / divisor.Value);
+
+        // Act
+        NonNegativeInteger actual = dividend / divisor;
+
+        // Assert
+        actual.Should().Be(expected);
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_a_NonNegativeInteger_When_Dividing_by_Zero_Then_DivideByZeroException_should_be_thrown(NonNegativeInteger initial)
+    {
+        // Arrange
+        NonNegativeInteger expected = initial;
+
+        // Act
+        Action dividingByZero = () => _ = initial / NonNegativeInteger.Zero;
+
+        // Assert
+        dividingByZero.Should().ThrowExactly<DivideByZeroException>();
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_a_NonNegativeInteger_When_calling_unary_plus_Then_result_should_be_initial_value(NonNegativeInteger initial)
+    {
+        // Arrange
+        NonNegativeInteger expected = initial;
+
+        // Act
+        NonNegativeInteger actual = +initial;
+
+        // Assert
+        actual.Should().Be(expected);
+    }
 }
