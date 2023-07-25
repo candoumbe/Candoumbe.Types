@@ -3,7 +3,7 @@
     <LangVersion>latest</LangVersion>
     <Authors>Cyrille NDOUMBE</Authors>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/candoumbe/DataFilters</RepositoryUrl>
+    <RepositoryUrl>https://github.com/candoumbe/Candoumbe.Types</RepositoryUrl>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
     <PublishUrl>true</PublishUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
