@@ -20,7 +20,7 @@ namespace Candoumbe.Types.Numerics
         , IEqualityOperators<NonNegativeInteger, int, bool>
         , IMultiplyOperators<NonNegativeInteger, NonNegativeInteger, NonNegativeInteger>
         , IMultiplyOperators<NonNegativeInteger, PositiveInteger, NonNegativeInteger>
-        
+
 #endif
     {
         /// <summary>
@@ -78,11 +78,12 @@ namespace Candoumbe.Types.Numerics
         ///<inheritdoc/>
         public static NonNegativeInteger MinValue => Zero;
         /// <inheritdoc/>
-        public static NonNegativeInteger One => throw new NotImplementedException();
+        public static NonNegativeInteger One => From(1);
+
         /// <inheritdoc/>
         public static int Radix => throw new NotImplementedException();
         /// <inheritdoc/>
-        public static NonNegativeInteger MultiplicativeIdentity => throw new NotImplementedException();
+        public static NonNegativeInteger MultiplicativeIdentity => One;
 
         ///<inheritdoc/>
         public bool Equals(NonNegativeInteger other) => Equals(Value, other.Value);
