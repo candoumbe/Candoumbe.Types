@@ -45,6 +45,7 @@ using System.Linq;
     FetchDepth = 0,
     OnCronSchedule = "0 0 * * *",
     InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(Tests), nameof(IPushNugetPackages.Pack) },
+    On = new[] { GitHubActionsTrigger.WorkflowDispatch },
     OnPushBranches = new[] { IGitFlowWithPullRequest.DevelopBranchName },
     CacheKeyFiles = new[] {
         "src/**/*.csproj",
