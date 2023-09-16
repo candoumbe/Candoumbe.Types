@@ -11,10 +11,21 @@ using FsCheck;
 using FsCheck.Xunit;
 
 using System;
+using Xunit;
 
 public class PositiveIntegerTests
 {
     private readonly static Faker Faker = new();
+
+    [Fact]
+    public void Should_Have_A_Value_Of_One_By_Default()
+    {
+        // Act
+        PositiveInteger actual = default;
+
+        // Assert
+        actual.Should().Be(PositiveInteger.MinValue);
+    }
 
     [Property]
     public void Given_PositiveIntegers_When_Addition_Then_ShouldReturnCorrectResult(int left, int right)
@@ -256,5 +267,23 @@ public class PositiveIntegerTests
 
         // Assert
         actual.Should().Be(NonNegativeInteger.From(left.Value / right.Value));
+    }
+
+    [Property]
+    public void Given_an_integer_that_is_outside_range_of_PositiveInteger_MinValue_and_MaxValue_When_explicitly_casting_to_PositiveInteger_Then_InvalidCastException_should_be_thrown(PositiveInt positiveInteger)
+    {
+        // Arrange
+        int value = -positiveInteger.Item;
+
+        // Act
+        Action explicitCastOfValueThatIsOutsideRangeOfPositiveIntegerValues = () => _ = (PositiveInteger)value;
+
+        // Assert
+        explicitCastOfValueThatIsOutsideRangeOfPositiveIntegerValues.Should()
+            .ThrowExactly<InvalidCastException>()
+            .Where(ex => !string.IsNullOrWhiteSpace(ex.Message))
+            .WithInnerExceptionExactly<ArgumentOutOfRangeException>()
+            .Where(ex => !string.IsNullOrWhiteSpace(ex.Message))
+            .And.ParamName.Should().NotBeNullOrWhiteSpace();
     }
 }

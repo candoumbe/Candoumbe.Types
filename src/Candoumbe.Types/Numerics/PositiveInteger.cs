@@ -9,7 +9,7 @@ namespace Candoumbe.Types.Numerics
     /// <summary>
     /// A numeric type which value is garantied to always be greater than <c>0</c>
     /// </summary>
-    public record PositiveInteger : IEquatable<PositiveInteger>, IComparable<PositiveInteger>
+    public readonly record struct PositiveInteger : IEquatable<PositiveInteger>, IComparable<PositiveInteger>
 #if NET7_0_OR_GREATER
         , IAdditionOperators<PositiveInteger, PositiveInteger, PositiveInteger>
         , IAdditionOperators<PositiveInteger, NonNegativeInteger, PositiveInteger>
@@ -215,12 +215,7 @@ namespace Candoumbe.Types.Numerics
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
-        public int CompareTo(PositiveInteger other)
-        {
-            return other is null
-                ? throw new ArgumentNullException(nameof(other), $"{nameof(other)} cannot be null")
-                : Value.CompareTo(other.Value);
-        }
+        public int CompareTo(PositiveInteger other) => Value.CompareTo(other.Value);
 
         ///<inheritdoc/>
         public static implicit operator int(PositiveInteger x) => x.Value;
@@ -236,6 +231,19 @@ namespace Candoumbe.Types.Numerics
 
         ///<inheritdoc/>
         public static implicit operator uint(PositiveInteger x) => (uint)x.Value;
+
+        ///<inheritdoc/>
+        public static explicit operator PositiveInteger(int value)
+        {
+            try
+            {
+                return From(value);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                throw new InvalidCastException($"{value} is outside of {nameof(PositiveInteger)} min and max values", ex);
+            }
+        }
 
         /// <summary>
         /// Implicitely cast to <see cref="NonNegativeInteger"/> type
