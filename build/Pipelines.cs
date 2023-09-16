@@ -1,7 +1,7 @@
 using Candoumbe.Pipelines.Components;
 using Candoumbe.Pipelines.Components.GitHub;
 using Candoumbe.Pipelines.Components.NuGet;
-
+using Candoumbe.Pipelines.Components.Workflows;
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
@@ -44,9 +44,8 @@ using System.Linq;
     AutoGenerate = true,
     FetchDepth = 0,
     OnCronSchedule = "0 0 * * *",
-    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(Tests), nameof(IPushNugetPackages.Pack) },
-    On = new[] { GitHubActionsTrigger.WorkflowDispatch },
-    OnPushBranches = new[] { IGitFlowWithPullRequest.DevelopBranchName },
+    InvokedTargets = new[] { nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack) },
+    OnPushBranches = new[] { IHaveDevelopBranch.DevelopBranchName },
     CacheKeyFiles = new[] {
         "src/**/*.csproj",
         "test/**/*.csproj",
@@ -143,12 +142,14 @@ public class Pipelines : NukeBuild,
     };
 
     ///<inheritdoc/>
-    IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.*Tests");
+    IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests");
 
     ///<inheritdoc/>
-    IEnumerable<(Project SourceProject, IEnumerable<Project> TestProjects)> IMutationTest.MutationTestsProjects => new[] {
-
-        (Solution.AllProjects.Single(project => string.Equals(project.Name, "Candoumbe.Types", StringComparison.InvariantCultureIgnoreCase)), this.Get<IHaveSolution>().Solution.GetAllProjects("*Tests"))
+    IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects => new[]
+    {
+        new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, "Candoumbe.Types", StringComparison.InvariantCultureIgnoreCase)),
+                                         this.Get<IHaveSolution>().Solution.GetAllProjects("*UnitTests"),
+                                         this.Get<IHaveTestDirectory>().TestDirectory / "stryker-config.json")
     };
 
     ///<inheritdoc/>
@@ -172,7 +173,7 @@ public class Pipelines : NukeBuild,
     public Target Tests => _ => _
         .TryDependsOn<IUnitTest>(x => x.UnitTests)
         .TryDependsOn<IMutationTest>(x => x.MutationTests)
-        .Description("Run all tests")
+        .Description("Run both unit and mutation tests")
         .Executes(() =>
         {
             // Nothing to set here
@@ -183,7 +184,6 @@ public class Pipelines : NukeBuild,
 
     ///<inheritdoc/>
     Configure<CodecovSettings> IReportCoverage.CodecovSettings => _ => _.SetFramework("netcoreapp3.1");
-
 
     protected override void OnBuildCreated()
     {
