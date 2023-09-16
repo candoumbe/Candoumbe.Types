@@ -8,12 +8,15 @@ csharp_style_expression_bodied_accessors = when_on_single_line:suggestion
 csharp_style_var_for_built_in_types = false:error
 csharp_style_var_when_type_is_apparent = false:error
 
+
 # Indentation Options
 csharp_indent_block_contents = true:warning
 csharp_indent_braces = false:warning
 csharp_indent_case_contents = true:warning
 csharp_indent_labels = no_change:warning
 csharp_indent_switch_labels = true:warning
+indent_style = space
+indent_size = 4
 # New Line Options
 csharp_new_line_before_catch = true:warning
 csharp_new_line_before_else = true:warning
