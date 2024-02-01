@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Candoumbe.Pipelines.Components;
 using Candoumbe.Pipelines.Components.GitHub;
 using Candoumbe.Pipelines.Components.NuGet;
@@ -10,10 +13,6 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.Codecov;
 using Nuke.Common.Utilities.Collections;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 [GitHubActions("integration", GitHubActionsImage.UbuntuLatest,
     AutoGenerate = true,
@@ -107,8 +106,7 @@ public class Pipelines : NukeBuild,
     IPack,
     IPushNugetPackages,
     ICreateGithubRelease,
-    IGitFlowWithPullRequest,
-    IHaveSecret
+    IGitFlowWithPullRequest
 {
 
     [CI]
