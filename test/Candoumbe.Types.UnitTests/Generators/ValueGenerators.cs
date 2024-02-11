@@ -12,9 +12,9 @@ using System;
 namespace Candoumbe.Types.UnitTests.Generators;
 
 /// <summary>
-/// Utility class for generating custom <see cref="Arbitrary{T}"/>
+/// Utility class for generating custom <see cref="Arbitrary{T}"/> used by property based tests.
 /// </summary>
-internal static class ValueGenerators
+public static class ValueGenerators
 {
 #if NET6_0_OR_GREATER
     /// <summary>
@@ -22,43 +22,43 @@ internal static class ValueGenerators
     /// </summary>
     public static Arbitrary<DateOnly> DateOnlys()
         => ArbMap.Default.ArbFor<DateTime>()
-                         .Generator
-                         .Select(dateTime => DateOnly.FromDateTime(dateTime))
-                         .ToArbitrary();
+                            .Generator
+                            .Select(dateTime => DateOnly.FromDateTime(dateTime))
+                            .ToArbitrary();
 
     /// <summary>
     /// Generates Arbitrary for <see cref="TimeOnly"/>
     /// </summary>
     public static Arbitrary<TimeOnly> TimeOnlys()
         => ArbMap.Default.ArbFor<DateTime>()
-                         .Generator
-                         .Zip(ArbMap.Default.ArbFor<NonNegativeInt>().Generator)
-                         .Select(tuple => (dateTime: tuple.Item1, milliseconds: tuple.Item2.Get))
-                         .Select((dateTimeAndMillisecobds) => TimeOnly.FromDateTime(dateTimeAndMillisecobds.dateTime).Add(TimeSpan.FromMilliseconds(dateTimeAndMillisecobds.milliseconds)))
-                         .ToArbitrary();
+                            .Generator
+                            .Zip(ArbMap.Default.ArbFor<NonNegativeInt>().Generator)
+                            .Select(tuple => (dateTime: tuple.Item1, milliseconds: tuple.Item2.Get))
+                            .Select((dateTimeAndMillisecobds) => TimeOnly.FromDateTime(dateTimeAndMillisecobds.dateTime).Add(TimeSpan.FromMilliseconds(dateTimeAndMillisecobds.milliseconds)))
+                            .ToArbitrary();
 
     public static Arbitrary<DateOnlyRange> DateOnlyRanges()
         => DateOnlys().Generator.Two()
-                         .Select(dates => (start: dates.Item1, end: dates.Item2))
-                         .Where(dates => dates.start != dates.end)
-                         .Select(dates => (dates.start < dates.end) switch
-                         {
-                             true => new DateOnlyRange(dates.start, dates.end),
-                             _ => new DateOnlyRange(dates.end, dates.start)
-                         })
+                            .Select(dates => (start: dates.Item1, end: dates.Item2))
+                            .Where(dates => dates.start != dates.end)
+                            .Select(dates => (dates.start < dates.end) switch
+                            {
+                                true => new DateOnlyRange(dates.start, dates.end),
+                                _ => new DateOnlyRange(dates.end, dates.start)
+                            })
         .ToArbitrary();
 
     public static Arbitrary<TimeOnlyRange> TimeOnlyRanges()
         => Gen.OneOf(TimeOnlys().Generator.Two()
-                         .Select(times => (start: times.Item1, end: times.Item2))
-                             .Where(times => times.start != times.end)
-                             .Select(times => (times.start < times.end) switch
-                             {
-                                 true => new TimeOnlyRange(times.start, times.end),
-                                 _ => new TimeOnlyRange(times.end, times.start)
-                             }),
-                      Gen.Constant(TimeOnlyRange.Empty),
-                      Gen.Constant(TimeOnlyRange.AllDay))
+                            .Select(times => (start: times.Item1, end: times.Item2))
+                                .Where(times => times.start != times.end)
+                                .Select(times => (times.start < times.end) switch
+                                {
+                                    true => new TimeOnlyRange(times.start, times.end),
+                                    _ => new TimeOnlyRange(times.end, times.start)
+                                }),
+                        Gen.Constant(TimeOnlyRange.Empty),
+                        Gen.Constant(TimeOnlyRange.AllDay))
             .ToArbitrary();
 
     public static Arbitrary<MultiTimeOnlyRange> MultiTimeOnlyRanges()
@@ -73,7 +73,7 @@ internal static class ValueGenerators
             case 0:
                 {
                     gen = Gen.OneOf(TimeOnlyRanges().Generator.ArrayOf(2)
-                                     .Select(ranges => new MultiTimeOnlyRange(ranges)),
+                                        .Select(ranges => new MultiTimeOnlyRange(ranges)),
                                     Gen.Constant(MultiTimeOnlyRange.Empty),
                                     Gen.Constant(MultiTimeOnlyRange.Infinite));
                     break;
@@ -84,7 +84,7 @@ internal static class ValueGenerators
                     Gen<MultiTimeOnlyRange> subtree = MultiTimeOnlyRangesGenerator(size / 2);
 
                     gen = Gen.OneOf(TimeOnlyRanges().Generator.ArrayOf(size)
-                                     .Select(ranges => new MultiTimeOnlyRange(ranges)),
+                                        .Select(ranges => new MultiTimeOnlyRange(ranges)),
                                     subtree);
                     break;
                 }
@@ -105,7 +105,7 @@ internal static class ValueGenerators
             case 0:
                 {
                     gen = Gen.OneOf(DateOnlyRanges().Generator.ArrayOf(2)
-                                     .Select(ranges => new MultiDateOnlyRange(ranges)),
+                                        .Select(ranges => new MultiDateOnlyRange(ranges)),
                                     Gen.Constant(MultiDateOnlyRange.Empty),
                                     Gen.Constant(MultiDateOnlyRange.Infinite));
                     break;
@@ -116,7 +116,7 @@ internal static class ValueGenerators
                     Gen<MultiDateOnlyRange> subtree = MultiDateOnlyRangesGenerator(size / 2);
 
                     gen = Gen.OneOf(DateOnlyRanges().Generator.ArrayOf(size)
-                                     .Select(ranges => new MultiDateOnlyRange(ranges)),
+                                        .Select(ranges => new MultiDateOnlyRange(ranges)),
                                     subtree);
                     break;
                 }
@@ -128,15 +128,15 @@ internal static class ValueGenerators
 
     public static Arbitrary<DateTimeRange> DateTimeRanges()
         => Gen.OneOf(ArbMap.Default.ArbFor<DateTime>()
-                         .Generator
-                         .Select(date => new DateTime(date.Ticks, DateTimeKind.Utc))
-                         .Two()
-                         .Where(dates => dates.Item1 != dates.Item2)
-                         .Select(dates => (dates.Item1 < dates.Item2) switch
-                         {
-                             true => new DateTimeRange(dates.Item1, dates.Item2),
-                             _ => new DateTimeRange(dates.Item2, dates.Item1)
-                         }),
+                            .Generator
+                            .Select(date => new DateTime(date.Ticks, DateTimeKind.Utc))
+                            .Two()
+                            .Where(dates => dates.Item1 != dates.Item2)
+                            .Select(dates => (dates.Item1 < dates.Item2) switch
+                            {
+                                true => new DateTimeRange(dates.Item1, dates.Item2),
+                                _ => new DateTimeRange(dates.Item2, dates.Item1)
+                            }),
                     Gen.Constant(DateTimeRange.Infinite),
                     Gen.Constant(DateTimeRange.Empty))
         .ToArbitrary();
@@ -150,14 +150,32 @@ internal static class ValueGenerators
 
                                                       return array;
                                                   }).ToArbitrary();
+    /// <summary>
+    /// Generates <see cref="PositiveInteger"/>s
+    /// </summary>
+    /// <returns></returns>
+    public static Arbitrary<PositiveInteger> PositiveIntegers()
+        => ArbMap.Default.ArbFor<PositiveInt>()
+                 .Generator
+                 .Select(positiveIntGenerator => PositiveInteger.From(positiveIntGenerator.Item))
+                 .ToArbitrary();
 
-    public static Arbitrary<PositiveInteger> PositiveIntegers() => ArbMap.Default.ArbFor<PositiveInt>()
-                                                                         .Generator
-                                                                         .Select(value => PositiveInteger.From(value.Item))
-        .ToArbitrary();
+    /// <summary>
+    /// Generates <see cref="NonNegativeInteger"/>s
+    /// </summary>
+    public static Arbitrary<NonNegativeInteger> NonNegativeIntegers()
+        => ArbMap.Default.ArbFor<NonNegativeInt>()
+                 .Generator
+                 .Select(generator => NonNegativeInteger.From(generator.Item))
+                 .ToArbitrary();
 
-    public static Arbitrary<NonNegativeInteger> NonNegativeIntegers() => ArbMap.Default.ArbFor<NonNegativeInt>()
-                                                                         .Generator
-                                                                         .Select(value => NonNegativeInteger.From(value.Item))
-        .ToArbitrary();
+    /// <summary>
+    /// Generates <see cref="NonNegativeLong"/>s
+    /// </summary>
+    public static Arbitrary<NonNegativeLong> NonNegativeLongs()
+        => ArbMap.Default.ArbFor<long>()
+                 .Generator
+                 .Where(value => value >= 0)
+                 .Select(value => NonNegativeLong.From(value))
+                 .ToArbitrary();
 }

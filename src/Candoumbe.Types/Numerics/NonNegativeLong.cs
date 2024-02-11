@@ -6,30 +6,33 @@ using System.Numerics;
 namespace Candoumbe.Types.Numerics
 {
     /// <summary>
-    /// A numeric type that can only hold an <see langword="int" /> value &gt;= <c>0</c>.
+    /// A numeric type that can only hold an <see langword="long" /> value &gt;= <c>0</c>.
     /// </summary>
-    public record NonNegativeInteger :
-        NonNegativeNumberBase<int, NonNegativeInteger>,
-        IEquatable<NonNegativeInteger>
-#if NET7_0_OR_GREATER
-        , IAdditiveIdentity<NonNegativeInteger, NonNegativeInteger>
-        , IMinMaxValue<NonNegativeInteger>
-        , IAdditionOperators<NonNegativeInteger, NonNegativeInteger, NonNegativeInteger>
-        , IAdditionOperators<NonNegativeInteger, int, NonNegativeInteger>
-        , ISubtractionOperators<NonNegativeInteger, NonNegativeInteger, NonNegativeInteger>
-        , ISubtractionOperators<NonNegativeInteger, int, NonNegativeInteger>
-        , IEqualityOperators<NonNegativeInteger, NonNegativeInteger, bool>
-        , IEqualityOperators<NonNegativeInteger, int, bool>
-        , IMultiplyOperators<NonNegativeInteger, NonNegativeInteger, NonNegativeInteger>
-        , IMultiplyOperators<NonNegativeInteger, PositiveInteger, NonNegativeInteger>
-        , IComparisonOperators<NonNegativeInteger, NonNegativeInteger, bool>
+    /// <remarks>
+    /// This type is fully interoperable with <see cref="long"/> type.
+    /// </remarks>
+    public record NonNegativeLong :
+        NonNegativeNumberBase<long, NonNegativeLong>,
+        IEquatable<NonNegativeLong>
 
+#if NET7_0_OR_GREATER
+        , IAdditiveIdentity<NonNegativeLong, NonNegativeLong>
+        , IMinMaxValue<NonNegativeLong>
+        , IAdditionOperators<NonNegativeLong, NonNegativeLong, NonNegativeLong>
+        , IAdditionOperators<NonNegativeLong, long, NonNegativeLong>
+        , ISubtractionOperators<NonNegativeLong, NonNegativeLong, NonNegativeLong>
+        , ISubtractionOperators<NonNegativeLong, long, NonNegativeLong>
+        , IEqualityOperators<NonNegativeLong, NonNegativeLong, bool>
+        , IEqualityOperators<NonNegativeLong, long, bool>
+        , IMultiplyOperators<NonNegativeLong, NonNegativeLong, NonNegativeLong>
+        , IMultiplyOperators<NonNegativeLong, PositiveLong, NonNegativeLong>
+        , IComparisonOperators<NonNegativeLong, NonNegativeLong, bool>
 #endif
     {
         /// <summary>
-        /// The underlying <see langword="int"/> value
+        /// The underlying <see langword="long"/> value
         /// </summary>
-        public int Value
+        public long Value
         {
             get;
 #if NET6_0_OR_GREATER
@@ -37,28 +40,28 @@ namespace Candoumbe.Types.Numerics
 #endif
         }
 
-        private NonNegativeInteger(int value)
+        private NonNegativeLong(long value)
         {
             Value = value;
         }
 
         /// <summary>
-        /// Creates a new <see cref="NonNegativeInteger"/> with the specified value
+        /// Builds a new <see cref="NonNegativeLong"/> with the specified value
         /// </summary>
         /// <param name="value">The desired value</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is &lt; 0</exception>
-        public static NonNegativeInteger From(int value)
+        /// <returns>A <see cref="NonNegativeLong"/> which holds the specified <paramref name="value"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is &lt; <c>0L</c></exception>
+        public static NonNegativeLong From(long value)
         {
             return value < 0
                 ? throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(value)} cannot be negative")
-                : new NonNegativeInteger(value);
+                : new NonNegativeLong(value);
         }
 
         /// <summary>
-        /// The zero
+        /// The zero value of the current type
         /// </summary>
-        public static NonNegativeInteger Zero => From(0);
+        public static NonNegativeLong Zero => From(0);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -67,7 +70,7 @@ namespace Candoumbe.Types.Numerics
         /// Gets additive identity of the current type
         /// </summary>
 #endif
-        public static NonNegativeInteger AdditiveIdentity => Zero;
+        public static NonNegativeLong AdditiveIdentity => Zero;
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -76,31 +79,29 @@ namespace Candoumbe.Types.Numerics
         /// Gets the maximum value of the current type
         /// </summary>
 #endif
-        public static NonNegativeInteger MaxValue => From(int.MaxValue);
+        public static NonNegativeLong MaxValue => From(long.MaxValue);
 
         ///<inheritdoc/>
-        public static NonNegativeInteger MinValue => Zero;
+        public static NonNegativeLong MinValue => Zero;
 
         /// <inheritdoc/>
-        public static NonNegativeInteger One => From(1);
+        public static NonNegativeLong One => From(1);
 
         /// <inheritdoc/>
-        public static int Radix => throw new NotImplementedException();
-
+        public static long Radix => throw new NotImplementedException();
         /// <inheritdoc/>
-        public static NonNegativeInteger MultiplicativeIdentity => One;
-
+        public static NonNegativeLong MultiplicativeIdentity => One;
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
 #else
         /// <summary>
-        /// Computes the sum of two <see cref="NonNegativeInteger"/> values.
+        /// Computes the sum of two <see cref="NonNegativeLong"/> values.
         /// </summary>
         /// <param name="left">The value from which <paramref name="right"/> is subtracted</param>
         /// <param name="right">The value to subtract from <paramref name="left"/>.</param>
         /// <returns>the sum of left and right.</returns>
 #endif
-        public static NonNegativeInteger operator +(NonNegativeInteger left, NonNegativeInteger right)
+        public static NonNegativeLong operator +(NonNegativeLong left, NonNegativeLong right)
             => From(left.Value + right.Value);
 
 #if NET7_0_OR_GREATER
@@ -113,11 +114,11 @@ namespace Candoumbe.Types.Numerics
         /// <param name="right">The value to subtract from <paramref name="left"/>.</param>
         /// <returns>the sum of left and right.</returns>
 #endif
-        public static NonNegativeInteger operator +(NonNegativeInteger left, int right)
+        public static NonNegativeLong operator +(NonNegativeLong left, long right)
             => From((left.Value + right) switch
             {
                 < 0 => 0,
-                int value => value
+                long value => value
             });
 
 #if NET7_0_OR_GREATER
@@ -130,7 +131,7 @@ namespace Candoumbe.Types.Numerics
         /// <param name="right">The value to subtract from <paramref name="left"/>.</param>
         /// <returns>the result of the subtraction.</returns>
 #endif
-        public static NonNegativeInteger operator -(NonNegativeInteger left, NonNegativeInteger right)
+        public static NonNegativeLong operator -(NonNegativeLong left, NonNegativeLong right)
             => left - right.Value;
 
 #if NET7_0_OR_GREATER
@@ -144,60 +145,54 @@ namespace Candoumbe.Types.Numerics
         /// <returns>the result of the subtraction.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="left"/> is <see langword="null"/></exception>
 #endif
-        public static NonNegativeInteger operator -(NonNegativeInteger left, int right)
+        public static NonNegativeLong operator -(NonNegativeLong left, long right)
             => From((left.Value - right) switch
             {
                 < 0 => 0,
-                int value => value
+                long value => value
             });
-
-        /// <summary>
-        /// Implicit cast to <see langword="int"/>
-        /// </summary>
-        /// <param name="value">The value to cast</param>
-        public static implicit operator int(NonNegativeInteger value) => value.Value;
 
         /// <summary>
         /// Implicit cast to <see langword="long"/>
         /// </summary>
         /// <param name="value">The value to cast</param>
-        public static implicit operator long(NonNegativeInteger value) => value.Value;
+        public static implicit operator long(NonNegativeLong value) => value.Value;
 
         /// <summary>
         /// Implicit cast to <see langword="ulong"/> type
         /// </summary>
         /// <param name="value">The value to cast</param>
-        public static implicit operator ulong(NonNegativeInteger value) => (ulong)value.Value;
+        public static implicit operator ulong(NonNegativeLong value) => (ulong)value.Value;
 
         /// <summary>
         /// Implicit cast to <see langword="decimal"/> type
         /// </summary>
         /// <param name="value">The value to cast</param>
-        public static implicit operator decimal(NonNegativeInteger value) => value.Value;
+        public static implicit operator decimal(NonNegativeLong value) => value.Value;
 
         /// <summary>
         /// Implicit cast to <see langword="decimal"/> type
         /// </summary>
         /// <param name="value">The value to cast</param>
-        public static implicit operator uint(NonNegativeInteger value) => (uint)value.Value;
+        public static implicit operator uint(NonNegativeLong value) => (uint)value.Value;
 
         ///<inheritdoc/>
-        public static bool operator <(NonNegativeInteger left, NonNegativeInteger right) => left.Value < right.Value;
+        public static bool operator ==(NonNegativeLong left, long right) => left.Value == right;
 
         ///<inheritdoc/>
-        public static bool operator >(NonNegativeInteger left, NonNegativeInteger right) => left.Value > right.Value;
+        public static bool operator !=(NonNegativeLong left, long right) => !(left.Value == right);
 
         ///<inheritdoc/>
-        public static bool operator >=(NonNegativeInteger left, NonNegativeInteger right) => left.Value >= right.Value;
+        public static bool operator <(NonNegativeLong left, NonNegativeLong right) => left.Value < right.Value;
 
         ///<inheritdoc/>
-        public static bool operator <=(NonNegativeInteger left, NonNegativeInteger right) => left.Value <= right.Value;
+        public static bool operator >(NonNegativeLong left, NonNegativeLong right) => left.Value > right.Value;
 
         ///<inheritdoc/>
-        public static bool operator ==(NonNegativeInteger left, int right) => left.Value == right;
+        public static bool operator <=(NonNegativeLong left, NonNegativeLong right) => left.Value <= right.Value;
 
         ///<inheritdoc/>
-        public static bool operator !=(NonNegativeInteger left, int right) => !(left.Value == right);
+        public static bool operator >=(NonNegativeLong left, NonNegativeLong right) => left.Value >= right.Value;
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -209,9 +204,9 @@ namespace Candoumbe.Types.Numerics
         /// <param name="right">The value to multiply by <paramref name="left"/>.</param>
         /// <returns>the result of the multiplication.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="left"/> is <see langword="null"/></exception>
-        /// <exception cref="OverflowException">The result of <paramref name="left"/> <c>*</c> <paramref name="right"/> falls outside of <see cref="NonNegativeInteger"/> values.</exception>
+        /// <exception cref="OverflowException">The result of <paramref name="left"/> <c>*</c> <paramref name="right"/> falls outside of <see cref="NonNegativeLong"/> values.</exception>
 #endif
-        public static NonNegativeInteger operator *(NonNegativeInteger left, NonNegativeInteger right) => From(left.Value * right.Value);
+        public static NonNegativeLong operator *(NonNegativeLong left, NonNegativeLong right) => From(left.Value * right.Value);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -223,58 +218,52 @@ namespace Candoumbe.Types.Numerics
         /// <param name="right">The value to multiply by <paramref name="left"/>.</param>
         /// <returns>the product.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="left"/> is <see langword="null"/></exception>
-        /// <exception cref="OverflowException">The result of <paramref name="left"/> <c>*</c> <paramref name="right"/> falls outside of <see cref="NonNegativeInteger"/> values.</exception>
+        /// <exception cref="OverflowException">The result of <paramref name="left"/> <c>*</c> <paramref name="right"/> falls outside of <see cref="NonNegativeLong"/> values.</exception>
 #endif
-        public static NonNegativeInteger operator *(NonNegativeInteger left, PositiveInteger right) => From(left.Value * right.Value);
+        public static NonNegativeLong operator *(NonNegativeLong left, PositiveLong right) => From(left.Value * right.Value);
 
         /// <inheritdoc/>
-        public static NonNegativeInteger operator --(NonNegativeInteger value)
-            => value.Value switch
-            {
-                0 => MaxValue,
-                _ => value - One
-            };
+        public static NonNegativeLong operator --(NonNegativeLong value)
+        {
+            throw new NotImplementedException();
+        }
+        /// <inheritdoc/>
+        public static NonNegativeLong operator /(NonNegativeLong left, NonNegativeLong right)
+        {
+            throw new NotImplementedException();
+        }
+        /// <inheritdoc/>
+        public static NonNegativeLong operator ++(NonNegativeLong value)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <inheritdoc/>
-        public static NonNegativeInteger operator /(NonNegativeInteger left, NonNegativeInteger right)
-            => right.Value switch
-            {
-                0 => throw new DivideByZeroException(),
-                1 => left,
-                _ => From(left.Value / right.Value)
-            };
-
-        /// <inheritdoc/>
-        public static NonNegativeInteger operator ++(NonNegativeInteger value)
-            => value.Value switch
-            {
-                int.MaxValue => Zero,
-                _ => value + One
-            };
-
-        /// <inheritdoc/>
-        public static NonNegativeInteger operator +(NonNegativeInteger value) => value;
+        public static NonNegativeLong operator +(NonNegativeLong value)
+        {
+            throw new NotImplementedException();
+        }
 
         ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
-        public static NonNegativeInteger Abs(NonNegativeInteger value) => value;
+        public static NonNegativeLong Abs(NonNegativeLong value) => value;
 
         ///<inheritdoc/>
-        public static bool IsCanonical(NonNegativeInteger value) => true;
+        public static bool IsCanonical(NonNegativeLong value) => true;
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
-        public static bool IsOddInteger(NonNegativeInteger value)
-                    => int.IsOddInteger(value.Value);
+        public static bool IsOddInteger(NonNegativeLong value)
+                    => long.IsOddInteger(value.Value);
 #else
         /// <summary>
         /// Determines if <paramref name="value"/> is an odd integral number
         /// </summary>
         /// <param name="value">the value to test</param>
         /// <returns><see langword="true"/> if <paramref name="value"/> is odd</returns>
-        public static bool IsOddInteger(NonNegativeInteger value)
+        public static bool IsOddInteger(NonNegativeLong value)
                     => value.Value % 2 != 0;
 #endif
 
@@ -287,7 +276,7 @@ namespace Candoumbe.Types.Numerics
         /// <param name="value">the value to test</param>
         /// <returns><see langword="true"/> if <paramref name="value"/> is even.</returns>
 #endif
-        public static bool IsEvenInteger(NonNegativeInteger value) => !IsOddInteger(value);
+        public static bool IsEvenInteger(NonNegativeLong value) => !IsOddInteger(value);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -298,18 +287,18 @@ namespace Candoumbe.Types.Numerics
         /// <param name="value">the value to test</param>
         /// <returns><see langword="false"/></returns>
 #endif
-        public static bool IsComplexNumber(NonNegativeInteger value) => false;
+        public static bool IsComplexNumber(NonNegativeLong value) => false;
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
 #else
         /// <summary>
-        /// Determines if <paramref name="value"/> is a finite <see cref="NonNegativeInteger"/>
+        /// Determines if <paramref name="value"/> is a finite <see cref="NonNegativeLong"/>
         /// </summary>
         /// <param name="value">the value to test</param>
         /// <returns><see langword="true"/></returns>
 #endif
-        public static bool IsFinite(NonNegativeInteger value) => true;
+        public static bool IsFinite(NonNegativeLong value) => true;
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -320,7 +309,7 @@ namespace Candoumbe.Types.Numerics
         /// <param name="value">the value to test</param>
         /// <returns><see langword="false"/></returns>
 #endif
-        public static bool IsImaginaryNumber(NonNegativeInteger value) => false;
+        public static bool IsImaginaryNumber(NonNegativeLong value) => false;
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -331,37 +320,45 @@ namespace Candoumbe.Types.Numerics
         /// <param name="value">the value to test</param>
         /// <returns><see langword="false"/></returns>
 #endif
-        public static bool IsInfinity(NonNegativeInteger value) => false;
+        public static bool IsInfinity(NonNegativeLong value) => false;
 
         /// <summary>
         /// Determines if <paramref name="value"/> is an integer.
         /// </summary>
         /// <param name="value">the value to test</param>
         /// <returns><see langword="true"/></returns>
-        public static bool IsInteger(NonNegativeInteger value) => true;
+        public static bool IsLong(NonNegativeLong value) => true;
 
         /// <summary>
         /// Determines if <paramref name="value"/> is not a number.
         /// </summary>
         /// <param name="value">the value to test</param>
         /// <returns><see langword="false"/></returns>
-        public static bool IsNaN(NonNegativeInteger value) => false;
+        public static bool IsNaN(NonNegativeLong value) => false;
 
         /// <summary>
         /// Determines if <paramref name="value"/> is not a number.
         /// </summary>
         /// <param name="value">the value to test</param>
         /// <returns><see langword="false"/></returns>
-        public static bool IsNegative(NonNegativeInteger value) => false;
+        public static bool IsNegative(NonNegativeLong value) => false;
 
         /// <inheritdoc/>
-        public static bool IsNegativeInfinity(NonNegativeInteger value) => false;
+        public static bool IsNegativeInfinity(NonNegativeLong value) => throw new NotImplementedException();
+        /// <inheritdoc/>
+        public static bool IsNormal(NonNegativeLong value) => throw new NotImplementedException();
 
         /// <inheritdoc/>
-        public static bool IsPositive(NonNegativeInteger value) => true;
+        public static bool IsPositive(NonNegativeLong value) => true;
 
         /// <inheritdoc/>
-        public static bool IsPositiveInfinity(NonNegativeInteger value) => false;
+        public static bool IsPositiveInfinity(NonNegativeLong value) => false;
+
+        /// <inheritdoc/>
+        public static bool IsRealNumber(NonNegativeLong value) => true;
+
+        /// <inheritdoc/>
+        public static bool IsSubnormal(NonNegativeLong value) => throw new NotImplementedException();
 
 #if NET7_0_OR_GREATER
         /// <inheritdoc/>
@@ -372,7 +369,7 @@ namespace Candoumbe.Types.Numerics
         /// <param name="value">The value to be checked</param>
         /// <returns><see langword="true"/> if <paramref name="value"/> is <see cref="Zero"/> and <see langword="false"/> otherwise</returns>
 #endif
-        public static bool IsZero(NonNegativeInteger value) => value == Zero;
+        public static bool IsZero(NonNegativeLong value) => value == Zero;
 
 #if NET7_0_OR_GREATER
         /// <inheritdoc/>
@@ -384,7 +381,7 @@ namespace Candoumbe.Types.Numerics
         /// <param name="y">The value to compare to <paramref name="x"/>.</param>
         /// <returns><paramref name="x"/> if <paramref name="x"/> is greater than <paramref name="y"/>; otherwise <paramref name="y"/>.</returns>
 #endif
-        public static NonNegativeInteger MaxMagnitude(NonNegativeInteger x, NonNegativeInteger y)
+        public static NonNegativeLong MaxMagnitude(NonNegativeLong x, NonNegativeLong y)
             => (x > y) switch
             {
                 true => x,
@@ -401,25 +398,26 @@ namespace Candoumbe.Types.Numerics
         /// <param name="y">The value to compare to <paramref name="x"/>.</param>
         /// <returns><paramref name="x"/> if <paramref name="x"/> is greater than <paramref name="y"/>; otherwise <paramref name="y"/>.</returns>
 #endif
-        public static NonNegativeInteger MaxMagnitudeNumber(NonNegativeInteger x, NonNegativeInteger y) => MaxMagnitude(x, y);
+        public static NonNegativeLong MaxMagnitudeNumber(NonNegativeLong x, NonNegativeLong y) => MaxMagnitude(x, y);
 
         /// <inheritdoc/>
-        public static NonNegativeInteger MinMagnitude(NonNegativeInteger x, NonNegativeInteger y) => MaxMagnitude(x, y) == x ? y : x;
+        public static NonNegativeLong MinMagnitude(NonNegativeLong x, NonNegativeLong y) => MaxMagnitude(x, y) == x ? y : x;
 
         /// <inheritdoc/>
-        public static NonNegativeInteger MinMagnitudeNumber(NonNegativeInteger x, NonNegativeInteger y) => MinMagnitude(x, y);
+        public static NonNegativeLong MinMagnitudeNumber(NonNegativeLong x, NonNegativeLong y) => MinMagnitude(x, y);
 
         /// <inheritdoc/>
-        public static NonNegativeInteger Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider) => throw new NotImplementedException();
+        public static NonNegativeLong Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider) => From(long.Parse(s, style, provider));
 
         /// <inheritdoc/>
-        public static NonNegativeInteger Parse(string s, NumberStyles style, IFormatProvider provider) => throw new NotImplementedException();
+        public static NonNegativeLong Parse(string s, NumberStyles style, IFormatProvider provider) => Parse(s.AsSpan(), style, provider);
 
         /// <inheritdoc/>
-        public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeInteger result) => throw new NotImplementedException();
+        public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeLong result)
+             => throw new NotImplementedException();
 
         /// <inheritdoc/>
-        public static bool TryParse([NotNullWhen(true)] string s, NumberStyles style, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeInteger result)
+        public static bool TryParse([NotNullWhen(true)] string s, NumberStyles style, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeLong result)
             => throw new NotImplementedException();
 
 #if NET7_0_OR_GREATER
@@ -436,15 +434,15 @@ namespace Candoumbe.Types.Numerics
 
 #if NET7_0_OR_GREATER
         /// <inheritdoc/>
-        public static NonNegativeInteger Parse(ReadOnlySpan<char> s, IFormatProvider provider) => From(int.Parse(s, provider));
+        public static NonNegativeLong Parse(ReadOnlySpan<char> s, IFormatProvider provider) => From(long.Parse(s, provider));
 
         /// <inheritdoc/>
-        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeInteger result)
+        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeLong result)
         {
             bool successfullyParsed = false;
             try
             {
-                result = From(int.Parse(s, provider));
+                result = From(long.Parse(s, provider));
                 successfullyParsed = true;
             }
             catch
@@ -456,17 +454,30 @@ namespace Candoumbe.Types.Numerics
         }
 #endif
 
-        /// <inheritdoc/>
-        public static NonNegativeInteger Parse(string s, IFormatProvider provider)
+        /// <summary>
+        /// Parses a <see cref="NonNegativeLong"/> out of a string
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="provider"></param>
+        /// <returns></returns>
+        /// <exception cref="OverflowException"></exception>
+        public static NonNegativeLong Parse(string s, IFormatProvider provider)
         {
-            long value = long.Parse(s, provider);
-            return value < MinValue || value > MaxValue
-                ? throw new OverflowException($@"""{s}"" represents a value that is outside range of {nameof(NonNegativeInteger)} values")
-                : From((int)value);
+            try
+            {
+                long value = long.Parse(s, provider);
+                return value < MinValue || value > MaxValue
+                    ? throw new OverflowException($@"""{s}"" represents a value that is outside range of {nameof(NonNegativeLong)} values")
+                    : From(value);
+            }
+            catch (FormatException)
+            {
+                throw;
+            }
         }
 
         /// <inheritdoc/>
-        public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeInteger result)
+        public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeLong result)
         {
             bool parsingDone = false;
 
