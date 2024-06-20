@@ -270,7 +270,7 @@ public record TimeOnlyRange : Range<TimeOnly>
     /// Gets the <see cref="TimeOnlyRange"/> that complements <paramref name="source"/>
     /// </summary>
     /// <param name="source"></param>
-    /// <returns>A <see cref="TimeOnlyRange"/> does not overlaps the source and </returns>  
+    /// <returns>A <see cref="TimeOnlyRange"/> does not overlaps the source and </returns>
 #else
     ///<inheritdoc/>
 #endif
