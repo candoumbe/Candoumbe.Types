@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Candoumbe.Types;
 
 /// <summary>
-/// It's quite common to see comparisons where a value is checked against a range of values. Ranges are most of the time handled by a pair of values
+/// It's quite common to see comparisons where a value is checked against a range of values. Ranges are most of the time handled by a pair of values,
 /// and you check against them both. <see cref="Range{TBound}"/> instead uses a single object to represent the range as a whole, and then provides the relevant operations
 /// to test to see if values fall in the <see cref="Range{TBound}"/> and to compare <see cref="Range{TBound}"/>s.
 /// </summary>
@@ -63,10 +63,20 @@ public abstract record Range<TBound>(TBound Start, TBound End)
     public override int GetHashCode() => HashCode.Combine(Start, End);
 #endif
 
-    ///<inheritdoc/>
+    /// <summary>
+    /// Override <c>==</c> operator
+    /// </summary>
+    /// <param name="left">Left operand</param>
+    /// <param name="right">Right operand</param>
+    /// <returns><see langword="true"/> when both ranges are equal and <see langword="false"/> otherwise. </returns>
     public static bool operator ==(Range<TBound> left, Range<TBound> right) => EqualityComparer<Range<TBound>>.Default.Equals(left, right);
 
-    ///<inheritdoc/>
+    /// <summary>
+    /// Override <c>!=</c> operator
+    /// </summary>
+    /// <param name="left">Left operand</param>
+    /// <param name="right">Right operand</param>
+    /// <returns><see langword="true"/> when <paramref name="left"/> and <paramref name="right"/> values are not equal, and <see langword="false"/> otherwise. </returns>
     public static bool operator !=(Range<TBound> left, Range<TBound> right) => !(left == right);
 #endif
 
