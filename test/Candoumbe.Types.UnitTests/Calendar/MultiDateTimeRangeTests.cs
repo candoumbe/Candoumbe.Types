@@ -1,21 +1,17 @@
 ﻿// "Copyright (c) Cyrille NDOUMBE.
 // Licenced under GNU General Public Licence, version 3.0"
 
-using Candoumbe.Types.Calendar;
-using Candoumbe.Types.UnitTests.Generators;
-
-using FluentAssertions;
-using FluentAssertions.Extensions;
-
-using FsCheck;
-using FsCheck.Xunit;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-
+using Candoumbe.Types.Calendar;
+using Candoumbe.Types.UnitTests.Generators;
+using FluentAssertions;
+using FluentAssertions.Extensions;
+using FsCheck;
+using FsCheck.Xunit;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
@@ -23,133 +19,109 @@ using Xunit.Categories;
 namespace Candoumbe.Types.UnitTests.Calendar;
 
 [UnitTest]
-public class MultiDateTimeRangeTests
+public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
 {
-    private readonly ITestOutputHelper _outputHelper;
-
-    public MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
-    {
-        _outputHelper = outputHelper;
-    }
-
-    public static IEnumerable<object[]> ConstructorCases
+    public static TheoryData<IEnumerable<DateTimeRange>, Expression<Func<IEnumerable<DateTimeRange>, bool>>> ConstructorCases
     {
         get
         {
-            yield return new object[]
+            return new TheoryData<IEnumerable<DateTimeRange>, Expression<Func<IEnumerable<DateTimeRange>, bool>>>
             {
-                Array.Empty<DateTimeRange>(),
-                (Expression<Func<IEnumerable<DateTimeRange>, bool>>)(ranges => ranges.Exactly(0))
-            };
-
-            /**
-             * inputs :  ------------------------
-             *                 |--------|
-             *
-             * ranges : ------------------------
-             */
-            yield return new object[]
-            {
-                new[]
                 {
-                    DateTimeRange.Infinite,
-                    new DateTimeRange(8.April(2014), 16.April(2014))
+                    [],
+                    ranges => ranges.Exactly(0)
                 },
-                (Expression<Func<IEnumerable<DateTimeRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range.IsInfinite())
-                )
-            };
-
-            /**
-             * inputs :       |--------|
-             *          ------------------------
-             *
-             * ranges : ------------------------
-             */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :  ------------------------
+                 *                 |--------|
+                 *
+                 * ranges : ------------------------
+                 */
                 {
-                    new DateTimeRange(8.April(2014), 16.April(2014)),
-                    DateTimeRange.Infinite
+                    [
+                        DateTimeRange.Infinite,
+                        new DateTimeRange(8.April(2014), 16.April(2014))
+                    ],
+                    ranges => ranges.Once()
+                              && ranges.Once(range => range.IsInfinite())
                 },
-                (Expression<Func<IEnumerable<DateTimeRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == DateTimeRange.Infinite)
-                )
-            };
 
-            /**
-             * inputs :       |--------|
-             *           |--------|
-             *
-             * ranges :  |-------------|
-             */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :       |--------|
+                 *          ------------------------
+                 *
+                 * ranges : ------------------------
+                 */
                 {
-                    new DateTimeRange(8.April(2014), 16.April(2014)),
-                    new DateTimeRange(5.April(2014), 12.April(2014)),
+                    [
+                        new DateTimeRange(8.April(2014), 16.April(2014)),
+                        DateTimeRange.Infinite
+                    ],
+                    ranges => ranges.Once()
+                              && ranges.Once(range => range == DateTimeRange.Infinite)
                 },
-                (Expression<Func<IEnumerable<DateTimeRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == new DateTimeRange(5.April(2014), 16.April(2014)))
-                )
-            };
 
-            /**
-             * inputs :  |--------|
-             *                |--------|
-             * ranges :  |-------------|
-             */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :       |--------|
+                 *           |--------|
+                 *
+                 * ranges :  |-------------|
+                 */
                 {
-                    new DateTimeRange(5.April(2014), 12.April(2014)),
-                    new DateTimeRange(8.April(2014), 16.April(2014)),
+                    [
+                        new DateTimeRange(8.April(2014), 16.April(2014)),
+                        new DateTimeRange(5.April(2014), 12.April(2014)),
+                    ],
+                    ranges => ranges.Once()
+                              && ranges.Once(range => range == new DateTimeRange(5.April(2014), 16.April(2014)))
                 },
-                (Expression<Func<IEnumerable<DateTimeRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == new DateTimeRange(5.April(2014), 16.April(2014)))
-                )
-            };
+                /*
+                 * inputs :  |--------|
+                 *                |--------|
+                 * ranges :  |-------------|
+                 */
+                {
+                    [
+                        new DateTimeRange(5.April(2014), 12.April(2014)),
+                        new DateTimeRange(8.April(2014), 16.April(2014))
+                    ],
+                    ranges => ranges.Once()
+                              && ranges.Once(range => range == new DateTimeRange(5.April(2014), 16.April(2014)))
+                },
 
-            /**
-             * inputs :  |--|
-             *                |------|
-             * ranges :  |--|
-             *                |------|
-             */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :  |--|
+                 *                |------|
+                 * ranges :  |--|
+                 *                |------|
+                 */
                 {
-                    new DateTimeRange(5.April(2014), 12.April(2014)),
-                    new DateTimeRange(14.April(2014), 16.April(2014)),
-                },
-                (Expression<Func<IEnumerable<DateTimeRange>, bool>>)(ranges => ranges.Exactly(2)
-                                                                               && ranges.Once(range => range == new DateTimeRange(5.April(2014), 12.April(2014)))
-                                                                               && ranges.Once(range => range == new DateTimeRange(14.April(2014), 16.April(2014)))
-                )
-            };
+                    [
+                        new DateTimeRange(5.April(2014), 12.April(2014)),
+                        new DateTimeRange(14.April(2014), 16.April(2014)),
+                    ],
+                    ranges => ranges.Exactly(2)
+                              && ranges.Once(range => range == new DateTimeRange(5.April(2014), 12.April(2014)))
+                              && ranges.Once(range => range == new DateTimeRange(14.April(2014), 16.April(2014)))
 
-            /**
-            * inputs :  |--|
-            *             |----|
-            *                |------|
-            * ranges :  |-----------|
-            */
-            yield return new object[]
-            {
-                new[]
-                {
-                    new DateTimeRange(5.April(2014), 12.April(2014)),
-                    new DateTimeRange(9.April(2014), 14.April(2014)),
-                    new DateTimeRange(12.April(2014),18.April(2014)),
                 },
-                (Expression<Func<IEnumerable<DateTimeRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == new DateTimeRange(5.April(2014),
-                                                                                                                                  18.April(2014)))
-                )
+
+                /*
+                 * inputs :  |--|
+                 *             |----|
+                 *                |------|
+                 * ranges :  |-----------|
+                 */
+                {
+                    [
+                        new DateTimeRange(5.April(2014), 12.April(2014)),
+                        new DateTimeRange(9.April(2014), 14.April(2014)),
+                        new DateTimeRange(12.April(2014), 18.April(2014)),
+                    ],
+                     ranges => ranges.Once()
+                        && ranges.Once(range => range == new DateTimeRange(5.April(2014), 18.April(2014)))
+                    
+                }
             };
         }
     }
@@ -215,14 +187,14 @@ public class MultiDateTimeRangeTests
         MultiDateTimeRange left = leftSource.Item;
         MultiDateTimeRange right = rightSource.Item;
 
-        _outputHelper.WriteLine($"{nameof(left)} : {left}");
-        _outputHelper.WriteLine($"{nameof(right)} : {right}");
+        outputHelper.WriteLine($"{nameof(left)} : {left}");
+        outputHelper.WriteLine($"{nameof(right)} : {right}");
 
         // Act
         MultiDateTimeRange union = left.Merge(right);
 
         // Assert
-        _outputHelper.WriteLine($"Union : {union}");
+        outputHelper.WriteLine($"Union : {union}");
         foreach (DateTimeRange range in left.Ranges.Concat(right.Ranges))
         {
             union.Overlaps(range).Should().BeTrue();
@@ -253,8 +225,8 @@ public class MultiDateTimeRangeTests
         MultiDateTimeRange left = leftSource.Item;
         MultiDateTimeRange right = rightSource.Item;
 
-        _outputHelper.WriteLine($"{nameof(left)} : {left}");
-        _outputHelper.WriteLine($"{nameof(right)} : {right}");
+        outputHelper.WriteLine($"{nameof(left)} : {left}");
+        outputHelper.WriteLine($"{nameof(right)} : {right}");
         MultiDateTimeRange expected = left.Merge(right);
 
         // Act
@@ -312,11 +284,11 @@ public class MultiDateTimeRangeTests
     {
         // Arrange
         MultiDateTimeRange complement = original.Complement();
-        _outputHelper.WriteLine($"Complement of {original} is {complement}");
+        outputHelper.WriteLine($"Complement of {original} is {complement}");
 
         // Act
         MultiDateTimeRange actual = original + complement;
-        _outputHelper.WriteLine($"Union of {original} and {complement} is {actual}");
+        outputHelper.WriteLine($"Union of {original} and {complement} is {actual}");
 
         // Assert
         actual.Should().Be(MultiDateTimeRange.Infinite);
@@ -327,7 +299,7 @@ public class MultiDateTimeRangeTests
     {
         // Arrange
         MultiDateTimeRange complement = range.Complement();
-        _outputHelper.WriteLine($"Complement is {complement}");
+        outputHelper.WriteLine($"Complement is {complement}");
 
         // Act
         MultiDateTimeRange actual = complement.Complement();
@@ -375,7 +347,7 @@ public class MultiDateTimeRangeTests
     {
         // Arrange
         MultiDateTimeRange complement = value.Complement();
-        _outputHelper.WriteLine($"Complement is {complement}");
+        outputHelper.WriteLine($"Complement is {complement}");
 
         // Act
         MultiDateTimeRange result = value + complement;
