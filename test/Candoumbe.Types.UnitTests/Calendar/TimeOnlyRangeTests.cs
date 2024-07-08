@@ -22,7 +22,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
 {
     private static readonly Faker Faker = new();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_start_and_end_Constructor_should_feed_Properties_accordingly(TimeOnly start, TimeOnly end)
     {
         // Act
@@ -33,7 +33,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
         range.End.Should().Be(end);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_non_empty_TimeOnlyRange_that_are_equals_Overlaps_should_return_true(TimeOnly reference)
     {
         // Arrange
@@ -60,7 +60,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
                 .BeTrue("Two TimeOnly ranges that are equal overlaps");
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public Property Given_two_TimeOnlyRange_instances_Overlaps_should_be_symetric(TimeOnlyRange left, TimeOnlyRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
@@ -69,7 +69,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
         return (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_non_empty_TimeOnlyRange_instances_when_first_ends_where_other_starts_Abuts_should_return_true(NonNull<TimeOnlyRange> nonNullLeft, NonNull<TimeOnlyRange> nonNullRight)
     {
         // Arrange
@@ -84,7 +84,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
                     .Be(left.Start == right.End || right.Start == left.End);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public Property Given_two_TimeOnlyRange_instances_IsContiguous_should_be_symetric(TimeOnlyRange left, TimeOnlyRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
@@ -93,7 +93,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
         return (left.IsContiguousWith(right) == right.IsContiguousWith(left)).ToProperty();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_TimeOnlyRange_instance_When_Start_eq_End_IsEmpty_should_be_True(TimeOnly reference)
     {
         // Arrange
@@ -107,7 +107,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
                .BeTrue();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_TimeOnly_value_UpTo_should_build_a_TimeOnlyRange_up_to_that_value(TimeOnly reference)
     {
         // Act
@@ -120,7 +120,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
                  .Be(reference);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_TimeOnly_value_DownTo_should_build_a_TimeOnlyRange_down_to_that_value(TimeOnly reference)
     {
         // Act
@@ -235,11 +235,11 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public Property Overlaps_should_be_symetric(TimeOnlyRange left, TimeOnlyRange right)
         => (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_infinity_when_testing_overlap_with_any_other_TimeOnlyRange_Overlaps_should_be_true(TimeOnlyRange other)
     {
         // Act
@@ -259,144 +259,144 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
              * other     :         s---------------e 
              * expected  : s-----------------------e 
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(11.Hours()), TimeOnly.FromTimeSpan(13.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(13.Hours()))
-            };
+            ];
 
             /* 
              * current   :         s---------------e 
              * other     : s---------------e
              * expected  : s-----------------------e 
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(11.Hours()), TimeOnly.FromTimeSpan(13.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(13.Hours()))
-            };
+            ];
 
             /* 
              * current   :                 s---------------e 
              * other     : s---------------e
              * expected  : s-------------------------------e 
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(11.Hours()), TimeOnly.FromTimeSpan(13.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(9.Hours()), TimeOnly.FromTimeSpan(11.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(9.Hours()), TimeOnly.FromTimeSpan(13.Hours()))
-            };
+            ];
 
             /* 
              * current     : s---------------e
              * other       :                 s---------------e 
              * expected    : s-------------------------------e 
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(9.Hours()), TimeOnly.FromTimeSpan(11.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(11.Hours()), TimeOnly.FromTimeSpan(13.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(9.Hours()), TimeOnly.FromTimeSpan(13.Hours()))
-            };
+            ];
 
             /* 
              * current     : s---------------------e
              * other       :         s---------e 
              * expected    : s---------------------e
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(9.Hours()), TimeOnly.FromTimeSpan(13.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(11.Hours()), TimeOnly.FromTimeSpan(12.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(9.Hours()), TimeOnly.FromTimeSpan(13.Hours()))
-            };
+            ];
 
             /* 
              * current     : -------e       s-----
              * other       :    s-------------e 
              * expected    : ---------------------
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(21.Hours()), TimeOnly.FromTimeSpan(7.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(05.Hours()), TimeOnly.FromTimeSpan(22.Hours())),
                 TimeOnlyRange.AllDay
-            };
+            ];
 
             /* 
              * current     : -------e       s-----
              * other       :        s-------e 
              * expected    : ---------------------
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(21.Hours()), TimeOnly.FromTimeSpan(7.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(7.Hours()), TimeOnly.FromTimeSpan(21.Hours())),
                 TimeOnlyRange.AllDay
-            };
+            ];
 
             /* 
              * current     : -------e       s-----
              * other       :    s-------e 
              * expected    : -----------e   s-----
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(21.Hours()), TimeOnly.FromTimeSpan(07.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(05.Hours()), TimeOnly.FromTimeSpan(09.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(21.Hours()), TimeOnly.FromTimeSpan(09.Hours()))
-            };
+            ];
 
             /* 
              * current     : -------e       s-----
              * other       :    s-------e 
              * expected    : -----------e   s-----
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(21.Hours()), TimeOnly.FromTimeSpan(07.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(05.Hours()), TimeOnly.FromTimeSpan(09.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(21.Hours()), TimeOnly.FromTimeSpan(09.Hours()))
-            };
+            ];
 
             /* 
              * current     : -------e       s-----
              * other       :           s-------e 
              * expected    : -------e  s----------
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(21.Hours()), TimeOnly.FromTimeSpan(07.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(19.Hours()), TimeOnly.FromTimeSpan(23.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(19.Hours()), TimeOnly.FromTimeSpan(07.Hours()))
-            };
+            ];
 
             /* 
              * current     : -------e       s-----
              * other       :                  s-e
              * expected    : -------e       s-----
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(21.Hours()), TimeOnly.FromTimeSpan(07.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(22.Hours()), TimeOnly.FromTimeSpan(23.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(21.Hours()), TimeOnly.FromTimeSpan(07.Hours()))
-            };
+            ];
 
             /* 
              * current     : -------e       s-----
              * other       :        s-------e
              * expected    : ---------------------
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(21.Hours()), TimeOnly.FromTimeSpan(07.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(7.Hours()), TimeOnly.FromTimeSpan(21.Hours())),
                 TimeOnlyRange.AllDay
-            };
+            ];
         }
     }
 
@@ -420,72 +420,72 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
              * other    :  |
              * expected :  |
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 TimeOnlyRange.Empty,
                 TimeOnlyRange.Empty,
                 TimeOnlyRange.Empty
-            };
+            ];
 
             /*
              * current   :  s-----------e
              * other     :          s------------e
              * expected  :          s---e
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(4.Hours()), TimeOnly.FromTimeSpan(11.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(09.Hours()), TimeOnly.FromTimeSpan(13.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(09.Hours()), TimeOnly.FromTimeSpan(11.Hours()))
-            };
+            ];
 
             /*
              * current   :          s------------e
              * other     :  s-----------e
              * expected  :          s---e
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(09.Hours()), TimeOnly.FromTimeSpan(13.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(4.Hours()), TimeOnly.FromTimeSpan(11.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(09.Hours()), TimeOnly.FromTimeSpan(11.Hours()))
-            };
+            ];
 
             /*
              * current   :  s-----------e
              * other     :      s-----e
              * expected  :      s-----e
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(09.Hours()), TimeOnly.FromTimeSpan(13.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))
-            };
+            ];
 
             /*
              * current   :  s----e
              * other     :          s------------e
              * expected  :  |
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(07.Hours()), TimeOnly.FromTimeSpan(13.Hours())),
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(21.Hours()), TimeOnly.FromTimeSpan(06.Hours())),
                 TimeOnlyRange.Empty
-            };
+            ];
 
             /*
              * current   :  s----e
              * other     :  ----------------------
              * expected  :  s----e
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(07.Hours()), TimeOnly.FromTimeSpan(13.Hours())),
                 TimeOnlyRange.AllDay,
                 new TimeOnlyRange(TimeOnly.FromTimeSpan(07.Hours()), TimeOnly.FromTimeSpan(13.Hours()))
-            };
+            ];
         }
     }
 
@@ -502,11 +502,11 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
                     .Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public Property Intersect_should_be_symetric(TimeOnlyRange left, TimeOnlyRange right)
         => (left.Intersect(right) == right.Intersect(left)).ToProperty();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Empty_should_be_the_neutral_element_of_TimeOnlyRange(TimeOnlyRange range)
     {
         // Act
@@ -517,7 +517,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
               .Be(range);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_TimeOnlyRange_is_empty_When_value_is_anything_Overlaps_should_returns_Inconclusive(TimeOnly date)
     {
         // Arrange
@@ -530,7 +530,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
         result.Should().BeFalse($"The {nameof(TimeOnlyRange)} is empty");
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_TimeOnlyRange_is_AllDay_When_value_anything_Overlaps_should_returns_Yes(TimeOnly date)
     {
         // Arrange
@@ -543,7 +543,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
         result.Should().BeTrue($"The {nameof(TimeOnlyRange.AllDay)} contains all {nameof(TimeOnly)} values");
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_TimeOnlyRange_is_not_empty_and_not_infinite_When_value_is_between_Start_and_End_Overlaps_should_returns_Yes(TimeOnly value)
     {
         // Arrange
@@ -586,28 +586,28 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
     {
         get
         {
-            yield return new object[]
-            {
+            yield return
+            [
                 (Start:TimeOnly.MinValue, End: TimeOnly.MaxValue),
                 true,
                 $"{nameof(TimeOnlyRange.Start)} is equal to {TimeOnly.MinValue} and {nameof(TimeOnlyRange.End)} is equal to {TimeOnly.MaxValue}"
-            };
+            ];
 
-            yield return new object[]
-            {
+            yield return
+            [
                 (Start:TimeOnly.MaxValue, End:TimeOnly.MinValue),
                 false,
                 $"{nameof(TimeOnlyRange.Start)} is equal to {TimeOnly.MaxValue} and {nameof(TimeOnlyRange.End)} is equal to {TimeOnly.MinValue}"
-            };
+            ];
 
             TimeOnly end = new(11, 00);
             TimeOnly start = end.Add(1.Minutes());
-            yield return new object[]
-            {
+            yield return
+            [
                 (Start:start, End: end),
                 false,
                 $"{nameof(TimeOnlyRange.Start)} is equal to {start} and {nameof(TimeOnlyRange.End)} is equal to {end}"
-            };
+            ];
         }
     }
 

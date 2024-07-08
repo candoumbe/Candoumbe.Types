@@ -27,7 +27,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
 {
     private static readonly Faker Faker = new();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_start_gt_end_Constructor_should_feed_Properties_accordingly(DateOnly start)
     {
         // Arrange
@@ -42,7 +42,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
                        .Where(ex => !string.IsNullOrWhiteSpace(ex.ParamName));
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_start_and_end_Constructor_should_feed_Properties_accordingly(DateOnly start)
     {
         // Arrange
@@ -56,7 +56,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
         range.End.Should().Be(end);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_non_empty_DateOnlyRange_that_are_equals_Overlaps_should_return_true(DateOnly reference)
     {
         // Arrange
@@ -74,7 +74,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
                 .BeTrue("Two DateOnly ranges that are equal overlaps");
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public FsCheck.Property Given_two_DateOnlyRange_instances_Overlaps_should_be_symetric(DateOnlyRange left, DateOnlyRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
@@ -83,7 +83,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
         return (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_non_empty_DateOnlyRange_instances_when_first_ends_where_other_starts_Abuts_should_return_true(NonNull<DateOnlyRange> nonNullLeft, NonNull<DateOnlyRange> nonNullRight)
     {
         // Arrange
@@ -98,7 +98,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
                     .Be(left.Start == right.End || right.Start == left.End);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public FsCheck.Property Given_two_DateOnlyRange_instances_IsContiguous_should_be_symetric(DateOnlyRange left, DateOnlyRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
@@ -107,7 +107,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
         return (left.IsContiguousWith(right) == right.IsContiguousWith(left)).ToProperty();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateOnlyRange_instance_When_Start_eq_End_IsEmpty_should_be_True(DateOnly reference)
     {
         // Arrange
@@ -121,7 +121,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
                .BeTrue();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateOnly_value_UpTo_should_build_a_DateOnlyRange_up_to_that_value(DateOnly reference)
     {
         // Act
@@ -134,7 +134,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
                  .Be(reference);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateOnly_value_DownTo_should_build_a_DateOnlyRange_down_to_that_value(DateOnly reference)
     {
         // Act
@@ -155,56 +155,56 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
              * first: |---------------|
              * other:         |---------------| 
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new DateOnlyRange(DateOnly.FromDateTime(1.April(1832)), DateOnly.FromDateTime(5.April(1945))),
                 new DateOnlyRange(DateOnly.FromDateTime(3.April(1888)), DateOnly.FromDateTime(5.April(1950))),
                 true
-            };
+            ];
 
             /* 
              * first: |---------------|
              * other:                     |---------------| 
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new DateOnlyRange(DateOnly.FromDateTime(1.April(1832)), DateOnly.FromDateTime(5.April(1945))),
                 new DateOnlyRange(DateOnly.FromDateTime(3.July(1970)), DateOnly.FromDateTime(5.April(1980))),
                 false
-            };
+            ];
 
             /* 
              * first: |---------------|
              * other:                 |---------------| 
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new DateOnlyRange(DateOnly.FromDateTime(1.April(1832)), DateOnly.FromDateTime(5.April(1945))),
                 new DateOnlyRange(DateOnly.FromDateTime(5.April(1945)), DateOnly.FromDateTime(5.April(1950))),
                 false
-            };
+            ];
 
             /* 
              * first:         |--------|
              * other:      |---------------| 
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new DateOnlyRange(DateOnly.FromDateTime(1.April(1832)), DateOnly.FromDateTime(5.April(1945))),
                 new DateOnlyRange(DateOnly.FromDateTime(14.July(1789)), DateOnly.FromDateTime(5.April(1950))),
                 true
-            };
+            ];
 
             /* 
              * first:         |--------|
              * other is null :
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new DateOnlyRange(DateOnly.FromDateTime(1.April(1832)), DateOnly.FromDateTime(5.April(1945))),
                 null,
                 false
-            };
+            ];
         }
     }
 
@@ -219,11 +219,11 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public FsCheck.Property Overlaps_should_be_symetric(DateOnlyRange left, DateOnlyRange right)
         => (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_AllTime_when_testing_overlap_with_any_other_DateOnlyRange_Overlaps_should_be_true(DateOnlyRange other)
     {
         // Act
@@ -318,7 +318,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_non_empty_TimeOnlyRange_When_merging_with_empty_range_Merge_should_returns_the_non_empty_range(DateOnlyRange range, DateOnly date)
     {
         // Arrange
@@ -331,7 +331,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
         union.Should().Be(range);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_non_empty_TimeOnlyRange_When_merging_with_an_other_TimeOnlyRange_that_does_not_overlaps_nor_is_contiguous_Merge_should_throw_InvalidOperationException(DateOnly date)
     {
         // Arrange
@@ -360,72 +360,72 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
              * other    :  |
              * expected :  |
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 DateOnlyRange.Empty,
                 DateOnlyRange.Empty,
                 DateOnlyRange.Empty
-            };
+            ];
 
             /*
              * current   :  |-----------|
              * other     :          |------------|
              * expected  :          |---|
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
                 new DateOnlyRange(DateOnly.FromDateTime(4.January(1990)), DateOnly.FromDateTime(8.February(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(4.January(1990)), DateOnly.FromDateTime(6.January(1990))),
-            };
+                new DateOnlyRange(DateOnly.FromDateTime(4.January(1990)), DateOnly.FromDateTime(6.January(1990)))
+            ];
 
             /*
              * current   :          |------------|
              * other     :  |-----------|
              * expected  :          |---|
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new DateOnlyRange(DateOnly.FromDateTime(3.January(1990)), DateOnly.FromDateTime(5.January(1990))),
                 new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(4.January(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(3.January(1990)), DateOnly.FromDateTime(4.January(1990))),
-            };
+                new DateOnlyRange(DateOnly.FromDateTime(3.January(1990)), DateOnly.FromDateTime(4.January(1990)))
+            ];
 
             /*
              * current   :  |-----------|
              * other     :      |-----|
              * expected  :      |-----|
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
                 new DateOnlyRange(DateOnly.FromDateTime(3.January(1990)), DateOnly.FromDateTime(5.January(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(3.January(1990)), DateOnly.FromDateTime(5.January(1990))),
-            };
+                new DateOnlyRange(DateOnly.FromDateTime(3.January(1990)), DateOnly.FromDateTime(5.January(1990)))
+            ];
 
             /*
              * current   :  |----|
              * other     :          |------------|
              * expected  :  |
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
                 new DateOnlyRange(DateOnly.FromDateTime(18.February(1990)), DateOnly.FromDateTime(25.July(1990))),
                 DateOnlyRange.Empty
-            };
+            ];
 
             /*
              * current   :  |----|
              * other     :  ----------------------
              * expected  :  |----|
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
                 DateOnlyRange.Infinite,
-                new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
-            };
+                new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990)))
+            ];
         }
     }
 
@@ -442,11 +442,11 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
                     .Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public FsCheck.Property Intersect_should_be_symetric(DateOnlyRange left, DateOnlyRange right)
         => (left.Intersect(right) == right.Intersect(left)).ToProperty();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Empty_should_be_the_neutral_element_of_DateOnlyRange(DateOnlyRange range)
     {
         // Act
@@ -457,7 +457,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
               .Be(range);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateOnlyRange_is_empty_When_value_is_empty_and_matches_Overlaps_should_returns_true(DateOnly date)
     {
         // Arrange
@@ -470,7 +470,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
         actual.Should().Be(empty.Start == date);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateOnlyRange_is_infinite_When_value_anything_Then_Overlaps_should_returns_true(DateOnly date)
     {
         // Act
@@ -480,7 +480,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
         actual.Should().BeTrue($"The {nameof(DateOnlyRange.Infinite)} 7678333contains all {nameof(DateOnly)} values");
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateOnlyRange_is_not_empty_and_not_infinite_When_value_is_between_Start_and_End_Then_Contains_should_returns_true(DateOnly date)
     {
         // Arrange
