@@ -28,7 +28,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
 {
     private static readonly Faker Faker = new();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_start_gt_end_Constructor_should_feed_Properties_accordingly(DateTime start)
     {
         // Arrange
@@ -41,7 +41,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
         action.Should().Throw<ArgumentOutOfRangeException>("start cannot be greater than end");
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_start_and_end_Constructor_should_feed_Properties_accordingly(DateTime start)
     {
         // Arrange
@@ -55,7 +55,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
         range.End.Should().Be(end);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_non_empty_DateTimeRange_that_are_equals_Overlaps_should_return_true(DateTime reference)
     {
         // Arrange
@@ -73,7 +73,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
                 .BeTrue("Two DateTime ranges that are equal overlaps");
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public FsCheck.Property Given_two_DateTimeRange_instances_Overlaps_should_be_symetric(DateTimeRange left, DateTimeRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
@@ -82,7 +82,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
         return (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
 
     public void Given_two_non_empty_DateTimeRange_instances_when_first_ends_where_other_starts_Abuts_should_return_true(DateTime reference)
     {
@@ -101,7 +101,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
             .BeTrue();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public FsCheck.Property Given_two_DateTimeRange_instances_IsContiguous_should_be_symetric(DateTimeRange left, DateTimeRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
@@ -110,7 +110,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
         return (left.IsContiguousWith(right) == right.IsContiguousWith(left)).ToProperty();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateTimeRange_instance_When_Start_eq_End_IsEmpty_should_be_True(DateTime reference)
     {
         // Arrange
@@ -124,7 +124,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
                .BeTrue();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateTime_value_UpTo_should_build_a_DateTimeRange_up_to_that_value(DateTime reference)
     {
         // Act
@@ -137,7 +137,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
                  .Be(reference);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateTime_value_DownTo_should_build_a_DateTimeRange_down_to_that_value(DateTime reference)
     {
         // Act
@@ -261,11 +261,11 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public FsCheck.Property Overlaps_should_be_symetric(DateTimeRange left, DateTimeRange right)
         => (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_AllTime_when_testing_overlap_with_any_other_DateTimeRange_Overlaps_should_be_true(DateTimeRange other)
     {
         // Act
@@ -447,11 +447,11 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
                     .Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public FsCheck.Property Intersect_should_be_symetric(DateTimeRange left, DateTimeRange right)
         => (left.Intersect(right) == right.Intersect(left)).ToProperty();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Empty_should_be_the_neutral_element_of_DateTimeRange(DateTimeRange range)
     {
         // Act
@@ -462,7 +462,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
               .Be(range);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateTimeRange_is_empty_When_value_is_anything_Overlaps_should_returns_Inconclusive(DateTime date)
     {
         // Arrange

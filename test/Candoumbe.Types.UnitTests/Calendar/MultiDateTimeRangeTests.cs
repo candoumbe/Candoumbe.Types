@@ -138,7 +138,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
                     .Match(rangeExpectation);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_date_only_ranges_that_overlaps_each_other_When_adding_them_using_Add_Then_should_pack_into_one_Range_only(NonNull<DateTimeRange> leftSource, NonNull<DateTimeRange> rightSource)
     {
         // Arrange
@@ -163,7 +163,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         };
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) }, Replay = "(16035462008899407285,4231346714582972547)")]
+    [Property(Arbitrary = [typeof(ValueGenerators)], Replay = "(16035462008899407285,4231346714582972547)")]
     public void Given_an_instance_that_one_range_eq_Infinite_When_adding_any_other_range_Should_result_in_a_noop_call(NonEmptyArray<DateTimeRange> ranges)
     {
         // Arrange
@@ -180,7 +180,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
                   .Contain(range => range == DateTimeRange.Infinite);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_one_MultiDateTimeRange_when_calling_union_with_an_other_MultiDateTimeRange_Then_the_result_should_covers_all_DateTimeRange_from_initial_MultiDateTimeRange(NonNull<MultiDateTimeRange> leftSource, NonNull<MultiDateTimeRange> rightSource)
     {
         // Arrange
@@ -218,7 +218,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         });
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_non_null_instances_when_calling_plus_operator_should_have_same_result_as_calling_Union_method(NonNull<MultiDateTimeRange> leftSource, NonNull<MultiDateTimeRange> rightSource)
     {
         // Arrange
@@ -245,12 +245,12 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
              * current    : ---------------------- 
              * expected   : true
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new MultiDateTimeRange(DateTimeRange.Infinite),
                 DateTimeRange.Infinite,
                 true
-            };
+            ];
 
             /*
              * multirange :       |--------|
@@ -258,13 +258,13 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
              * current    :   |-----|
              * expected   : false
              */
-            yield return new object[]
-            {
+            yield return
+            [
                 new MultiDateTimeRange(new DateTimeRange(6.April(2014), 9.April(2014)),
                                        new DateTimeRange(10.April(2014), 12.April(2014))),
                 new DateTimeRange(8.April(2014), 11.April(2014)),
                 false
-            };
+            ];
         }
     }
 
@@ -279,7 +279,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_non_null_MultiDateTimeRange_instance_When_adding_to_its_complement_Union_should_return_Infinite(MultiDateTimeRange original)
     {
         // Arrange
@@ -294,7 +294,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         actual.Should().Be(MultiDateTimeRange.Infinite);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) }, Replay = "(13215877118328040669,378035299666480085)")]
+    [Property(Arbitrary = [typeof(ValueGenerators)], Replay = "(13215877118328040669,378035299666480085)")]
     public void Given_MultiDateTimeRange_When_calling_Complement_on_the_complement_of_initial_value_Then_result_should_be_eq_to_the_initial_value(MultiDateTimeRange range)
     {
         // Arrange
@@ -312,22 +312,22 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
     {
         get
         {
-            yield return new object[]
-            {
+            yield return
+            [
                 MultiDateTimeRange.Infinite,
                 MultiDateTimeRange.Empty,
                 MultiDateTimeRange.Infinite
-            };
+            ];
 
-            yield return new object[]
-            {
+            yield return
+            [
                 new MultiDateTimeRange(new DateTimeRange(27.March(1900), 6.January(2071)),
                                        new DateTimeRange(17.March(2079), 2.February(2084))),
                 new MultiDateTimeRange(DateTimeRange.UpTo(27.March(1900)),
                                        new DateTimeRange(6.January(2071), 17.March(2079)),
                                        DateTimeRange.DownTo(2.February(2084))),
                 MultiDateTimeRange.Infinite
-            };
+            ];
         }
     }
 
@@ -342,7 +342,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_any_MultiDateTimeRange_instance_When_adding_its_complement_Then_result_should_be_Infinite(MultiDateTimeRange value)
     {
         // Arrange
@@ -380,7 +380,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
     }
 
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_an_instance_that_is_not_null_When_adding_a_DateOnlyRange_that_is_infinite_Then_IsInfinite_should_return_true(NonEmptyArray<DateOnlyRange> ranges)
     {
         // Arrange
@@ -404,7 +404,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         range.IsEmpty().Should().BeTrue();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_an_instance_that_is_not_null_Then_ToString_should_produce_expected_output(MultiDateTimeRange range)
     {
         // Arrange
@@ -442,7 +442,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_current_instance_is_infinite_When_Adding_any_other_value_Then_result_should_be_infinite(DateTimeRange other)
     {
         // Arrange

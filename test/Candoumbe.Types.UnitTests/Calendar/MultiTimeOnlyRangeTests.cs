@@ -152,7 +152,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
                     .Match(rangeExpectation);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_date_only_ranges_that_overlaps_each_other_When_adding_them_to_the_instance_Add_should_pack_into_one_Range_only(NonNull<TimeOnlyRange> leftSource, NonNull<TimeOnlyRange> rightSource)
     {
         // Arrange
@@ -186,7 +186,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         };
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_an_instance_that_one_range_eq_AllDay_When_adding_any_other_range_Should_result_in_a_noop_call(NonEmptyArray<TimeOnlyRange> ranges)
     {
         // Arrange
@@ -201,7 +201,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
                   .Contain(range => range == TimeOnlyRange.AllDay);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_MultiTimeOnlyRange_When_adding_its_complement_Then_the_result_should_be_Infinite(NonNull<MultiTimeOnlyRange> input)
     {
         // Arrange
@@ -217,7 +217,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         result.Should().Be(MultiTimeOnlyRange.Infinite);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_one_MultiTimeOnlyRange_when_calling_union_with_an_other_MultiTimeOnlyRange_Should_return_a_MultiTimeOnlyRange_instance_that_covers_all_TimeOnlyRange_from_initial_MultiTimeOnlyRange(NonNull<MultiTimeOnlyRange> leftSource, NonNull<MultiTimeOnlyRange> rightSource)
     {
         // Arrange
@@ -255,7 +255,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         });
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_non_null_instances_when_calling_plus_operator_should_have_same_result_as_calling_Merge_method(NonNull<MultiTimeOnlyRange> leftSource, NonNull<MultiTimeOnlyRange> rightSource)
     {
         // Arrange
@@ -346,7 +346,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Equals_should_be_reflexive(MultiTimeOnlyRange range)
     {
         // Act
@@ -356,7 +356,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         expected.Should().BeTrue();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Equals_should_be_symetric(MultiTimeOnlyRange first, MultiTimeOnlyRange other)
     {
         // Act
@@ -367,7 +367,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         firstEqualsOther.Should().Be(otherEqualsFirst);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Equals_should_be_transitive(MultiTimeOnlyRange one, MultiTimeOnlyRange second, MultiTimeOnlyRange third)
     {
         // Arrange
@@ -384,7 +384,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         }
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Empty_multiTimeOnlyRange_should_be_the_neutral_element(MultiTimeOnlyRange initialValue)
     {
         // Act
@@ -423,7 +423,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_MultiTimeOnlyRange_When_calling_Complement_on_the_complement_of_initial_value_Then_result_should_be_eq_to_the_initial_value(MultiTimeOnlyRange range)
     {
         // Arrange
