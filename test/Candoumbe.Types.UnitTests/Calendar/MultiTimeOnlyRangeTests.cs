@@ -23,134 +23,119 @@ using Xunit.Categories;
 namespace Candoumbe.Types.UnitTests.Calendar;
 
 [UnitTest]
-public class MultiTimeOnlyRangeTests
+public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
 {
-    private readonly ITestOutputHelper _outputHelper;
-
-    public MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
-    {
-        _outputHelper = outputHelper;
-    }
-
-    public static IEnumerable<object[]> ConstructorCases
+    public static TheoryData<IEnumerable<TimeOnlyRange>, Expression<Func<IEnumerable<TimeOnlyRange>, bool>> > ConstructorCases
     {
         get
         {
-            yield return new object[]
+            return new TheoryData<IEnumerable<TimeOnlyRange>, Expression<Func<IEnumerable<TimeOnlyRange>, bool>>>()
             {
-                Array.Empty<TimeOnlyRange>(),
-                (Expression<Func<IEnumerable<TimeOnlyRange>, bool>>)(ranges => ranges.Exactly(0))
-            };
-
-            /**
-             * inputs :  ------------------------
-             *                 |--------|
-             *
-             * ranges : ------------------------
-             */
-            yield return new object[]
-            {
-                new[]
                 {
-                    TimeOnlyRange.AllDay,
-                    new TimeOnlyRange(TimeOnly.FromTimeSpan(8.Hours()), TimeOnly.FromTimeSpan(16.Hours()))
+                    [],
+                    ( ranges => ranges.Exactly(0) )
                 },
-                (Expression<Func<IEnumerable<TimeOnlyRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == TimeOnlyRange.AllDay)
-                )
-            };
 
-            /**
-             * inputs :       |--------|
-             *          ------------------------
-             *
-             * ranges : ------------------------
-             */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :  ------------------------
+                 *                 |--------|
+                 *
+                 * ranges : ------------------------
+                 */
                 {
-                    new TimeOnlyRange(TimeOnly.FromTimeSpan(8.Hours()), TimeOnly.FromTimeSpan(16.Hours())),
-                    TimeOnlyRange.AllDay
+                    [
+                        TimeOnlyRange.AllDay,
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(8.Hours()), TimeOnly.FromTimeSpan(16.Hours()))
+                    ],
+                    ( ranges => ranges.Once()
+                                && ranges.Once(range => range == TimeOnlyRange.AllDay)
+                    )
                 },
-                (Expression<Func<IEnumerable<TimeOnlyRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == TimeOnlyRange.AllDay)
-                )
-            };
 
-            /**
-             * inputs :       |--------|
-             *           |--------|
-             *
-             * ranges :  |-------------|
-             */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :       |--------|
+                 *          ------------------------
+                 *
+                 * ranges : ------------------------
+                 */
                 {
-                    new TimeOnlyRange(TimeOnly.FromTimeSpan(8.Hours()), TimeOnly.FromTimeSpan(16.Hours())),
-                    new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()), TimeOnly.FromTimeSpan(12.Hours())),
+                    [
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(8.Hours()), TimeOnly.FromTimeSpan(16.Hours())),
+                        TimeOnlyRange.AllDay
+                    ],
+                    ranges => ranges.Once()
+                              && ranges.Once(range => range == TimeOnlyRange.AllDay)
                 },
-                (Expression<Func<IEnumerable<TimeOnlyRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()), TimeOnly.FromTimeSpan(16.Hours())))
-                )
-            };
 
-            /**
-             * inputs :  |--------|
-             *                |--------|
-             *
-             * ranges :  |-------------|
-             */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :       |--------|
+                 *           |--------|
+                 *
+                 * ranges :  |-------------|
+                 */
                 {
-                    new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()), TimeOnly.FromTimeSpan(12.Hours())),
-                    new TimeOnlyRange(TimeOnly.FromTimeSpan(8.Hours()), TimeOnly.FromTimeSpan(16.Hours())),
+                    [
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(8.Hours()), TimeOnly.FromTimeSpan(16.Hours())),
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()), TimeOnly.FromTimeSpan(12.Hours())),
+                    ],
+                    ranges => ranges.Once()
+                              && ranges.Once(range => range == new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()),
+                                    TimeOnly.FromTimeSpan(16.Hours())))
                 },
-                (Expression<Func<IEnumerable<TimeOnlyRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()), TimeOnly.FromTimeSpan(16.Hours())))
-                )
-            };
 
-            /**
-             * inputs :  |--|
-             *                |------|
-             *
-             * ranges :  |--|
-             *                |------|
-             */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :  |--------|
+                 *                |--------|
+                 *
+                 * ranges :  |-------------|
+                 */
                 {
-                    new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()), TimeOnly.FromTimeSpan(12.Hours())),
-                    new TimeOnlyRange(TimeOnly.FromTimeSpan(14.Hours()), TimeOnly.FromTimeSpan(16.Hours())),
-                },
-                (Expression<Func<IEnumerable<TimeOnlyRange>, bool>>)(ranges => ranges.Exactly(2)
-                                                                               && ranges.Once(range => range == new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()), TimeOnly.FromTimeSpan(12.Hours())))
-                                                                               && ranges.Once(range => range == new TimeOnlyRange(TimeOnly.FromTimeSpan(14.Hours()), TimeOnly.FromTimeSpan(16.Hours())))
-                )
-            };
+                    [
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()), TimeOnly.FromTimeSpan(12.Hours())),
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(8.Hours()), TimeOnly.FromTimeSpan(16.Hours())),
+                    ],
+                    ranges => ranges.Once()
+                              && ranges.Once(range => range == new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()),
+                                  TimeOnly.FromTimeSpan(16.Hours())))
 
-            /**
-            * inputs :  |--|
-            *             |----|
-            *                |------|
-            * ranges :  |-----------|
-            */
-            yield return new object[]
-            {
-                new[]
-                {
-                    new TimeOnlyRange(TimeOnly.FromTimeSpan(05.Hours()), TimeOnly.FromTimeSpan(12.Hours())),
-                    new TimeOnlyRange(TimeOnly.FromTimeSpan(09.Hours()), TimeOnly.FromTimeSpan(14.Hours())),
-                    new TimeOnlyRange(TimeOnly.FromTimeSpan(12.Hours()), TimeOnly.FromTimeSpan(18.Hours())),
                 },
-                (Expression<Func<IEnumerable<TimeOnlyRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()), TimeOnly.FromTimeSpan(18.Hours())))
-                )
+
+                /*
+                 * inputs :  |--|
+                 *                |------|
+                 *
+                 * ranges :  |--|
+                 *                |------|
+                 */
+                {
+                    [
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()), TimeOnly.FromTimeSpan(12.Hours())),
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(14.Hours()), TimeOnly.FromTimeSpan(16.Hours())),
+                    ],
+                    ranges => ranges.Exactly(2)
+                              && ranges.Once(range => range == new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()),
+                                  TimeOnly.FromTimeSpan(12.Hours())))
+                              && ranges.Once(range => range == new TimeOnlyRange(TimeOnly.FromTimeSpan(14.Hours()),
+                                  TimeOnly.FromTimeSpan(16.Hours())))
+                },
+
+                /*
+                 * inputs :  |--|
+                 *             |----|
+                 *                |------|
+                 * ranges :  |-----------|
+                 */
+                {
+                    [
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(05.Hours()), TimeOnly.FromTimeSpan(12.Hours())),
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(09.Hours()), TimeOnly.FromTimeSpan(14.Hours())),
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(12.Hours()), TimeOnly.FromTimeSpan(18.Hours())),
+                    ],
+                    ranges => ranges.Once()
+                              && ranges.Once(range => range == new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()),
+                                  TimeOnly.FromTimeSpan(18.Hours())))
+
+                }
             };
         }
     }
@@ -221,9 +206,9 @@ public class MultiTimeOnlyRangeTests
     {
         // Arrange
         MultiTimeOnlyRange range = input.Item;
-        _outputHelper.WriteLine($"Range is {range}");
+        outputHelper.WriteLine($"Range is {range}");
         MultiTimeOnlyRange complement = -range;
-        _outputHelper.WriteLine($"Complement is {complement}");
+        outputHelper.WriteLine($"Complement is {complement}");
 
         // Act
         MultiTimeOnlyRange result = complement + range;
@@ -239,14 +224,14 @@ public class MultiTimeOnlyRangeTests
         MultiTimeOnlyRange left = leftSource.Item;
         MultiTimeOnlyRange right = rightSource.Item;
 
-        _outputHelper.WriteLine($"{nameof(left)} : {left}");
-        _outputHelper.WriteLine($"{nameof(right)} : {right}");
+        outputHelper.WriteLine($"{nameof(left)} : {left}");
+        outputHelper.WriteLine($"{nameof(right)} : {right}");
 
         // Act
         MultiTimeOnlyRange union = left.Merge(right);
 
         // Assert
-        _outputHelper.WriteLine($"Merge : {union}");
+        outputHelper.WriteLine($"Merge : {union}");
         foreach (TimeOnlyRange range in left.Ranges.Concat(right.Ranges))
         {
             union.Covers(range).Should().BeTrue();
@@ -277,8 +262,8 @@ public class MultiTimeOnlyRangeTests
         MultiTimeOnlyRange left = leftSource.Item;
         MultiTimeOnlyRange right = rightSource.Item;
 
-        _outputHelper.WriteLine($"{nameof(left)} : {left}");
-        _outputHelper.WriteLine($"{nameof(right)} : {right}");
+        outputHelper.WriteLine($"{nameof(left)} : {left}");
+        outputHelper.WriteLine($"{nameof(right)} : {right}");
         MultiTimeOnlyRange expected = left.Merge(right);
 
         // Act
@@ -288,65 +273,64 @@ public class MultiTimeOnlyRangeTests
         actual.Should().BeEquivalentTo(expected);
     }
 
-    public static IEnumerable<object[]> CoversCases
+    public static TheoryData<MultiTimeOnlyRange, TimeOnlyRange, bool> CoversCases
     {
         get
         {
-            /*
-             * multirange : ----------------------
-             * current    : ---------------------- 
-             * expected   : true
-             */
-            yield return new object[]
+            return new TheoryData<MultiTimeOnlyRange, TimeOnlyRange, bool>()
             {
-                new MultiTimeOnlyRange(TimeOnlyRange.AllDay),
-                TimeOnlyRange.AllDay,
-                true
-            };
-
-            /*
-             * multirange :       |--------|
-             *              |--|
-             * current    :   |-----|
-             * expected   : false
-             */
-            yield return new object[]
-            {
-                new MultiTimeOnlyRange(new TimeOnlyRange(TimeOnly.FromTimeSpan(06.Hours()), TimeOnly.FromTimeSpan(09.Hours())),
-                                       new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))),
-                new TimeOnlyRange(TimeOnly.FromTimeSpan(8.Hours()), TimeOnly.FromTimeSpan(11.Hours())),
-                false
-            };
-
-            /*
-             * multirange :        
-             *             --|      |----     
-             *                 |--| 
-             * current    :     |-----|
-             * expected   : false
-             */
-            yield return new object[]
-            {
-                new MultiTimeOnlyRange(new TimeOnlyRange(TimeOnly.FromTimeSpan(22.Hours()), TimeOnly.FromTimeSpan(08.Hours())),
-                                       new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))),
-                new TimeOnlyRange(TimeOnly.FromTimeSpan(11.Hours()), TimeOnly.FromTimeSpan(23.Hours())),
-                false
-            };
-
-            /*
-             * multirange :        
-             *                
-             *                |--|      |----     
-             *                 |--| 
-             * current    :     |-----|
-             * expected   : false
-             */
-            yield return new object[]
-            {
-                new MultiTimeOnlyRange(new TimeOnlyRange(TimeOnly.FromTimeSpan(22.Hours()), TimeOnly.FromTimeSpan(08.Hours())),
-                                       new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))),
-                new TimeOnlyRange(TimeOnly.FromTimeSpan(11.Hours()), TimeOnly.FromTimeSpan(23.Hours())),
-                false
+                /*
+                 * multi-range : ----------------------
+                 * current     : ----------------------
+                 * expected    : true
+                 */
+                {
+                    new MultiTimeOnlyRange(TimeOnlyRange.AllDay),
+                    TimeOnlyRange.AllDay,
+                    true
+                },
+                /*
+                 * multi-range :       |--------|
+                 *               |--|
+                 * current     :   |-----|
+                 * expected    : false
+                 */
+                {
+                    new MultiTimeOnlyRange(
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(06.Hours()), TimeOnly.FromTimeSpan(09.Hours())),
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))),
+                    new TimeOnlyRange(TimeOnly.FromTimeSpan(8.Hours()), TimeOnly.FromTimeSpan(11.Hours())),
+                    false
+                },
+                /*
+                 * multi-range :
+                 *              --|      |----
+                 *                  |--|
+                 * current     :     |-----|
+                 * expected    : false
+                 */
+                {
+                    new MultiTimeOnlyRange(
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(22.Hours()), TimeOnly.FromTimeSpan(08.Hours())),
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))),
+                    new TimeOnlyRange(TimeOnly.FromTimeSpan(11.Hours()), TimeOnly.FromTimeSpan(23.Hours())),
+                    false
+                },
+                /*
+                 * multirange :
+                 *
+                 *                |--|      |----
+                 *                 |--|
+                 * current    :     |-----|
+                 * expected   : false
+                 */
+                {
+                    new MultiTimeOnlyRange(
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(22.Hours()), TimeOnly.FromTimeSpan(08.Hours())),
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))),
+                    new TimeOnlyRange(TimeOnly.FromTimeSpan(11.Hours()), TimeOnly.FromTimeSpan(23.Hours())),
+                    false
+                }
             };
         }
     }
@@ -411,17 +395,19 @@ public class MultiTimeOnlyRangeTests
         initialValuePlusEmpty.Should().Be(initialValueMinusEmpty);
     }
 
-    public static IEnumerable<object[]> ComplementCases
+    public static TheoryData<MultiTimeOnlyRange, MultiTimeOnlyRange> ComplementCases
     {
         get
         {
-            yield return new object[]
+            return new TheoryData<MultiTimeOnlyRange, MultiTimeOnlyRange>()
             {
-                new MultiTimeOnlyRange(new TimeOnlyRange(new TimeOnly(0, 15), new TimeOnly(3, 1)),
-                                       new TimeOnlyRange(new TimeOnly(17, 37), new TimeOnly(21, 7))),
-                new MultiTimeOnlyRange(TimeOnlyRange.UpTo(new TimeOnly(0, 15)),
-                                       new TimeOnlyRange(new (3, 1), new(17, 37)),
-                                       TimeOnlyRange.DownTo(new TimeOnly(21, 7)))
+                {
+                    new MultiTimeOnlyRange(new TimeOnlyRange(new TimeOnly(0, 15), new TimeOnly(3, 1)),
+                                           new TimeOnlyRange(new TimeOnly(17, 37), new TimeOnly(21, 7))),
+                    new MultiTimeOnlyRange(TimeOnlyRange.UpTo(new TimeOnly(0, 15)),
+                                           new TimeOnlyRange(new (3, 1), new(17, 37)),
+                                           TimeOnlyRange.DownTo(new TimeOnly(21, 7)))
+                }
             };
         }
     }

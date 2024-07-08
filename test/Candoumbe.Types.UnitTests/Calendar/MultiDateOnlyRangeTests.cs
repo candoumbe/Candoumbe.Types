@@ -23,135 +23,112 @@ using Xunit.Categories;
 
 namespace Candoumbe.Types.UnitTests.Calendar;
 [UnitTest]
-public class MultiDateOnlyRangeTests
+public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
 {
-    private readonly ITestOutputHelper _outputHelper;
-
-    public MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
-    {
-        _outputHelper = outputHelper;
-    }
-
-    public static IEnumerable<object[]> ConstructorCases
+    public static TheoryData<IReadOnlyCollection<DateOnlyRange>, Expression<Func<IEnumerable<DateOnlyRange>, bool>>> ConstructorCases
     {
         get
         {
-            yield return new object[]
+            return new TheoryData<IReadOnlyCollection<DateOnlyRange>, Expression<Func<IEnumerable<DateOnlyRange>, bool>>>()
             {
-                Array.Empty<DateOnlyRange>(),
-                (Expression<Func<IEnumerable<DateOnlyRange>, bool>>)(ranges => ranges.Exactly(0))
-            };
-
-            /**
-             * inputs :  ------------------------
-             *                 |--------|
-             *
-             * ranges : ------------------------
-             */
-            yield return new object[]
-            {
-                new[]
                 {
-                    DateOnlyRange.Infinite,
-                    new DateOnlyRange(DateOnly.FromDateTime(8.April(2014)), DateOnly.FromDateTime(16.April(2014)))
+                    [],
+                    ranges => ranges.Exactly(0)
                 },
-                (Expression<Func<IEnumerable<DateOnlyRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == DateOnlyRange.Infinite)
-                )
-            };
-
-            /**
-             * inputs :       |--------|
-             *          ------------------------
-             *
-             * ranges : ------------------------
-             */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :  ------------------------
+                 *                 |--------|
+                 *
+                 * ranges : ------------------------
+                 */
                 {
-                    new DateOnlyRange(DateOnly.FromDateTime(8.April(2014)), DateOnly.FromDateTime(16.April(2014))),
-                    DateOnlyRange.Infinite
+                    [
+                        DateOnlyRange.Infinite,
+                        new DateOnlyRange(DateOnly.FromDateTime(8.April(2014)), DateOnly.FromDateTime(16.April(2014)))
+                    ],
+                    ranges => ranges.Once() && ranges.Once(range => range == DateOnlyRange.Infinite)
                 },
-                (Expression<Func<IEnumerable<DateOnlyRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == DateOnlyRange.Infinite)
-                )
-            };
 
-            /**
-             * inputs :       |--------|
-             *           |--------|
-             *
-             * ranges :  |-------------|
-             */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :       |--------|
+                 *          ------------------------
+                 *
+                 * ranges : ------------------------
+                 */
                 {
-                    new DateOnlyRange(DateOnly.FromDateTime(8.April(2014)), DateOnly.FromDateTime(16.April(2014))),
-                    new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)), DateOnly.FromDateTime(12.April(2014))),
+                    [
+                        new DateOnlyRange(DateOnly.FromDateTime(8.April(2014)), DateOnly.FromDateTime(16.April(2014))),
+                        DateOnlyRange.Infinite
+                    ],
+                    ranges => ranges.Once() && ranges.Once(range => range == DateOnlyRange.Infinite)
                 },
-                (Expression<Func<IEnumerable<DateOnlyRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)), DateOnly.FromDateTime(16.April(2014))))
-                )
-            };
+                /*
+                 * inputs :       |--------|
+                 *           |--------|
+                 *
+                 * ranges :  |-------------|
+                 */
+                {
+                    [
+                        new DateOnlyRange(DateOnly.FromDateTime(8.April(2014)), DateOnly.FromDateTime(16.April(2014))),
+                        new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)), DateOnly.FromDateTime(12.April(2014))),
+                    ],
+                    ranges => ranges.Once()
+                              && ranges.Once(range => range == new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)),
+                                  DateOnly.FromDateTime(16.April(2014))))
+                },
 
-            /**
-             * inputs :  |--------|
-             *                |--------|
-             *
-             * ranges :  |-------------|
-             */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :  |--------|
+                 *                |--------|
+                 *
+                 * ranges :  |-------------|
+                 */
                 {
-                    new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)), DateOnly.FromDateTime(12.April(2014))),
-                    new DateOnlyRange(DateOnly.FromDateTime(8.April(2014)), DateOnly.FromDateTime(16.April(2014))),
+                    [
+                        new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)), DateOnly.FromDateTime(12.April(2014))),
+                        new DateOnlyRange(DateOnly.FromDateTime(8.April(2014)), DateOnly.FromDateTime(16.April(2014))),
+                    ],
+                    ranges => ranges.Once()
+                              && ranges.Once(range => range == new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)),
+                                  DateOnly.FromDateTime(16.April(2014))))
                 },
-                (Expression<Func<IEnumerable<DateOnlyRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)), DateOnly.FromDateTime(16.April(2014))))
-                )
-            };
-
-            /**
-             * inputs :  |--|
-             *                |------|
-             *
-             * ranges :  |--|
-             *                |------|
-             */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :  |--|
+                 *                |------|
+                 *
+                 * ranges :  |--|
+                 *                |------|
+                 */
                 {
-                    new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)), DateOnly.FromDateTime(12.April(2014))),
-                    new DateOnlyRange(DateOnly.FromDateTime(14.April(2014)), DateOnly.FromDateTime(16.April(2014))),
+                    [
+                        new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)), DateOnly.FromDateTime(12.April(2014))),
+                        new DateOnlyRange(DateOnly.FromDateTime(14.April(2014)), DateOnly.FromDateTime(16.April(2014))),
+                    ],
+                    ( ranges => ranges.Exactly(2)
+                                && ranges.Once(range => range == new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)),
+                                    DateOnly.FromDateTime(12.April(2014))))
+                                && ranges.Once(range =>
+                                    range == new DateOnlyRange(DateOnly.FromDateTime(14.April(2014)),
+                                        DateOnly.FromDateTime(16.April(2014))))
+                    )
                 },
-                (Expression<Func<IEnumerable<DateOnlyRange>, bool>>)(ranges => ranges.Exactly(2)
-                                                                               && ranges.Once(range => range == new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)), DateOnly.FromDateTime(12.April(2014))))
-                                                                               && ranges.Once(range => range == new DateOnlyRange(DateOnly.FromDateTime(14.April(2014)), DateOnly.FromDateTime(16.April(2014))))
-                )
-            };
-
-            /**
-            * inputs :  |--|
-            *             |----|
-            *                |------|
-            * ranges :  |-----------|
-            */
-            yield return new object[]
-            {
-                new[]
+                /*
+                 * inputs :  |--|
+                 *             |----|
+                 *                |------|
+                 * ranges :  |-----------|
+                    */
                 {
-                    new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)), DateOnly.FromDateTime(12.April(2014))),
-                    new DateOnlyRange(DateOnly.FromDateTime(9.April(2014)), DateOnly.FromDateTime(14.April(2014))),
-                    new DateOnlyRange(DateOnly.FromDateTime(12.April(2014)), DateOnly.FromDateTime(18.April(2014))),
-                },
-                (Expression<Func<IEnumerable<DateOnlyRange>, bool>>)(ranges => ranges.Once()
-                                                                               && ranges.Once(range => range == new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)),
-                                                                                                                                  DateOnly.FromDateTime(18.April(2014))))
-                )
+                    [
+                        new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)), DateOnly.FromDateTime(12.April(2014))),
+                        new DateOnlyRange(DateOnly.FromDateTime(9.April(2014)), DateOnly.FromDateTime(14.April(2014))),
+                        new DateOnlyRange(DateOnly.FromDateTime(12.April(2014)), DateOnly.FromDateTime(18.April(2014))),
+                    ],
+                    ranges => ranges.Once()
+                              && ranges.Once(range => range == new DateOnlyRange(DateOnly.FromDateTime(5.April(2014)),
+                                  DateOnly.FromDateTime(18.April(2014))))
+                }
             };
         }
     }
@@ -261,14 +238,14 @@ public class MultiDateOnlyRangeTests
         MultiDateOnlyRange left = leftSource.Item;
         MultiDateOnlyRange right = rightSource.Item;
 
-        _outputHelper.WriteLine($"{nameof(left)} : {left}");
-        _outputHelper.WriteLine($"{nameof(right)} : {right}");
+        outputHelper.WriteLine($"{nameof(left)} : {left}");
+        outputHelper.WriteLine($"{nameof(right)} : {right}");
 
         // Act
         MultiDateOnlyRange union = left.Merge(right);
 
         // Assert
-        _outputHelper.WriteLine($"Union : {union}");
+        outputHelper.WriteLine($"Union : {union}");
         foreach (DateOnlyRange range in left.Ranges.Concat(right.Ranges))
         {
             union.Overlaps(range).Should().BeTrue();
@@ -299,8 +276,8 @@ public class MultiDateOnlyRangeTests
         MultiDateOnlyRange left = leftSource.Item;
         MultiDateOnlyRange right = rightSource.Item;
 
-        _outputHelper.WriteLine($"{nameof(left)} : {left}");
-        _outputHelper.WriteLine($"{nameof(right)} : {right}");
+        outputHelper.WriteLine($"{nameof(left)} : {left}");
+        outputHelper.WriteLine($"{nameof(right)} : {right}");
         MultiDateOnlyRange expected = left.Merge(right);
 
         // Act
@@ -358,11 +335,11 @@ public class MultiDateOnlyRangeTests
     {
         // Arrange
         MultiDateOnlyRange complement = original.Complement();
-        _outputHelper.WriteLine($"Complement of {original} is {complement}");
+        outputHelper.WriteLine($"Complement of {original} is {complement}");
 
         // Act
         MultiDateOnlyRange actual = original + complement;
-        _outputHelper.WriteLine($"Union of {original} and {complement} is {actual}");
+        outputHelper.WriteLine($"Union of {original} and {complement} is {actual}");
 
         // Assert
         actual.Should().Be(MultiDateOnlyRange.Infinite);
@@ -420,7 +397,7 @@ public class MultiDateOnlyRangeTests
     {
         // Arrange
         MultiDateOnlyRange complement = value.Complement();
-        _outputHelper.WriteLine($"Complement is {complement}");
+        outputHelper.WriteLine($"Complement is {complement}");
 
         // Act
         MultiDateOnlyRange result = value + complement;
@@ -458,7 +435,7 @@ public class MultiDateOnlyRangeTests
     public void Given_an_instance_that_is_not_null_Then_ToString_should_produce_expected_output(MultiDateOnlyRange range)
     {
         // Arrange
-        string expected = string.Empty;
+        string expected;
         if (range.IsInfinite())
         {
             expected = "{infinite}";

@@ -8,7 +8,6 @@ using Candoumbe.Types.Calendar;
 using Candoumbe.Types.UnitTests.Generators;
 
 using FluentAssertions;
-using FluentAssertions.Equivalency;
 using FluentAssertions.Extensions;
 
 using FsCheck;
@@ -24,15 +23,9 @@ using Xunit.Categories;
 
 namespace Candoumbe.Types.UnitTests.Calendar;
 [UnitTest]
-public class DateOnlyRangeTests
+public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
 {
-    private readonly ITestOutputHelper _outputHelper;
     private static readonly Faker Faker = new();
-
-    public DateOnlyRangeTests(ITestOutputHelper outputHelper)
-    {
-        _outputHelper = outputHelper;
-    }
 
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
     public void Given_start_gt_end_Constructor_should_feed_Properties_accordingly(DateOnly start)
@@ -41,7 +34,7 @@ public class DateOnlyRangeTests
         DateOnly end = start.AddDays(1);
 
         // Act
-        Action action = () => new DateOnlyRange(start: end, end: start);
+        Action action = () => _ = new DateOnlyRange(start: end, end: start);
 
         // Assert
         action.Should().Throw<ArgumentOutOfRangeException>("start cannot be greater than end")
@@ -84,8 +77,8 @@ public class DateOnlyRangeTests
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
     public FsCheck.Property Given_two_DateOnlyRange_instances_Overlaps_should_be_symetric(DateOnlyRange left, DateOnlyRange right)
     {
-        _outputHelper.WriteLine($"{nameof(left)}: {left}");
-        _outputHelper.WriteLine($"{nameof(right)}: {right}");
+        outputHelper.WriteLine($"{nameof(left)}: {left}");
+        outputHelper.WriteLine($"{nameof(right)}: {right}");
 
         return (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
     }
@@ -108,8 +101,8 @@ public class DateOnlyRangeTests
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
     public FsCheck.Property Given_two_DateOnlyRange_instances_IsContiguous_should_be_symetric(DateOnlyRange left, DateOnlyRange right)
     {
-        _outputHelper.WriteLine($"{nameof(left)}: {left}");
-        _outputHelper.WriteLine($"{nameof(right)}: {right}");
+        outputHelper.WriteLine($"{nameof(left)}: {left}");
+        outputHelper.WriteLine($"{nameof(right)}: {right}");
 
         return (left.IsContiguousWith(right) == right.IsContiguousWith(left)).ToProperty();
     }
@@ -241,80 +234,74 @@ public class DateOnlyRangeTests
               .BeTrue($"{nameof(DateOnlyRange.Infinite)} range overlaps every other {nameof(DateOnlyRange)}s");
     }
 
-    public static IEnumerable<object[]> MergeCases
+    public static TheoryData<DateOnlyRange, DateOnlyRange, DateOnlyRange> MergeCases
     {
         get
         {
-            /* 
-             * curernt   : |---------------|
-             * other     :         |---------------| 
-             * expected  : |-----------------------| 
-             */
-            yield return new object[]
+            return new TheoryData<DateOnlyRange, DateOnlyRange, DateOnlyRange>()
             {
-                new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(4.January(1990)), DateOnly.FromDateTime(8.January(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(8.January(1990))),
-            };
+                /*
+                 * current   : |---------------|
+                 * other     :         |---------------|
+                 * expected  : |-----------------------|
+                 */
 
-            /* 
-             * current   :         |---------------| 
-             * other     : |---------------|
-             * expected  : |-----------------------| 
-             */
-            yield return new object[]
-            {
-                new DateOnlyRange(DateOnly.FromDateTime(4.January(1990)), DateOnly.FromDateTime(8.January(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(8.January(1990))),
-            };
+                {
+                    new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
+                    new DateOnlyRange(DateOnly.FromDateTime(4.January(1990)), DateOnly.FromDateTime(8.January(1990))),
+                    new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(8.January(1990)))
+                },
+                /*
+                 * current   :         |---------------|
+                 * other     : |---------------|
+                 * expected  : |-----------------------|
+                 */
+                {
+                    new DateOnlyRange(DateOnly.FromDateTime(4.January(1990)), DateOnly.FromDateTime(8.January(1990))),
+                    new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
+                    new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(8.January(1990)))
+                },
+                /*
+                 * current   :                 |---------------|
+                 * other     : |---------------|
+                 * expected  : |-------------------------------|
+                 */
 
-            /* 
-             * current   :                 |---------------| 
-             * other     : |---------------|
-             * expected  : |-------------------------------| 
-             */
-            yield return new object[]
-            {
-                new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(6.January(1990)), DateOnly.FromDateTime(8.January(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(8.January(1990))),
-            };
-
-            /* 
-             * current     : |---------------|
-             * other       :                 |---------------| 
-             * expected    : |-------------------------------| 
-             */
-            yield return new object[]
-            {
-                new DateOnlyRange(DateOnly.FromDateTime(6.January(1990)), DateOnly.FromDateTime(8.January(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(8.January(1990))),
-            };
-
-            /* 
-             * current     : |---------------------|
-             * other       :         |---------| 
-             * expected    : |---------------------|
-             */
-            yield return new object[]
-            {
-                new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(3.January(1990)), DateOnly.FromDateTime(5.January(1990))),
-                new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
-            };
-
-            /* 
-             * current     : ---------------------
-             * other       :         |---------| 
-             * expected    : ---------------------
-             */
-            yield return new object[]
-            {
-                DateOnlyRange.Infinite,
-                new DateOnlyRange(DateOnly.FromDateTime(3.January(1990)), DateOnly.FromDateTime(5.January(1990))),
-                DateOnlyRange.Infinite,
+                {
+                    new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
+                    new DateOnlyRange(DateOnly.FromDateTime(6.January(1990)), DateOnly.FromDateTime(8.January(1990))),
+                    new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(8.January(1990)))
+                },
+                /*
+                 * current     : |---------------|
+                 * other       :                 |---------------|
+                 * expected    : |-------------------------------|
+                 */
+                {
+                    new DateOnlyRange(DateOnly.FromDateTime(6.January(1990)), DateOnly.FromDateTime(8.January(1990))),
+                    new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
+                    new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(8.January(1990)))
+                },
+                /*
+                 * current     : |---------------------|
+                 * other       :         |---------|
+                 * expected    : |---------------------|
+                 */
+                {
+                    new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990))),
+                    new DateOnlyRange(DateOnly.FromDateTime(3.January(1990)), DateOnly.FromDateTime(5.January(1990))),
+                    new DateOnlyRange(DateOnly.FromDateTime(1.January(1990)), DateOnly.FromDateTime(6.January(1990)))
+                },
+                /*
+                 * current     : ---------------------
+                 * other       :         |---------|
+                 * expected    : ---------------------
+                 */
+                {
+                    DateOnlyRange.Infinite,
+                    new DateOnlyRange(DateOnly.FromDateTime(3.January(1990)), DateOnly.FromDateTime(5.January(1990))),
+                    DateOnlyRange.Infinite
+                }
             };
         }
     }
@@ -325,7 +312,7 @@ public class DateOnlyRangeTests
     {
         // Act
         DateOnlyRange actual = current.Merge(other);
-        _outputHelper.WriteLine($"Result: {actual}");
+        outputHelper.WriteLine($"Result: {actual}");
 
         // Assert
         actual.Should().Be(expected);
@@ -351,8 +338,8 @@ public class DateOnlyRangeTests
         DateOnlyRange left = new(date.AddDays(1), Faker.Date.FutureDateOnly(refDate: date.AddDays(2)));
         DateOnlyRange right = new(Faker.Date.RecentDateOnly(refDate: date.AddDays(-2)), date.AddDays(-1));
 
-        _outputHelper.WriteLine($"{nameof(left)} : {left}");
-        _outputHelper.WriteLine($"{nameof(right)} : {right}");
+        outputHelper.WriteLine($"{nameof(left)} : {left}");
+        outputHelper.WriteLine($"{nameof(right)} : {right}");
 
         // Act
         Action callingUnionWhenLeftAndRightDontOverlapsAndAreNotContiguous = () => left.Merge(right);
