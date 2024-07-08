@@ -15,7 +15,7 @@ using Nuke.Common.Tools.Codecov;
 using Nuke.Common.Utilities.Collections;
 
 [GitHubActions("integration", GitHubActionsImage.UbuntuLatest,
-    AutoGenerate = true,
+    AutoGenerate = false,
     FetchDepth = 0,
     InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Pack), nameof(IPushNugetPackages.Publish) },
     CacheKeyFiles = new[] {
@@ -40,7 +40,7 @@ using Nuke.Common.Utilities.Collections;
     }
 )]
 [GitHubActions("nightly", GitHubActionsImage.UbuntuLatest,
-    AutoGenerate = true,
+    AutoGenerate = false,
     FetchDepth = 0,
     OnCronSchedule = "0 0 * * *",
     InvokedTargets = new[] { nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack) },
@@ -67,7 +67,7 @@ using Nuke.Common.Utilities.Collections;
     }
 )]
 [GitHubActions("delivery", GitHubActionsImage.UbuntuLatest,
-    AutoGenerate = true,
+    AutoGenerate = false,
     FetchDepth = 0,
     InvokedTargets = new[] { nameof(IPushNugetPackages.Pack), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease) },
     CacheKeyFiles = new[] {
