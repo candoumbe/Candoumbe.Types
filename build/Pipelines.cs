@@ -100,6 +100,7 @@ public class Pipelines : NukeBuild,
     IRestore,
     ICompile,
     IUnitTest,
+    IBenchmark,
     IHaveGitVersion,
     IReportCoverage,
     IMutationTest,
@@ -190,4 +191,7 @@ public class Pipelines : NukeBuild,
             Environment.SetEnvironmentVariable("DOTNET_ROLL_FORWARD", "LatestMajor");
         }
     }
+    
+    ///<inheritdoc/>
+    IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
 }
