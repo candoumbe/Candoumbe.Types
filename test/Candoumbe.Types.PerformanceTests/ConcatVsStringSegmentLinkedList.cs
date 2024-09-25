@@ -1,0 +1,60 @@
+using System.Text;
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
+using Bogus;
+using Candoumbe.Types.Strings;
+
+namespace Candoumbe.Types.PerformanceTests;
+
+[MemoryDiagnoser]
+[SimpleJob(RuntimeMoniker.Net60)]
+[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob(RuntimeMoniker.Net90)]
+public class ConcatVsStringSegmentLinkedList
+{
+    [Params(10, 100, 1000)]
+    public int WordCount { get; set; }
+
+    private Faker _faker;
+    private string[] _words;
+
+    [GlobalSetup]
+    public void SetUp()
+    {
+        _faker = new Faker();
+        _words = _faker.Lorem.Words(WordCount);
+    }
+
+
+    [Benchmark(Baseline = true)]
+    public string Concatenate_with_string_concat()
+    {
+        string result = _words.Aggregate(string.Empty, string.Concat);
+
+        return result;
+    }
+
+    [Benchmark]
+    public string Concatenate_with_StringBuilder()
+    {
+        StringBuilder result =  new StringBuilder();
+
+        result = _words.Aggregate(result, (current, word) => current.Append(word));
+
+        return result.ToString();
+    }
+
+
+    [Benchmark]
+    public string Concatenate_with_StringSegments()
+    {
+        StringSegmentLinkedList list = new StringSegmentLinkedList(_words[0]);
+
+        foreach (string word in _words.Skip(1))
+        {
+            list.AddLast(word);
+        }
+        
+        return list.ToStringValue();
+    }
+}

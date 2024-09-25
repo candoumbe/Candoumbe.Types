@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `NonNegativeInteger` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
 - Added `PositiveInteger` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
 - Added `net8.0` support
+- Added `StringSegmentLinkedList`
 
 ### 🚨 Breaking changes
 - Dropped `net7.0` support as it's no longer maintained by Microsoft.
@@ -17,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🧹 Housekeeping
 - Fixed incorrect package and repository urls which caused report of mutation tests to not be sent.
 - Bumped `Candoumbe.Pipelines` dependency to `0.9.0`
-- Enabled ``
+- Added benchmarks for `StringSegmentLinkedList` type
 
 ## [0.1.0] / 2023-01-29
 - Initial release
