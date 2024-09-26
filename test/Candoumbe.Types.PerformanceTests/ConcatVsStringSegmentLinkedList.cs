@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
@@ -46,13 +47,13 @@ public class ConcatVsStringSegmentLinkedList
 
 
     [Benchmark]
-    public string Concatenate_with_StringSegments()
+    public string Concatenate_with_StringSegmentLinkedList()
     {
-        StringSegmentLinkedList list = new StringSegmentLinkedList(_words[0]);
+        StringSegmentLinkedList list = new(_words[0]);
 
         foreach (string word in _words.Skip(1))
         {
-            list.AddLast(word);
+            list.Append(word);
         }
         
         return list.ToStringValue();

@@ -1,4 +1,9 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Extensions.Primitives;
 
@@ -7,60 +12,133 @@ namespace Candoumbe.Types.Strings;
 /// <summary>
 /// Represents a linked list data structure for managing <see cref="StringSegment"/> nodes.
 /// </summary>
-public class StringSegmentLinkedList
+public class StringSegmentLinkedList : IEnumerable<StringSegment>
 {
-    public StringSegmentNode Head { get; }
-    private StringSegmentNode? tail;
-    private int count;
+    private StringSegmentNode _head;
+    private StringSegmentNode _tail;
 
-    public StringSegmentLinkedList(StringSegment headValue)
+    /// <summary>
+    /// Builds a new instance of <see cref="StringSegmentLinkedList"/>.
+    /// </summary>
+    /// <param name="head">the value of the head</param>
+    /// <param name="others">Additional <see cref="StringSegment"/>s to append to the list</param>
+    public StringSegmentLinkedList(StringSegment head, params StringSegment[] others)
     {
-        Head = new StringSegmentNode(headValue);
-        tail = Head;
-        count = 1;
-    }
-    
+        _head = new StringSegmentNode(head);
+        Count = 1;
 
-    public void AddLast(StringSegment value)
+        foreach (StringSegment next in others)
+        {
+            Append(next);
+        }
+    }
+
+    /// <summary>
+    /// Appends <paramref name="value"/> to the end of the list
+    /// </summary>
+    /// <param name="value"></param>
+    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
+    public StringSegmentLinkedList Append(StringSegment value)
     {
-        StringSegmentNode newNode = new StringSegmentNode(value);
-        tail.Next = newNode;
-        tail = newNode;
-        count++;
+        if (value is { Length: > 0 })
+        {
+            StringSegmentNode newNode = new StringSegmentNode(value);
+            AppendInternal(newNode);
+        }
+
+        return this;
     }
 
+    private void AppendInternal(StringSegmentNode newNode)
+    {
+        if (_tail is null)
+        {
+            _tail = newNode;
+            _head.Next = _tail;
+        }
+        else
+        {
+            _head.Next ??= _tail;
+            _tail.Next = newNode;
+            _tail = newNode;
+        }
+
+        Count++;
+    }
+
+    /// <summary>
+    /// Inserts a new link containing <paramref name=""/> at the given <paramref name="index"/>.
+    /// </summary>
+    /// <param name="index">0-based index where the new node will be inserted</param>
+    /// <param name="value">The value of the node to inserts</param>
+    /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0. or &gt; <see cref="Count"/>.</exception>
     public void InsertAt(int index, StringSegment value)
     {
-        if (index < 0 || index > count)
+        if (index < 0 || index > Count)
         {
             throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
         }
 
+        if (value is { Length: 0 })
+        {
+            return;
+        }
+
         StringSegmentNode newNode = new StringSegmentNode(value);
-        StringSegmentNode current = Head;
+        InsertAtInternal(index, newNode);
+    }
 
-        for (int i = 0; i < index; i++)
+    private void InsertAtInternal(int index, StringSegmentNode newNode)
+    {
+        if (index == 0)
         {
-            current = current.Next;
+            newNode.Next = _head;
+            _head = newNode;
+        }
+        else
+        {
+            StringSegmentNode current = _head;
+            StringSegmentNode previous = null;
+
+            for (int i = 0; i < index; i++)
+            {
+                previous = current;
+                current = current!.Next;
+            }
+
+            previous ??= newNode;
+            previous.Next = newNode;
+            newNode.Next ??= _tail;
         }
 
-        newNode.Next = current.Next;
-        current.Next = newNode;
+        Count++;
+    }
 
-        if (newNode.Next == null)
+    /// <summary>
+    /// Inserts <paramref name="other"/> at the given <paramref name="index"/>
+    /// </summary>
+    /// <param name="index">0-based index where the new node will be inserted</param>
+    /// <param name="other">The value of the node to inserts</param>
+    /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0. or &gt; <see cref="Count"/>.</exception>
+    /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/> .</exception>
+    public void InsertAt(int index, StringSegmentLinkedList other)
+    {
+        if (index > 0)
         {
-            tail = newNode;
+            InsertAtInternal(index, other._head);
         }
-
-        count++;
+        else if (index == 0)
+        {
+            other.AppendInternal(_head);
+            _head = other._head;
+        }
     }
 
     /// <summary>
     /// Gets the number of nodes in the current linked list
     /// </summary>
-    public int Count => count;
+    public int Count { get; private set; }
 
-    
     /// <summary>
     /// Computes the total length of the resulting string value
     /// </summary>
@@ -68,12 +146,13 @@ public class StringSegmentLinkedList
     public int GetTotalLength()
     {
         int totalLength = 0;
-        StringSegmentNode current = Head;
-        while (current != null)
+        StringSegmentNode current = _head;
+        while (current is not null)
         {
-            totalLength += current.Value.Length; // Ajoute la longueur de chaque StringSegment
+            totalLength += current.Value.Length;
             current = current.Next;
         }
+
         return totalLength;
     }
 
@@ -84,12 +163,28 @@ public class StringSegmentLinkedList
     public string ToStringValue()
     {
         StringBuilder sb = new StringBuilder();
-        StringSegmentNode current = Head;
-        while (current != null)
+        StringSegmentNode current = _head;
+        while (current is not null)
         {
             sb.Append(current.Value.Value);
             current = current.Next;
         }
+
         return sb.ToString();
     }
+
+    /// <inheritdoc />
+    public IEnumerator<StringSegment> GetEnumerator()
+    {
+        yield return _head.Value;
+
+        StringSegmentNode current = _head.Next;
+        while (current is not null)
+        {
+            yield return current.Value;
+            current = current.Next;
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
