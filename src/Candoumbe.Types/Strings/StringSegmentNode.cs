@@ -4,9 +4,15 @@ namespace Candoumbe.Types.Strings;
 
 public record StringSegmentNode
 {
+    /// <summary>
+    /// Value of the current node
+    /// </summary>
     public StringSegment Value { get; }
     
-    public StringSegmentNode? Next { get; set; }
+    /// <summary>
+    /// Pointer to the next node (if any).
+    /// </summary>
+    public StringSegmentNode Next { get; internal set; }
 
     /// <summary>
     /// Initializes a new instance of the StringSegmentNode class with the specified value.
