@@ -187,19 +187,36 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-
+    
     /// <summary>
-    /// Replaces
+    /// Replaces one character <paramref name="oldChar"/> by <paramref name="newChar"/>.
     /// </summary>
     /// <param name="oldChar"><see langword="character"/> to replace.</param>
-    /// <param name="newChar"><see langword="character"/> to use as replacement</param>
+    /// <param name="newChar"><see langword="character"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
-    public StringSegmentLinkedList Replace(char oldChar, char newChar)
+    /// <remarks>
+    /// This method does its best to never allocated.
+    /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
+    /// the current instance.
+    /// </remarks>
+    public StringSegmentLinkedList Replace(char oldChar, char newChar) => Replace(oldChar, newChar.ToString());
+
+    /// <summary>
+    /// Replaces all <paramref name="oldChar"/> by <paramref name="newString"/>.
+    /// </summary>
+    /// <param name="oldChar"><see langword="character"/> to replace.</param>
+    /// <param name="newString"><see langword="string"/> that will replace <paramref name="oldChar"/>.</param>
+    /// <returns>The current list where all characters were replaced.</returns>
+    /// <remarks>
+    /// This method does its best to never allocated.
+    /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
+    /// the current instance.
+    /// </remarks>
+    public StringSegmentLinkedList Replace(char oldChar, string newString)
     {
         StringSegmentLinkedList replacementList = this;
         StringSegmentNode current = _head;
-        StringSegment replacement = newChar.ToString();
+        StringSegment replacement = newString;
         while (current is not null)
         {
             int indexOfOldChar = current.Value.IndexOf(oldChar);
@@ -219,7 +236,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
 
             current = current.Next;
         }
-
+        
         return replacementList;
     }
 }
