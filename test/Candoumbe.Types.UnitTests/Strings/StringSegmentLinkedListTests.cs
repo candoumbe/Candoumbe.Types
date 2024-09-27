@@ -185,4 +185,21 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         initialList.ToStringValue().Should().Be(expected.value);
         initialList.GetTotalLength().Should().Be(expected.length);
     }
+
+    public static TheoryData<StringSegmentLinkedList, (char oldChar, char newChar), string> ReplaceCases
+        => new()
+        {
+            { new StringSegmentLinkedList("Hello"), ('e', 'a'), "Hallo" }
+        };
+
+    [Theory]
+    [MemberData(nameof(ReplaceCases))]
+    public void Given_a_initial_list_When_replacing_a_character_that_exists_in_one_of_its_node_Then_the_string_should_be_updated(StringSegmentLinkedList initialList, (char oldChar, char newChar) replacement, string expected)
+    {
+        // Act
+        StringSegmentLinkedList actualList = initialList.Replace(replacement.oldChar, replacement.newChar);
+
+        // Assert
+        actualList.ToStringValue().Should().Be(expected);
+    }
 }
