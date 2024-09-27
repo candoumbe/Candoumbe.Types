@@ -187,4 +187,39 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+
+    /// <summary>
+    /// Replaces
+    /// </summary>
+    /// <param name="oldChar"><see langword="character"/> to replace.</param>
+    /// <param name="newChar"><see langword="character"/> to use as replacement</param>
+    /// <returns>The current list where all characters were replaced.</returns>
+    public StringSegmentLinkedList Replace(char oldChar, char newChar)
+    {
+        StringSegmentLinkedList replacementList = this;
+        StringSegmentNode current = _head;
+        StringSegment replacement = newChar.ToString();
+        while (current is not null)
+        {
+            int indexOfOldChar = current.Value.IndexOf(oldChar);
+            if (indexOfOldChar >= 0)
+            {
+                StringTokenizer tokenizer = current.Value.Split([oldChar]);
+                replacementList = new(tokenizer.First());
+
+                foreach (StringSegment segment in tokenizer.Skip(1))
+                {
+                    replacementList.Append(replacement)
+                        .Append(segment);
+                }
+
+                current = replacementList._head;
+            }
+
+            current = current.Next;
+        }
+
+        return replacementList;
+    }
 }
