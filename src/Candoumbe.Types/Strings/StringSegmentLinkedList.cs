@@ -17,6 +17,10 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
 
+    private readonly IDictionary<char, char> _charTocharReplacement;
+    private readonly IDictionary<(string, StringComparison), string> _stringToStringReplacement;
+    
+    
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/>.
     /// </summary>
@@ -31,6 +35,9 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
         {
             Append(next);
         }
+        
+        _charTocharReplacement = new Dictionary<char, char>();
+        _stringToStringReplacement = new Dictionary<(string, StringComparison), string>();
     }
 
     /// <summary>
@@ -123,14 +130,20 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/> .</exception>
     public void InsertAt(int index, StringSegmentLinkedList other)
     {
-        if (index > 0)
+        if (index < 0 || index > Count)
         {
-            InsertAtInternal(index, other._head);
+            throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
         }
-        else if (index == 0)
+
+        switch (index)
         {
-            other.AppendInternal(_head);
-            _head = other._head;
+            case > 0:
+                InsertAtInternal(index, other._head);
+                break;
+            case 0:
+                other.AppendInternal(_head);
+                _head = other._head;
+                break;
         }
     }
 
@@ -157,7 +170,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     }
 
     /// <summary>
-    /// Computes the <see cref="string"/> values
+    /// Computes the <see cref="string"/> value.
     /// </summary>
     /// <returns></returns>
     public string ToStringValue()
@@ -166,10 +179,20 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
         StringSegmentNode current = _head;
         while (current is not null)
         {
-            sb.Append(current.Value.Value);
+            sb = sb.Append(current.Value.Value);
             current = current.Next;
         }
 
+        foreach ((char key, char value) in _charTocharReplacement)
+        {
+            sb = sb.Replace(key, value);
+        }
+        
+        foreach (((string oldValue, StringComparison comparison) key, string value) in _stringToStringReplacement)
+        {
+            sb = sb.Replace(key.oldValue, value);
+        }
+        
         return sb.ToString();
     }
 
@@ -214,29 +237,28 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     /// </remarks>
     public StringSegmentLinkedList Replace(char oldChar, string newString)
     {
-        StringSegmentLinkedList replacementList = this;
-        StringSegmentNode current = _head;
-        StringSegment replacement = newString;
-        while (current is not null)
-        {
-            int indexOfOldChar = current.Value.IndexOf(oldChar);
-            if (indexOfOldChar >= 0)
-            {
-                StringTokenizer tokenizer = current.Value.Split([oldChar]);
-                replacementList = new(tokenizer.First());
-
-                foreach (StringSegment segment in tokenizer.Skip(1))
-                {
-                    replacementList.Append(replacement)
-                        .Append(segment);
-                }
-
-                current = replacementList._head;
-            }
-
-            current = current.Next;
-        }
+        _stringToStringReplacement.Add((oldChar.ToString(), StringComparison.InvariantCulture), newString);
         
-        return replacementList;
+        return this;
+    }
+
+
+    /// <summary>
+    /// Replaces all occurrences of <paramref name="oldString"/> by <paramref name="newString"/>.
+    /// </summary>
+    /// <param name="oldString"><see langword="character"/> to replace.</param>
+    /// <param name="newString"><see langword="string"/> that will replace <paramref name="newString"/>.</param>
+    /// <param name="comparer">The comparer to use.</param>
+    /// <returns>The current list where all characters were replaced.</returns>
+    /// <remarks>
+    /// This method does its best to never allocated.
+    /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
+    /// the current instance.
+    /// </remarks>
+    public StringSegmentLinkedList Replace(string oldString, string newString, StringComparison comparer = StringComparison.InvariantCultureIgnoreCase)
+    {
+        _stringToStringReplacement.Add((oldString, comparer), newString);
+
+        return this;
     }
 }

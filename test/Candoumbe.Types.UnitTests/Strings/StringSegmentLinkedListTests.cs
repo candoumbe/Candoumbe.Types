@@ -221,4 +221,23 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         // Assert
         actualList.ToStringValue().Should().Be(expected);
     }
+    
+    public static TheoryData<StringSegmentLinkedList, (string oldString, string newString), string> ReplaceStringByStringCases
+        => new()
+        {
+            { new StringSegmentLinkedList("Hello"), ("e", "a"), "Hallo" },
+            { new StringSegmentLinkedList("Hello"), ("llo", "ro"), "Hero" },
+            { new StringSegmentLinkedList("Hello"), ("ll", "r"), "Hero" },
+        };
+
+    [Theory]
+    [MemberData(nameof(ReplaceStringByStringCases))]
+    public void Given_a_initial_list_When_replacing_a_character_that_exists_in_one_of_its_node_Then_the_string_should_be_updated(StringSegmentLinkedList initialList, (string oldString, string newString) replacement, string expected)
+    {
+        // Act
+        StringSegmentLinkedList actualList = initialList.Replace(replacement.oldString, replacement.newString);
+
+        // Assert
+        actualList.ToStringValue().Should().Be(expected);
+    }
 }
