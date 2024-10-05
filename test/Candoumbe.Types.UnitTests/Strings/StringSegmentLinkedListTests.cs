@@ -221,7 +221,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         // Assert
         actualList.ToStringValue().Should().Be(expected);
     }
-    
+
     public static TheoryData<StringSegmentLinkedList, (string oldString, string newString), string> ReplaceStringByStringCases
         => new()
         {
@@ -232,12 +232,38 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 
     [Theory]
     [MemberData(nameof(ReplaceStringByStringCases))]
-    public void Given_a_initial_list_When_replacing_a_character_that_exists_in_one_of_its_node_Then_the_string_should_be_updated(StringSegmentLinkedList initialList, (string oldString, string newString) replacement, string expected)
+    public void Given_a_non_initial_list_When_replacing_a_character_that_exists_in_one_of_its_node_Then_the_string_should_be_updated(StringSegmentLinkedList initialList, (string oldString, string newString) replacement, string expected)
     {
         // Act
         StringSegmentLinkedList actualList = initialList.Replace(replacement.oldString, replacement.newString);
 
         // Assert
         actualList.ToStringValue().Should().Be(expected);
+    }
+
+    [Property]
+    public void Given_the_initial_list_is_empty_When_I_add_an_non_empty_string_Then_the_list_should_only_contains_the_new_element(NonEmptyString stringGenerator)
+    {
+        // Arrange
+        StringSegmentLinkedList initialList = new(StringSegment.Empty);
+        StringSegment segment = stringGenerator.Item;
+
+        // Act
+        StringSegmentLinkedList actualList = initialList.Append(segment);
+
+        // Assert
+        actualList.Count.Should().Be(2);
+        actualList.GetTotalLength().Should().Be(segment.Length);
+    }
+
+    [Fact]
+    public void Given_initial_empty_list_Then_Count_should_return_zero()
+    {
+        // Arrange
+        StringSegmentLinkedList initialList = new(StringSegment.Empty);
+
+        // Act
+        initialList.Count.Should().Be(1);
+        initialList.GetTotalLength().Should().Be(0);
     }
 }

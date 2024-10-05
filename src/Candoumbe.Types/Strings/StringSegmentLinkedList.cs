@@ -17,10 +17,15 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
 
-    private readonly IDictionary<char, char> _charTocharReplacement;
-    private readonly IDictionary<(string, StringComparison), string> _stringToStringReplacement;
-    
-    
+    private readonly IDictionary<string, string> _replacements;
+
+    /// <summary>
+    /// Builds a new instance of <see cref="StringSegmentLinkedList"/> that is empty.
+    /// </summary>
+    public StringSegmentLinkedList() : this(StringSegment.Empty)
+    {
+    }
+
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/>.
     /// </summary>
@@ -36,8 +41,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
             Append(next);
         }
         
-        _charTocharReplacement = new Dictionary<char, char>();
-        _stringToStringReplacement = new Dictionary<(string, StringComparison), string>();
+        _replacements = new Dictionary<string, string>();
     }
 
     /// <summary>
@@ -74,7 +78,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     }
 
     /// <summary>
-    /// Inserts a new link containing <paramref name=""/> at the given <paramref name="index"/>.
+    /// Inserts a new link containing <paramref name="value"/> at the given <paramref name="index"/>.
     /// </summary>
     /// <param name="index">0-based index where the new node will be inserted</param>
     /// <param name="value">The value of the node to inserts</param>
@@ -128,7 +132,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     /// <param name="other">The value of the node to inserts</param>
     /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0. or &gt; <see cref="Count"/>.</exception>
     /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/> .</exception>
-    public void InsertAt(int index, StringSegmentLinkedList other)
+    public StringSegmentLinkedList InsertAt(int index, StringSegmentLinkedList other)
     {
         if (index < 0 || index > Count)
         {
@@ -145,6 +149,8 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
                 _head = other._head;
                 break;
         }
+
+        return this;
     }
 
     /// <summary>
@@ -179,20 +185,16 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
         StringSegmentNode current = _head;
         while (current is not null)
         {
-            sb = sb.Append(current.Value.Value);
+            StringSegment segment = current.Value;
+            sb = sb.Append(segment.Value);
             current = current.Next;
         }
 
-        foreach ((char key, char value) in _charTocharReplacement)
+        foreach (( string key, string value ) in _replacements)
         {
             sb = sb.Replace(key, value);
         }
-        
-        foreach (((string oldValue, StringComparison comparison) key, string value) in _stringToStringReplacement)
-        {
-            sb = sb.Replace(key.oldValue, value);
-        }
-        
+
         return sb.ToString();
     }
 
@@ -237,27 +239,46 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     /// </remarks>
     public StringSegmentLinkedList Replace(char oldChar, string newString)
     {
-        _stringToStringReplacement.Add((oldChar.ToString(), StringComparison.InvariantCulture), newString);
+        StringSegmentLinkedList replacementList = this;
+        StringSegmentNode current = _head;
+        StringSegment replacement = newString;
+        while (current is not null)
+        {
+            int indexOfOldChar = current.Value.IndexOf(oldChar);
+            if (indexOfOldChar >= 0)
+            {
+                StringTokenizer tokenizer = current.Value.Split([oldChar]);
+                replacementList = new(tokenizer.First());
+
+                foreach (StringSegment segment in tokenizer.Skip(1))
+                {
+                    replacementList.Append(replacement)
+                        .Append(segment);
+                }
+
+                current = replacementList._head;
+            }
+
+            current = current.Next;
+        }
         
-        return this;
+        return replacementList;
     }
 
-
     /// <summary>
-    /// Replaces all occurrences of <paramref name="oldString"/> by <paramref name="newString"/>.
+    /// Replaces all <paramref name="oldString"/> by <paramref name="newString"/>.
     /// </summary>
-    /// <param name="oldString"><see langword="character"/> to replace.</param>
-    /// <param name="newString"><see langword="string"/> that will replace <paramref name="newString"/>.</param>
-    /// <param name="comparer">The comparer to use.</param>
+    /// <param name="oldString"><see langword="string"/> to replace.</param>
+    /// <param name="newString"><see langword="string"/> that will replace <paramref name="oldString"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
     /// This method does its best to never allocated.
     /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
-    /// the current instance.
+    /// the current instance had.
     /// </remarks>
-    public StringSegmentLinkedList Replace(string oldString, string newString, StringComparison comparer = StringComparison.InvariantCultureIgnoreCase)
+    public StringSegmentLinkedList Replace(string oldString, string newString)
     {
-        _stringToStringReplacement.Add((oldString, comparer), newString);
+        _replacements.Add(oldString, newString);
 
         return this;
     }
