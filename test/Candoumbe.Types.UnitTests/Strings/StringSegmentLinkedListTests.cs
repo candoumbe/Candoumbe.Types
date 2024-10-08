@@ -20,7 +20,7 @@ namespace Candoumbe.Types.UnitTests.Strings;
 public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 {
     private static readonly Faker Faker = new();
-
+    
     [Property]
     public void Given_non_empty_string_segment_Then_constructor_should_initialize_properties(NonEmptyString stringGenerator)
     {
@@ -208,7 +208,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         => new()
         {
             { new StringSegmentLinkedList("Hello"), ('e', "a"), "Hallo" },
-            { new StringSegmentLinkedList("Hello"), ('H', "Tr"), "Trello" },
+            { new StringSegmentLinkedList("Hello"), ('H', "Tr"), "Trello" }
         };
 
     [Theory]
@@ -228,6 +228,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
             { new StringSegmentLinkedList("Hello"), ("e", "a"), "Hallo" },
             { new StringSegmentLinkedList("Hello"), ("llo", "ro"), "Hero" },
             { new StringSegmentLinkedList("Hello"), ("ll", "r"), "Hero" },
+            { new StringSegmentLinkedList("Hel", "lo"), ("ll", "r"), "Hero" }
         };
 
     [Theory]
@@ -266,4 +267,67 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         initialList.Count.Should().Be(1);
         initialList.GetTotalLength().Should().Be(0);
     }
+
+    public static TheoryData<StringSegmentLinkedList, Func<StringSegment, bool>, Expression<Func<StringSegmentLinkedList, bool>>> RemoveSegmentByPredicateCases
+        => new()
+        {
+            {
+                new StringSegmentLinkedList("Hel", "lo"),
+                segment => segment.StartsWith("lo", StringComparison.OrdinalIgnoreCase),
+                list => list.ToStringValue() == "Hel"
+            },
+            {
+                new StringSegmentLinkedList("Hel", "lo"),
+                segment => segment.StartsWith("He", StringComparison.OrdinalIgnoreCase),
+                list => list.ToStringValue() == "lo"
+            },
+            {
+                new StringSegmentLinkedList("Hel"),
+                segment => segment.StartsWith("Hel", StringComparison.OrdinalIgnoreCase),
+                list => list.ToStringValue() == string.Empty
+            }
+        };
+    
+    [Theory]
+    [MemberData(nameof(RemoveSegmentByPredicateCases))]
+    public void Given_a_initial_list_When_removing_node_with_specified_predicate_Then_the_resulting_list_should_match_expectation(StringSegmentLinkedList initialList, Func<StringSegment, bool> nodeToRemovePredicate, Expression<Func<StringSegmentLinkedList, bool>> resultExpectation)
+    {
+        // Act
+        StringSegmentLinkedList actual = initialList.RemoveBy(nodeToRemovePredicate);
+
+        // Assert
+        actual.Should().Match(resultExpectation);
+    }
+
+    // public static TheoryData<StringSegmentLinkedList, StringSegmentLinkedList> AppendListToAnotherListCases
+    //     => new()
+    //     {
+    //         {
+    //             new StringSegmentLinkedList(),
+    //             new StringSegmentLinkedList()
+    //         },
+    //         {
+    //             new StringSegmentLinkedList("one","two"),
+    //             new StringSegmentLinkedList()
+    //         },
+    //         {
+    //             new StringSegmentLinkedList(),
+    //             new StringSegmentLinkedList("one","two")
+    //         },
+    //         {
+    //             new StringSegmentLinkedList("one","two"),
+    //             new StringSegmentLinkedList("three", ["four", "five", "six", "seven", "eight", "nine"])
+    //         }
+    //     };
+    //
+    // [Theory]
+    // [MemberData(nameof(AppendListToAnotherListCases))]
+    // public void Given_an_initial_list_When_appending_another_list_Then_the_resulting_list_should_match_expectation(StringSegmentLinkedList first, StringSegmentLinkedList second)
+    // {
+    //     // Act
+    //     StringSegmentLinkedList actual = first.Append(second);
+    //
+    //     // Assert
+    //     actual.Should().BeEquivalentTo([..first, ..second]);
+    // }
 }

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Extensions.Primitives;
 
@@ -12,6 +11,9 @@ namespace Candoumbe.Types.Strings;
 /// <summary>
 /// Represents a linked list data structure for managing <see cref="StringSegment"/> nodes.
 /// </summary>
+/// <remarks>
+/// This implementation is specifically designed to not allow appending <see cref="StringSegment.Empty"/> values.
+/// </remarks>
 public class StringSegmentLinkedList : IEnumerable<StringSegment>
 {
     private StringSegmentNode _head;
@@ -40,7 +42,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
         {
             Append(next);
         }
-        
+
         _replacements = new Dictionary<string, string>();
     }
 
@@ -95,7 +97,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
             return;
         }
 
-        StringSegmentNode newNode = new StringSegmentNode(value);
+        StringSegmentNode newNode = new(value);
         InsertAtInternal(index, newNode);
     }
 
@@ -261,7 +263,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
 
             current = current.Next;
         }
-        
+
         return replacementList;
     }
 
@@ -279,6 +281,36 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     public StringSegmentLinkedList Replace(string oldString, string newString)
     {
         _replacements.Add(oldString, newString);
+
+        return this;
+    }
+
+    /// <summary>
+    /// Remove nodes by a predicate
+    /// </summary>
+    /// <param name="predicate">filter</param>
+    /// <returns>A new <see cref="StringSegmentLinkedList"/> where all candidates <paramref name="predicate"/> were removed.</returns>
+    public StringSegmentLinkedList RemoveBy(Func<StringSegment, bool> predicate)
+    {
+        StringSegmentNode current = _head;
+        StringSegmentNode previous = null;
+        while (current is not null)
+        {
+            if (predicate(current.Value))
+            {
+                if (previous is not null)
+                {
+                    previous.Next = current.Next;
+                }
+                else
+                {
+                    Debug.Assert(_head == current);
+                    _head = _tail;
+                }
+            }
+            previous = current;
+            current = current.Next;
+        }
 
         return this;
     }
