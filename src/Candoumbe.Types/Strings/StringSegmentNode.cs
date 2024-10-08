@@ -2,13 +2,16 @@ using Microsoft.Extensions.Primitives;
 
 namespace Candoumbe.Types.Strings;
 
-public record StringSegmentNode
+/// <summary>
+/// Represents a node in a <see cref="StringSegmentLinkedList"/>
+/// </summary>
+internal record StringSegmentNode
 {
     /// <summary>
     /// Value of the current node
     /// </summary>
     public StringSegment Value { get; }
-    
+
     /// <summary>
     /// Pointer to the next node (if any).
     /// </summary>
