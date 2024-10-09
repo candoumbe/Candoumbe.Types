@@ -299,35 +299,48 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         actual.Should().Match(resultExpectation);
     }
 
-    // public static TheoryData<StringSegmentLinkedList, StringSegmentLinkedList> AppendListToAnotherListCases
-    //     => new()
-    //     {
-    //         {
-    //             new StringSegmentLinkedList(),
-    //             new StringSegmentLinkedList()
-    //         },
-    //         {
-    //             new StringSegmentLinkedList("one","two"),
-    //             new StringSegmentLinkedList()
-    //         },
-    //         {
-    //             new StringSegmentLinkedList(),
-    //             new StringSegmentLinkedList("one","two")
-    //         },
-    //         {
-    //             new StringSegmentLinkedList("one","two"),
-    //             new StringSegmentLinkedList("three", ["four", "five", "six", "seven", "eight", "nine"])
-    //         }
-    //     };
-    //
-    // [Theory]
-    // [MemberData(nameof(AppendListToAnotherListCases))]
-    // public void Given_an_initial_list_When_appending_another_list_Then_the_resulting_list_should_match_expectation(StringSegmentLinkedList first, StringSegmentLinkedList second)
-    // {
-    //     // Act
-    //     StringSegmentLinkedList actual = first.Append(second);
-    //
-    //     // Assert
-    //     actual.Should().BeEquivalentTo([..first, ..second]);
-    // }
+    public static TheoryData<StringSegmentLinkedList, StringSegmentLinkedList> AppendListToAnotherListCases
+        => new()
+        {
+            {
+                new StringSegmentLinkedList(),
+                new StringSegmentLinkedList()
+            },
+            {
+                new StringSegmentLinkedList("one","two"),
+                new StringSegmentLinkedList()
+            },
+            {
+                new StringSegmentLinkedList(),
+                new StringSegmentLinkedList("one","two")
+            },
+            {
+                new StringSegmentLinkedList("one","two"),
+                new StringSegmentLinkedList("three", ["four", "five", "six", "seven", "eight", "nine"])
+            }
+        };
+    
+    [Theory]
+    [MemberData(nameof(AppendListToAnotherListCases))]
+    public void Given_an_initial_list_When_appending_another_list_Then_the_resulting_list_should_match_expectation(StringSegmentLinkedList first, StringSegmentLinkedList second)
+    {
+        // Act
+        StringSegmentLinkedList actual = first.Append(second);
+
+        // Assert
+        actual.Should().BeEquivalentTo([..first, ..second]);
+    }
+
+    [Fact]
+    public void Given_initial_list_not_null_When_appending_null_Then_Append_should_throw_ArgumentNullException()
+    {
+        // Arrange
+        StringSegmentLinkedList initialList = new StringSegmentLinkedList();
+
+        // Act
+        Action appendingNullList = () => initialList.Append((StringSegmentLinkedList)null);
+        
+        // Assert
+        appendingNullList.Should().Throw<ArgumentNullException>();
+    }
 }

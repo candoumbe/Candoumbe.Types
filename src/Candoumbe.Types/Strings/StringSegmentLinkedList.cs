@@ -19,13 +19,17 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
 
+    private static readonly StringSegmentNode EmptyNode = new StringSegmentNode(StringSegment.Empty);
+
     private readonly IDictionary<string, string> _replacements;
 
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/> that is empty.
     /// </summary>
-    public StringSegmentLinkedList() : this(StringSegment.Empty)
+    public StringSegmentLinkedList()
     {
+        _head = EmptyNode;
+        Count = 0;
     }
 
     /// <summary>
@@ -67,7 +71,14 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
         if (_tail is null)
         {
             _tail = newNode;
-            _head.Next = _tail;
+            if (_head == EmptyNode)
+            {
+                _head = newNode;
+            }
+            else
+            {
+                _head.Next = _tail;
+            }
         }
         else
         {
@@ -203,6 +214,10 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     /// <inheritdoc />
     public IEnumerator<StringSegment> GetEnumerator()
     {
+        if (_head == EmptyNode)
+        {
+            yield break;
+        }
         yield return _head.Value;
 
         StringSegmentNode current = _head.Next;
@@ -214,7 +229,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    
+
     /// <summary>
     /// Replaces one character <paramref name="oldChar"/> by <paramref name="newChar"/>.
     /// </summary>
@@ -308,10 +323,55 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
                     _head = _tail;
                 }
             }
+
             previous = current;
             current = current.Next;
         }
 
         return this;
+    }
+
+    /// <summary>
+    /// Builds a new <see cref="StringSegmentLinkedList"/> which is 
+    /// </summary>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/></exception>
+    public StringSegmentLinkedList Append(StringSegmentLinkedList other)
+    {
+        if (other is null)
+        {
+            throw new ArgumentNullException(nameof(other));
+        }
+
+
+        StringSegmentLinkedList result = new ();
+        StringSegmentNode current = _head;
+        if (current != EmptyNode)
+        {
+            while (current is not null)
+            {
+                result = result.Append(current.Value);
+                current = current.Next;
+            }
+        }
+
+        current = other._head;
+        if (current != EmptyNode)
+        {
+            if (result.Count == 0)
+            {
+                result = new StringSegmentLinkedList(current.Value);
+                current = current.Next;
+            }
+
+            while (current is not null)
+            {
+                result = result.Append(current.Value);
+                current = current.Next;
+            }
+        }
+
+        return result;
     }
 }
