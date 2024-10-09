@@ -92,7 +92,7 @@ using Nuke.Common.Utilities.Collections;
         "LICENSE"
     }
 )]
-public class Pipelines : NukeBuild,
+public class Pipelines : EnhancedNukeBuild,
     IHaveSolution,
     IHaveSourceDirectory,
     IHaveTestDirectory,
@@ -135,7 +135,7 @@ public class Pipelines : NukeBuild,
                                                                .Concat(this.Get<IHaveTestDirectory>().TestDirectory.GlobDirectories("**/obj", "**/bin"));
 
     ///<inheritdoc/>
-    IEnumerable<AbsolutePath> IClean.DirectoriesToEnsureExistance => new[]
+    IEnumerable<AbsolutePath> IClean.DirectoriesToEnsureExistence => new[]
     {
         this.Get<IHaveArtifacts>().OutputDirectory,
         this.Get<IHaveArtifacts>().ArtifactsDirectory
