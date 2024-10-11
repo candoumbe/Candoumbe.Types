@@ -120,5 +120,3 @@ public abstract record Range<TBound>(TBound Start, TBound End) : IRange<Range<TB
             }
         };
 }
-
-//// <summary>
