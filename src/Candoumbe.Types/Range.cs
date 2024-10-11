@@ -114,6 +114,8 @@ public abstract record Range<TBound>(TBound Start, TBound End)
         // current :   |---------------|
         // other   :        |-------|
         ( <= 0, _, _, >= 0) => true,
+        // current :   |
+        // other   :   |
         _ => other is not null && IsEmpty() && other.IsEmpty() && Start.Equals(other.Start),
     };
 
