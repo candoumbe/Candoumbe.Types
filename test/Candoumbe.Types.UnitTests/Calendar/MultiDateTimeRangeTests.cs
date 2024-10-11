@@ -390,8 +390,9 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         range.Add(DateOnlyRange.Infinite);
 
         // Assert
-        range.IsInfinite().Should().BeTrue();
-        range.Ranges.Should().HaveCount(1);
+        range.IsInfinite().Should()
+            .BeTrue();
+        range.Should().HaveCount(1);
     }
 
     [Fact]
