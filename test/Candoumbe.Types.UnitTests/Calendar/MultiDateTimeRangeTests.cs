@@ -21,11 +21,11 @@ namespace Candoumbe.Types.UnitTests.Calendar;
 [UnitTest]
 public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
 {
-    public static TheoryData<IEnumerable<DateTimeRange>, Expression<Func<IEnumerable<DateTimeRange>, bool>>> ConstructorCases
+    public static TheoryData<IEnumerable<DateTimeRange>, Expression<Func<MultiDateTimeRange, bool>>> ConstructorCases
     {
         get
         {
-            return new TheoryData<IEnumerable<DateTimeRange>, Expression<Func<IEnumerable<DateTimeRange>, bool>>>
+            return new TheoryData<IEnumerable<DateTimeRange>, Expression<Func<MultiDateTimeRange, bool>>>
             {
                 {
                     [],
@@ -128,14 +128,14 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
 
     [Theory]
     [MemberData(nameof(ConstructorCases))]
-    public void Given_non_empty_array_of_DateTimeRange_Constructor_should_merge_them(DateTimeRange[] dateTimeRanges, Expression<Func<IEnumerable<DateTimeRange>, bool>> rangeExpectation)
+    public void Given_non_empty_array_of_DateTimeRange_Constructor_should_merge_them(DateTimeRange[] dateTimeRanges, Expression<Func<MultiDateTimeRange, bool>> rangeExpectation)
     {
         // Act
         MultiDateTimeRange range = new(dateTimeRanges);
 
         // Assert
-        range.Ranges.Should()
-                    .Match(rangeExpectation);
+        range.Should()
+             .Match(rangeExpectation);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -153,10 +153,10 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         // Assert
         _ = (left.IsContiguousWith(right) || left.Overlaps(right)) switch
         {
-            true => range.Ranges.Should()
-                                .HaveCount(1).And
-                                .ContainSingle(range => range == left.Merge(right)),
-            _ => range.Ranges.Should()
+            true => range.Should()
+                         .HaveCount(1).And
+                         .ContainSingle(range => range == left.Merge(right)),
+            _ => range.Should()
                 .HaveCount(2).And
                 .Contain(left).And
                 .Contain(right)
@@ -175,9 +175,9 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         // Assert
         sut.IsEmpty().Should().BeFalse();
         sut.IsInfinite().Should().BeTrue($"The initial {nameof(MultiDateTimeRange)} already contains infinite");
-        sut.Ranges.Should()
-                  .HaveCount(1, "The only range is infinite").And
-                  .Contain(range => range == DateTimeRange.Infinite);
+        sut.Should()
+           .HaveCount(1, "The only range is infinite").And
+           .Contain(range => range == DateTimeRange.Infinite);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -195,12 +195,12 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
 
         // Assert
         outputHelper.WriteLine($"Union : {union}");
-        foreach (DateTimeRange range in left.Ranges.Concat(right.Ranges))
+        foreach (DateTimeRange range in left.Concat(right))
         {
             union.Overlaps(range).Should().BeTrue();
         }
 
-        DateTimeRange[] ranges = union.Ranges.ToArray();
+        DateTimeRange[] ranges =  [ ..union];
 
         ranges.ForEach((range, index) =>
         {
@@ -233,7 +233,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         MultiDateTimeRange actual = left + right;
 
         // Assert
-        actual.Should().Be(expected);
+        actual.Should().BeEquivalentTo(expected);
     }
 
     public static IEnumerable<object[]> CoversCases
@@ -291,7 +291,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         outputHelper.WriteLine($"Union of {original} and {complement} is {actual}");
 
         // Assert
-        actual.Should().Be(MultiDateTimeRange.Infinite);
+        actual.Should().BeEquivalentTo(MultiDateTimeRange.Infinite);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)], Replay = "(13215877118328040669,378035299666480085)")]
@@ -305,7 +305,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         MultiDateTimeRange actual = complement.Complement();
 
         // Assert
-        actual.Should().Be(range);
+        actual.Should().BeEquivalentTo(range);
     }
 
     public static IEnumerable<object[]> UnionCases
@@ -339,7 +339,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         MultiDateTimeRange actual = left + right;
 
         // Assert
-        actual.Should().Be(expected);
+        actual.Should().BeEquivalentTo(expected);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -353,7 +353,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         MultiDateTimeRange result = value + complement;
 
         // Assert
-        result.Should().Be(MultiDateTimeRange.Infinite);
+        result.Should().BeEquivalentTo(MultiDateTimeRange.Infinite);
     }
 
     [Fact]
@@ -422,7 +422,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         {
             StringBuilder sb = new StringBuilder();
             int i = 0;
-            foreach (DateTimeRange item in range.Ranges)
+            foreach (DateTimeRange item in range)
             {
                 if (i > 0)
                 {
@@ -453,7 +453,8 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         MultiDateTimeRange actual = current + other;
 
         // Assert
-        actual.Should().Be(MultiDateTimeRange.Infinite);
-        actual.Ranges.Should().HaveCount(1);
+        actual.Should()
+            .BeEquivalentTo(MultiDateTimeRange.Infinite)
+            .And.HaveCount(1);
     }
 }
