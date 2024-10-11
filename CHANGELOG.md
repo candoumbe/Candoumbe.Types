@@ -17,8 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🧹 Housekeeping
 - Fixed incorrect package and repository urls which caused report of mutation tests to not be sent.
-- Bumped `Candoumbe.Pipelines` dependency to `0.9.0`
+- Bumped `Candoumbe.Pipelines` dependency to `0.11.0`
 - Added benchmarks for `StringSegmentLinkedList` type
+- Added `DotNet.ReproducibleBuilds` NuGet dependency when running on CI server
 
 ## [0.1.0] / 2023-01-29
 - Initial release
