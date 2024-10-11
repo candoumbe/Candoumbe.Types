@@ -22,6 +22,11 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
     , IUnaryNegationOperators<MultiDateTimeRange, MultiDateTimeRange>
 #endif
 {
+    /// <summary>
+    /// Ranges holded by the current instance.
+    /// </summary>
+    public IEnumerable<DateTimeRange> Ranges => _ranges.ToArray();
+
     private readonly ISet<DateTimeRange> _ranges;
 
     /// <summary>
@@ -53,10 +58,10 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
 
     /// <inheritdoc/>
     public IEnumerator<DateTimeRange> GetEnumerator() => _ranges.GetEnumerator();
-
+    
     /// <inheritdoc/>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
+    
     /// <summary>
     /// Adds <paramref name="range"/>.
     /// </summary>
@@ -124,7 +129,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
     /// <param name="other">The other instance to add</param>
     /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/></exception>
     /// <returns>a <see cref="MultiDateTimeRange"/> that represents the union of the current instance with <paramref name="other"/>.</returns>
-    public MultiDateTimeRange Merge(MultiDateTimeRange other) => [.. this, .. other];
+    public MultiDateTimeRange Merge(MultiDateTimeRange other) => new([.. _ranges, .. other._ranges]);
 
     /// <summary>
     /// Performs a "union" operation between <paramref name="left"/> and <paramref name="right"/> elements.
@@ -232,6 +237,14 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
                             {
                                 case 0:
                                     complement.Add(DateTimeRange.UpTo(current.Start));
+                                    break;
+                                case int _ when i <= ranges.Length - 2:
+                                    {
+                                        DateTimeRange previous = ranges[i - 1];
+                                        DateTimeRange next = ranges[i + 1];
+                                        complement.Add(new DateTimeRange(previous.End, current.Start));
+                                        complement.Add(new DateTimeRange(current.End, next.Start));
+                                    }
                                     break;
                                 default:
                                     {

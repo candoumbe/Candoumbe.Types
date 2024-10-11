@@ -464,6 +464,9 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         actual.Should()
             .BeEquivalentTo(MultiDateTimeRange.Infinite)
             .And.HaveCount(1);
+        actual.Should()
+            .BeEquivalentTo(MultiDateTimeRange.Infinite)
+            .And.HaveCount(1);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
