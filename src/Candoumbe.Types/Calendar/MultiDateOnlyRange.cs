@@ -6,6 +6,7 @@
 // Licenced under GNU General Public Licence, version 3.0"
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -16,18 +17,13 @@ namespace Candoumbe.Types.Calendar;
 /// <summary>
 /// A type that optimize the storage of several <see cref="DateOnlyRange"/>s.
 /// </summary>
-public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
+public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<DateOnlyRange>
 #if NET7_0_OR_GREATER
     , IAdditionOperators<MultiDateOnlyRange, MultiDateOnlyRange, MultiDateOnlyRange>
     , IAdditionOperators<MultiDateOnlyRange, DateOnlyRange, MultiDateOnlyRange>
     , IUnaryNegationOperators<MultiDateOnlyRange, MultiDateOnlyRange>
 #endif
 {
-    /// <summary>
-    /// Ranges holded by the current instance.
-    /// </summary>
-    public IEnumerable<DateOnlyRange> Ranges => _ranges.ToArray();
-
     private readonly ISet<DateOnlyRange> _ranges;
 
     /// <summary> 
@@ -52,6 +48,12 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
             Add(range);
         }
     }
+
+    /// <inheritdoc />
+    public IEnumerator<DateOnlyRange> GetEnumerator() => _ranges.GetEnumerator();
+
+    /// <inheritdoc />
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
     /// Adds <paramref name="range"/>.
@@ -108,7 +110,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
     /// <param name="other">The other instance to add</param>
     /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/></exception>
     /// <returns>a <see cref="MultiDateOnlyRange"/> that represents the union of the current instance with <paramref name="other"/>.</returns>
-    public MultiDateOnlyRange Merge(MultiDateOnlyRange other) => new(_ranges.Union(other.Ranges).ToArray());
+    public MultiDateOnlyRange Merge(MultiDateOnlyRange other) => new([.. _ranges.Union(other._ranges)]);
 
 #if !NET7_0_OR_GREATER
     /// <summary>
@@ -123,10 +125,10 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
     public static MultiDateOnlyRange operator +(MultiDateOnlyRange left, MultiDateOnlyRange right) => left.Merge(right);
 
     /// <summary>
-    /// Checks if the current instance contains one or more <see cref="DateOnlyRange"/>s which, combined together, overlap the specified <paramref name="range"/>.
+    /// Checks if the current instance contains one or more <see cref="DateOnlyRange"/>s which, once combined, overlap the specified <paramref name="range"/>.
     /// </summary>
     /// <param name="range">The range to test</param>
-    /// <returns><see langword="true"/> if the current instance contains <see cref="DateOnlyRange"/>s which combined together overlap <paramref name="range"/> and <see langword="false"/> otherwise.</returns>
+    /// <returns><see langword="true"/> if the current instance contains <see cref="DateOnlyRange"/>s which, once combined, overlap <paramref name="range"/> and <see langword="false"/> otherwise.</returns>
     public bool Overlaps(DateOnlyRange range)
     {
         return _ranges.Count != 0
@@ -135,10 +137,10 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
     }
 
     /// <summary>
-    /// Checks if the current instance contains one or more <see cref="TimeOnlyRange"/>s which, combined together, covers the specified <paramref name="other"/>.
+    /// Checks if the current instance contains one or more <see cref="TimeOnlyRange"/>s which, once combined, cover the specified <paramref name="other"/>.
     /// </summary>
     /// <param name="other">The range to test</param>
-    /// <returns><see langword="true"/> if the current instance contains <see cref="TimeOnlyRange"/>s which combined together covers <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
+    /// <returns><see langword="true"/> if the current instance contains <see cref="TimeOnlyRange"/>s which, once combined, cover <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
     public bool Overlaps(MultiDateOnlyRange other) => other is not null
                                                     && _ranges.AsParallel().All(other.Overlaps);
 
@@ -209,7 +211,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
                                 case 0:
                                     complement.Add(DateOnlyRange.UpTo(current.Start));
                                     break;
-                                case int index when index <= ranges.Length - 2:
+                                case int _ when i <= ranges.Length - 2:
                                     {
                                         DateOnlyRange previous = ranges[i - 1];
                                         DateOnlyRange next = ranges[i + 1];
