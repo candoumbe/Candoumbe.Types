@@ -2,6 +2,7 @@
 // Licenced under GNU General Public Licence, version 3.0"
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 #if NET7_0_OR_GREATER
@@ -14,18 +15,13 @@ namespace Candoumbe.Types.Calendar;
 /// <summary>
 /// A type that optimize the storage of several <see cref="DateTimeRange"/>.
 /// </summary>
-public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
+public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<DateTimeRange>
 #if NET7_0_OR_GREATER
     , IAdditionOperators<MultiDateTimeRange, MultiDateTimeRange, MultiDateTimeRange>
     , IAdditionOperators<MultiDateTimeRange, DateTimeRange, MultiDateTimeRange>
     , IUnaryNegationOperators<MultiDateTimeRange, MultiDateTimeRange>
 #endif
 {
-    /// <summary>
-    /// Ranges holded by the current instance.
-    /// </summary>
-    public IEnumerable<DateTimeRange> Ranges => _ranges.ToArray();
-
     private readonly ISet<DateTimeRange> _ranges;
 
     /// <summary>
@@ -55,6 +51,12 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
         }
     }
 
+    /// <inheritdoc/>
+    public IEnumerator<DateTimeRange> GetEnumerator() => _ranges.GetEnumerator();
+    
+    /// <inheritdoc/>
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    
     /// <summary>
     /// Adds <paramref name="range"/>.
     /// </summary>
@@ -121,7 +123,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
     /// <param name="other">The other instance to add</param>
     /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/></exception>
     /// <returns>a <see cref="MultiDateTimeRange"/> that represents the union of the current instance with <paramref name="other"/>.</returns>
-    public MultiDateTimeRange Merge(MultiDateTimeRange other) => new(_ranges.Union(other.Ranges).ToArray());
+    public MultiDateTimeRange Merge(MultiDateTimeRange other) => new([.. _ranges, .. other._ranges]);
 
     /// <summary>
     /// Performs a "union" operation between <paramref name="left"/> and <paramref name="right"/> elements.
@@ -132,13 +134,13 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
     public static MultiDateTimeRange operator +(MultiDateTimeRange left, MultiDateTimeRange right) => left.Merge(right);
 
     /// <summary>
-    /// Tests if the current instance contains one or more <see cref="DateTimeRange"/> which, combined together, overlap the specified <paramref name="range"/>.
+    /// Tests if the current instance contains one or more <see cref="DateTimeRange"/> which, once combined, overlap the specified <paramref name="range"/>.
     /// </summary>
     /// <param name="range">The range to test</param>
-    /// <returns><see langword="true"/> if the current instance contains <see cref="DateTimeRange"/>s which combined together overlap <paramref name="range"/> and <see langword="false"/> otherwise.</returns>
+    /// <returns><see langword="true"/> if the current instance contains <see cref="DateTimeRange"/>s which, once combined, overlap <paramref name="range"/> and <see langword="false"/> otherwise.</returns>
     public bool Overlaps(DateTimeRange range)
     {
-        bool covers = false;
+        bool covers;
 
         if (_ranges.Count == 0)
         {
@@ -158,17 +160,17 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
     }
 
     /// <summary>
-    /// Checks if the current instance contains one or more <see cref="DateTimeRange"/>s which, combined together, covers the specified <paramref name="other"/>.
+    /// Checks if the current instance contains one or more <see cref="DateTimeRange"/>s which, once combined, cover the specified <paramref name="other"/>.
     /// </summary>
     /// <param name="other">The range to test</param>
-    /// <returns><see langword="true"/> if the current instance contains <see cref="DateTimeRange"/>s which combined together covers <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
+    /// <returns><see langword="true"/> if the current instance contains <see cref="DateTimeRange"/>s which, once combined, cover <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
     public bool Overlaps(MultiDateTimeRange other) => other is not null
 #if NETSTANDARD1_0
                                                     && other.Ranges.All(range => Overlaps(range))
                                                     && _ranges.All(range => other.Overlaps(range))
 #else
-                                                    && other.Ranges.AsParallel().All(Overlaps)
-                                                    && _ranges.AsParallel().All(range => other.Overlaps(range))
+                                                    && other._ranges.AsParallel().All(Overlaps)
+                                                    && _ranges.AsParallel().All(other.Overlaps)
 
 #endif
         ;
@@ -240,7 +242,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
                                 case 0:
                                     complement.Add(DateTimeRange.UpTo(current.Start));
                                     break;
-                                case int index when index <= ranges.Length - 2:
+                                case int _ when i <= ranges.Length - 2:
                                     {
                                         DateTimeRange previous = ranges[i - 1];
                                         DateTimeRange next = ranges[i + 1];
@@ -312,7 +314,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
 
         return hashCode.ToHashCode();
 #else
-        return Ranges.GetHashCode();
+        return _ranges.GetHashCode();
 #endif
     }
 }
