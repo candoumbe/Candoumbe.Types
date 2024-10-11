@@ -13,17 +13,19 @@ namespace Candoumbe.Types.PerformanceTests;
 [SimpleJob(RuntimeMoniker.Net90)]
 public class ConcatVsStringSegmentLinkedList
 {
-    [Params(10, 100, 1000)]
+    [Params(10, 100, 1000, 5_000)]
     public int WordCount { get; set; }
 
     private Faker _faker;
     private string[] _words;
+    private int _characterCount;
 
     [GlobalSetup]
     public void SetUp()
     {
         _faker = new Faker();
         _words = _faker.Lorem.Words(WordCount);
+        _characterCount = _words.Sum(w => w.Length);
     }
 
 
@@ -53,7 +55,7 @@ public class ConcatVsStringSegmentLinkedList
 
         foreach (string word in _words.Skip(1))
         {
-            list.Append(word);
+            list.Add(word);
         }
         
         return list.ToStringValue();

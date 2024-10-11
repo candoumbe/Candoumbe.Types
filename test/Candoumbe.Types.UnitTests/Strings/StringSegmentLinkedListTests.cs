@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using Bogus;
 using Candoumbe.Types.Strings;
 using FluentAssertions;
@@ -20,7 +18,7 @@ namespace Candoumbe.Types.UnitTests.Strings;
 public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 {
     private static readonly Faker Faker = new();
-    
+
     [Property]
     public void Given_non_empty_string_segment_Then_constructor_should_initialize_properties(NonEmptyString stringGenerator)
     {
@@ -68,13 +66,14 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     public void Given_list_is_not_empty_when_the_value_to_add_is_empty_Then_the_list_is_not_modified(NonEmptyString stringGenerator)
     {
         // Arrange
-        StringSegmentLinkedList list = new StringSegmentLinkedList(stringGenerator.Item);
+        StringSegmentLinkedList list = [stringGenerator.Item];
+        int expected = list.Count;
 
         // Act
-        list.Append(StringSegment.Empty);
+        StringSegmentLinkedList actual = list.Add(StringSegment.Empty);
 
         // Assert
-        list.Count.Should().Be(1);
+        actual.Count.Should().Be(expected);
     }
 
     public static TheoryData<StringSegmentLinkedList, (int index, StringSegment value), (int length, string value)> InsertAtCases
@@ -139,7 +138,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         // Act
         foreach (StringSegment value in values)
         {
-            initialList.Append(value);
+            initialList.Add(value);
         }
 
         // Assert
@@ -250,7 +249,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         StringSegment segment = stringGenerator.Item;
 
         // Act
-        StringSegmentLinkedList actualList = initialList.Append(segment);
+        StringSegmentLinkedList actualList = initialList.Add(segment);
 
         // Assert
         actualList.Count.Should().Be(2);
@@ -319,7 +318,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
                 new StringSegmentLinkedList("three", ["four", "five", "six", "seven", "eight", "nine"])
             }
         };
-    
+
     [Theory]
     [MemberData(nameof(AppendListToAnotherListCases))]
     public void Given_an_initial_list_When_appending_another_list_Then_the_resulting_list_should_match_expectation(StringSegmentLinkedList first, StringSegmentLinkedList second)
@@ -329,18 +328,5 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 
         // Assert
         actual.Should().BeEquivalentTo([..first, ..second]);
-    }
-
-    [Fact]
-    public void Given_initial_list_not_null_When_appending_null_Then_Append_should_throw_ArgumentNullException()
-    {
-        // Arrange
-        StringSegmentLinkedList initialList = new StringSegmentLinkedList();
-
-        // Act
-        Action appendingNullList = () => initialList.Append((StringSegmentLinkedList)null);
-        
-        // Assert
-        appendingNullList.Should().Throw<ArgumentNullException>();
     }
 }

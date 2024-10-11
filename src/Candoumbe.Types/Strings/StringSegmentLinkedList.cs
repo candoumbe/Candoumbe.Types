@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Extensions.Primitives;
 
@@ -14,7 +15,10 @@ namespace Candoumbe.Types.Strings;
 /// <remarks>
 /// This implementation is specifically designed to not allow appending <see cref="StringSegment.Empty"/> values.
 /// </remarks>
-public class StringSegmentLinkedList : IEnumerable<StringSegment>
+#if NET8_0_OR_GREATER
+[CollectionBuilder(typeof(StringSegmentLinkedListBuilder), nameof(StringSegmentLinkedListBuilder.Create))]
+#endif
+public struct StringSegmentLinkedList : IEnumerable<StringSegment>
 {
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
@@ -26,10 +30,20 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/> that is empty.
     /// </summary>
-    public StringSegmentLinkedList()
+    public StringSegmentLinkedList() : this(EmptyNode, 0)
     {
-        _head = EmptyNode;
-        Count = 0;
+    }
+
+    /// <summary>
+    /// Builds a new instance of <see cref="StringSegmentLinkedList"/> instance which will have the specified <paramref name="head"/>.
+    /// </summary>
+    /// <param name="head">The head of the instance</param>
+    /// <param name="count">The number of nodes of the resulting instance holds </param>
+    internal StringSegmentLinkedList(StringSegmentNode head, int count)
+    {
+        _head = head;
+        Count = count;
+        _replacements = new Dictionary<string, string>();
     }
 
     /// <summary>
@@ -44,7 +58,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
 
         foreach (StringSegment next in others)
         {
-            Append(next);
+            Add(next);
         }
 
         _replacements = new Dictionary<string, string>();
@@ -53,20 +67,20 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     /// <summary>
     /// Appends <paramref name="value"/> to the end of the list
     /// </summary>
-    /// <param name="value"></param>
+    /// <param name="value">The value to append to the end of the current list.</param>
     /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
-    public StringSegmentLinkedList Append(StringSegment value)
+    public StringSegmentLinkedList Add(StringSegment value)
     {
         if (value is { Length: > 0 })
         {
             StringSegmentNode newNode = new StringSegmentNode(value);
-            AppendInternal(newNode);
+            AddInternal(newNode);
         }
 
         return this;
     }
 
-    private void AppendInternal(StringSegmentNode newNode)
+    private void AddInternal(StringSegmentNode newNode)
     {
         if (_tail is null)
         {
@@ -158,7 +172,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
                 InsertAtInternal(index, other._head);
                 break;
             case 0:
-                other.AppendInternal(_head);
+                other.AddInternal(_head);
                 _head = other._head;
                 break;
         }
@@ -269,8 +283,8 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
 
                 foreach (StringSegment segment in tokenizer.Skip(1))
                 {
-                    replacementList.Append(replacement)
-                        .Append(segment);
+                    replacementList.Add(replacement)
+                        .Add(segment);
                 }
 
                 current = replacementList._head;
@@ -339,19 +353,13 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/></exception>
     public StringSegmentLinkedList Append(StringSegmentLinkedList other)
     {
-        if (other is null)
-        {
-            throw new ArgumentNullException(nameof(other));
-        }
-
-
         StringSegmentLinkedList result = new ();
         StringSegmentNode current = _head;
         if (current != EmptyNode)
         {
             while (current is not null)
             {
-                result = result.Append(current.Value);
+                result = result.Add(current.Value);
                 current = current.Next;
             }
         }
@@ -367,7 +375,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
 
             while (current is not null)
             {
-                result = result.Append(current.Value);
+                result = result.Add(current.Value);
                 current = current.Next;
             }
         }
