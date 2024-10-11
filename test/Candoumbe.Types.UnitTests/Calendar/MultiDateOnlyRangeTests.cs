@@ -26,7 +26,7 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
     public static TheoryData<IReadOnlyList<DateOnlyRange>, Expression<Func<MultiDateOnlyRange, bool>>> ConstructorCases
     {
         get =>
-            new TheoryData<IReadOnlyList<DateOnlyRange>, Expression<Func<MultiDateOnlyRange, bool>>>
+            new()
             {
                 {
                     [],
@@ -137,7 +137,7 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
 
         // Assert
         addingNull.Should().Throw<ArgumentNullException>("cannot add null value")
-            .Where(ex => !string.IsNullOrWhiteSpace(ex.ParamName));
+                  .Where(ex => !string.IsNullOrWhiteSpace(ex.ParamName));
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -151,8 +151,8 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
 
         // Assert
         multiDateOnlyRange.Should()
-            .OnlyHaveUniqueItems("the constructor handles duplicates").And
-            .BeInAscendingOrder(x => x.Start, "the constructor reorders values added if necessary");
+                          .OnlyHaveUniqueItems("the constructor handles duplicates").And
+                          .BeInAscendingOrder(x => x.Start, "the constructor reorders values added if necessary");
         foreach (DateOnlyRange range in values)
         {
             multiDateOnlyRange.Overlaps(range).Should()
@@ -169,9 +169,9 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
 
         // Assert
         range.Should()
-            .Match(rangeExpectation).And
-            .OnlyHaveUniqueItems("the constructor handles duplicates").And
-            .BeInAscendingOrder(x => x.Start, "the constructor reorders values added if necessary");
+             .Match(rangeExpectation).And
+             .OnlyHaveUniqueItems("the constructor handles duplicates").And
+             .BeInAscendingOrder(x => x.Start, "the constructor reorders values added if necessary");
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -186,26 +186,26 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
         range.Add(right);
 
         // Assert
-        _ = ( left.IsEmpty(), right.IsEmpty(), left.IsContiguousWith(right) || left.Overlaps(right) ) switch
+        _ = (left.IsEmpty(), right.IsEmpty(), left.IsContiguousWith(right) || left.Overlaps(right)) switch
         {
             (true, false, true) => range.Should()
-                .HaveCount(1).And
-                .Contain(right),
+                                        .HaveCount(1).And
+                                        .Contain(right),
             (false, true, true) => range.Should()
-                .HaveCount(1).And
-                .Contain(left),
+                                        .HaveCount(1).And
+                                        .Contain(left),
             (false, true, false) => range.Should()
-                .HaveCount(2).And
-                .Contain(left).And
-                .Contain(right),
+                                         .HaveCount(2).And
+                                         .Contain(left).And
+                                         .Contain(right),
             (false, false, true) => range.Should()
-                .HaveCount(1, "left and right are either contiguous or overlap each other").And
-                .Contain(left.Merge(right)),
+                                         .HaveCount(1, "left and right are either contiguous or overlap each other").And
+                                         .Contain(left.Merge(right)),
             (true, true, _) => range.Should().BeEmpty(),
             _ => range.Should()
-                .HaveCount(2).And
-                .ContainSingle(range => range == right).And
-                .ContainSingle(range => range == left)
+                      .HaveCount(2).And
+                      .ContainSingle(range => range == right).And
+                      .ContainSingle(range => range == left)
         };
     }
 
@@ -213,7 +213,7 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
     public void Given_an_instance_that_one_range_eq_Infinite_When_adding_any_other_range_Should_result_in_a_noop_call(NonEmptyArray<DateOnlyRange> ranges)
     {
         // Arrange
-        MultiDateOnlyRange sut = new MultiDateOnlyRange(DateOnlyRange.Infinite);
+        MultiDateOnlyRange sut = new(DateOnlyRange.Infinite);
 
         // Act
         ranges.Item.ForEach(sut.Add);
@@ -222,8 +222,8 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
         sut.IsEmpty().Should().BeFalse();
         sut.IsInfinite().Should().BeTrue($"The initial {nameof(MultiDateOnlyRange)} already contains infinite");
         sut.Should()
-            .HaveCount(1, "The only range is infinite").And
-            .Contain(range => range.IsInfinite());
+           .HaveCount(1, "The only range is infinite").And
+           .Contain(range => range.IsInfinite());
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -367,10 +367,10 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
             yield return
             [
                 new MultiDateOnlyRange(new DateOnlyRange(DateOnly.FromDateTime(27.March(1900)), DateOnly.FromDateTime(6.January(2071))),
-                    new DateOnlyRange(DateOnly.FromDateTime(17.March(2079)), DateOnly.FromDateTime(2.February(2084)))),
+                                       new DateOnlyRange(DateOnly.FromDateTime(17.March(2079)), DateOnly.FromDateTime(2.February(2084)))),
                 new MultiDateOnlyRange(DateOnlyRange.UpTo(DateOnly.FromDateTime(27.March(1900))),
-                    new DateOnlyRange(DateOnly.FromDateTime(6.January(2071)), DateOnly.FromDateTime(17.March(2079))),
-                    DateOnlyRange.DownTo(DateOnly.FromDateTime(2.February(2084)))),
+                                       new DateOnlyRange(DateOnly.FromDateTime(6.January(2071)), DateOnly.FromDateTime(17.March(2079))),
+                                       DateOnlyRange.DownTo(DateOnly.FromDateTime(2.February(2084)))),
                 MultiDateOnlyRange.Infinite
             ];
         }
@@ -421,7 +421,7 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
     public void Given_an_instance_that_contains_no_DateOnlyRange_Then_IsEmpty_should_return_true()
     {
         // Arrange
-        MultiDateOnlyRange range = new MultiDateOnlyRange();
+        MultiDateOnlyRange range = [];
 
         // Assert
         range.IsEmpty().Should().BeTrue();
