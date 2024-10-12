@@ -148,8 +148,8 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         MultiTimeOnlyRange range = new(timeOnlyRanges);
 
         // Assert
-        range.Ranges.Should()
-                    .Match(rangeExpectation);
+        range.Should()
+             .Match(rangeExpectation);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -167,22 +167,22 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         // Assert
         _ = (left.IsEmpty(), right.IsEmpty(), left.IsContiguousWith(right) || left.Overlaps(right)) switch
         {
-            (true, false, _) => range.Ranges.Should()
-                                            .HaveCount(1).And
-                                            .Contain(right),
-            (false, true, _) => range.Ranges.Should()
-                                            .HaveCount(1).And
-                                            .Contain(left),
+            (true, false, _) => range.Should()
+                                     .HaveCount(1).And
+                                     .Contain(right),
+            (false, true, _) => range.Should()
+                                     .HaveCount(1).And
+                                     .Contain(left),
 
-            (false, false, true) => range.Ranges.Should()
-                                                .HaveCount(1).And
-                                                .Contain(left.Merge(right)),
-            (true, true, _) => range.Ranges.Should()
+            (false, false, true) => range.Should()
+                                         .HaveCount(1).And
+                                         .Contain(left.Merge(right)),
+            (true, true, _) => range.Should()
                                     .BeEmpty("Both left and right ranges are empty"),
-            _ => range.Ranges.Should()
-                             .HaveCount(2).And
-                             .ContainSingle(range => range == right).And
-                             .ContainSingle(range => range == left)
+            _ => range.Should()
+                       .HaveCount(2).And
+                       .ContainSingle(range => range == right).And
+                       .ContainSingle(range => range == left)
         };
     }
 
@@ -196,9 +196,9 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         ranges.Item.ForEach(range => sut.Add(range));
 
         // Assert
-        sut.Ranges.Should()
-                  .HaveCount(1).And
-                  .Contain(range => range == TimeOnlyRange.AllDay);
+        sut.Should()
+           .HaveCount(1).And
+           .Contain(range => range == TimeOnlyRange.AllDay);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -214,7 +214,9 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         MultiTimeOnlyRange result = complement + range;
 
         // Assert
-        result.Should().Be(MultiTimeOnlyRange.Infinite);
+        result.Should()
+              .BeEquivalentTo(MultiTimeOnlyRange.Infinite)
+              .And.HaveCount(1);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -232,12 +234,12 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
 
         // Assert
         outputHelper.WriteLine($"Merge : {union}");
-        foreach (TimeOnlyRange range in left.Ranges.Concat(right.Ranges))
+        foreach (TimeOnlyRange range in left.Concat(right))
         {
             union.Covers(range).Should().BeTrue();
         }
 
-        TimeOnlyRange[] ranges = union.Ranges.ToArray();
+        TimeOnlyRange[] ranges = [.. union];
 
         ranges.ForEach((range, index) =>
         {
@@ -392,7 +394,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         MultiTimeOnlyRange initialValueMinusEmpty = initialValue - MultiTimeOnlyRange.Empty;
 
         // Assert
-        initialValuePlusEmpty.Should().Be(initialValueMinusEmpty);
+        initialValuePlusEmpty.Should().BeEquivalentTo(initialValueMinusEmpty);
     }
 
     public static TheoryData<MultiTimeOnlyRange, MultiTimeOnlyRange> ComplementCases
@@ -420,7 +422,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         MultiTimeOnlyRange actual = initial.Complement();
 
         // Assert
-        actual.Should().Be(expected);
+        actual.Should().BeEquivalentTo(expected);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -433,7 +435,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         MultiTimeOnlyRange actual = complement.Complement();
 
         // Assert
-        actual.Should().Be(range);
+        actual.Should().BeEquivalentTo(range);
     }
 }
 
