@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `net8.0` support
 - Added [`StringSegmentLinkedList`](./src/Candoumbe.Types/Strings/StringSegmentLinkedList.cs) type
 - Added collection expression support for `MultiTimeOnlyRange`, `MultiDateTimeRange` and `MultiDateOnlyRange` ([#205](https://github.com/candoumbe/candoumbe.types/issues/205))
+- Added [`IRange`](./src/Candoumbe.Types/IRange.cs) interface
+- Added [ICanRepresentEmpty](./src/Candoumbe.Types/ICanRepresentEmpty.cs)
+- Added [ICanRepresentInfinite](./src/Candoumbe.Types/ICanRepresentInfinite.cs)
 
 ### 🚨 Breaking changes
 - Dropped `net7.0` support as it's no longer maintained by Microsoft.

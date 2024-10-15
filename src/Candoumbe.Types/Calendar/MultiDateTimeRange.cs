@@ -53,10 +53,10 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
 
     /// <inheritdoc/>
     public IEnumerator<DateTimeRange> GetEnumerator() => _ranges.GetEnumerator();
-    
+
     /// <inheritdoc/>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    
+
     /// <summary>
     /// Adds <paramref name="range"/>.
     /// </summary>
@@ -165,15 +165,8 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
     /// <param name="other">The range to test</param>
     /// <returns><see langword="true"/> if the current instance contains <see cref="DateTimeRange"/>s which, once combined, cover <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
     public bool Overlaps(MultiDateTimeRange other) => other is not null
-#if NETSTANDARD1_0
-                                                    && other.Ranges.All(range => Overlaps(range))
-                                                    && _ranges.All(range => other.Overlaps(range))
-#else
                                                     && other._ranges.AsParallel().All(Overlaps)
-                                                    && _ranges.AsParallel().All(other.Overlaps)
-
-#endif
-        ;
+                                                    && _ranges.AsParallel().All(other.Overlaps);
 
     ///<inheritdoc/>
     public override string ToString()
@@ -304,7 +297,6 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
     ///<inheritdoc/>
     public override int GetHashCode()
     {
-#if NET5_0_OR_GREATER
         HashCode hashCode = new();
 
         foreach (DateTimeRange range in _ranges)
@@ -313,8 +305,5 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
         }
 
         return hashCode.ToHashCode();
-#else
-        return _ranges.GetHashCode();
-#endif
     }
 }

@@ -144,11 +144,15 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         // Arrange
         DateTimeRange left = leftSource.Item;
         DateTimeRange right = rightSource.Item;
-        MultiDateTimeRange range = new();
-        range.Add(left);
+        MultiDateTimeRange range =
+        [
+            left,
+            // Act
+            right
+            // Assert
+        ];
 
         // Act
-        range.Add(right);
 
         // Assert
         _ = (left.IsContiguousWith(right) || left.Overlaps(right)) switch
@@ -360,31 +364,36 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
     public void Given_non_null_instance_When_adding_a_DateTimeRange_that_is_infinite_Then_IsInfinite_should_return_true()
     {
         // Arrange
-        MultiDateTimeRange range = new();
+        MultiDateTimeRange range =
+        [
+            DateTimeRange.Infinite
+            // Assert
+        ];
 
         // Act
-        range.Add(DateTimeRange.Infinite);
 
         // Assert
         range.IsInfinite().Should().BeTrue();
     }
 
-    [Fact]
-    public void Given_non_null_instance_Then_IsEmpty_should_return_true()
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_an_empty_range_When_Then_Overlaps_should_return_always_returns_false(DateTimeRange range)
     {
         // Arrange
-        MultiDateTimeRange range = new();
+        MultiDateTimeRange planning = [];
+
+        // Act
+        bool overlaps = planning.Overlaps(range);
 
         // Assert
-        range.IsEmpty().Should().BeTrue();
+        overlaps.Should().BeFalse();
     }
-
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_an_instance_that_is_not_null_When_adding_a_DateOnlyRange_that_is_infinite_Then_IsInfinite_should_return_true(NonEmptyArray<DateOnlyRange> ranges)
     {
         // Arrange
-        MultiDateOnlyRange range = new(ranges.Get);
+        MultiDateOnlyRange range = [.. ranges.Item];
 
         // Act
         range.Add(DateOnlyRange.Infinite);
@@ -399,7 +408,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
     public void Given_an_instance_that_contains_no_DateOnlyRange_Then_IsEmpty_should_return_true()
     {
         // Arrange
-        MultiDateOnlyRange range = new();
+        MultiDateOnlyRange range = [];
 
         // Assert
         range.IsEmpty().Should().BeTrue();
@@ -456,5 +465,19 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         actual.Should()
             .BeEquivalentTo(MultiDateTimeRange.Infinite)
             .And.HaveCount(1);
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_an_instance_that_is_not_null_When_calling_Complement_Then_the_result_should_be_equivalent_to_using_the_minus_operator(NonNull<MultiDateTimeRange> multiDateTimeRangeGenerator)
+    {
+        // Arrange
+        MultiDateTimeRange range = multiDateTimeRangeGenerator.Item;
+        MultiDateTimeRange expected = range.Complement();
+        
+        // Act
+        MultiDateTimeRange actual = -range;
+        
+        // Assert
+        actual.Should().BeEquivalentTo(expected);
     }
 }

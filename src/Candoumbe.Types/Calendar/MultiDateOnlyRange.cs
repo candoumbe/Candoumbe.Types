@@ -3,14 +3,18 @@
 
 #if NET6_0_OR_GREATER
 // "Copyright (c) Cyrille NDOUMBE.
-// Licenced under GNU General Public Licence, version 3.0"
+// Licenced under GNU Public Licence, version 3.0"
 
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+#if NET8_0_OR_GREATER
 using System.Numerics;
+#endif
 using System.Text;
+using System.Text.Unicode;
 
 namespace Candoumbe.Types.Calendar;
 
@@ -24,12 +28,12 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
     , IUnaryNegationOperators<MultiDateOnlyRange, MultiDateOnlyRange>
 #endif
 {
-    private readonly ISet<DateOnlyRange> _ranges;
+    private readonly HashSet<DateOnlyRange> _ranges;
 
     /// <summary> 
     /// A <see cref="MultiDateOnlyRange"/> that contains no <see cref="DateOnlyRange"/>.
     /// </summary>
-    public static MultiDateOnlyRange Empty => new();
+    public static MultiDateOnlyRange Empty => [];
 
     /// <summary>
     /// A <see cref="MultiDateOnlyRange"/> that overlaps any other <see cref="MultiDateOnlyRange"/>.
@@ -50,7 +54,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
     }
 
     /// <inheritdoc />
-    public IEnumerator<DateOnlyRange> GetEnumerator() => _ranges.GetEnumerator();
+    public IEnumerator<DateOnlyRange> GetEnumerator() => _ranges.OrderBy(x => x.Start).GetEnumerator();
 
     /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -213,7 +217,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
                                     break;
                                 case int _ when i <= ranges.Length - 2:
                                     {
-                                        DateOnlyRange previous = ranges[i - 1];
+                                        DateOnlyRange previous = ranges[i- 1];
                                         DateOnlyRange next = ranges[i + 1];
                                         complement.Add(new DateOnlyRange(previous.End, current.Start));
                                         complement.Add(new DateOnlyRange(current.End, next.Start));
