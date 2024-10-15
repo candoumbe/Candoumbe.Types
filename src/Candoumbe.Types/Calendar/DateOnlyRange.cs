@@ -9,7 +9,7 @@ using System.Numerics;
 namespace Candoumbe.Types.Calendar;
 
 /// <summary>
-/// A <see cref="DateOnly"/> range
+/// Represents a <see cref="DateOnly"/> range
 /// </summary>
 public record DateOnlyRange : Range<DateOnly>
 #if NET7_0_OR_GREATER
@@ -39,6 +39,9 @@ public record DateOnlyRange : Range<DateOnly>
             throw new ArgumentOutOfRangeException(nameof(start), $"{nameof(start)} cannot be after {nameof(end)}");
         }
     }
+
+    /// <inheritdoc/>
+    public bool Overlaps(DateOnly date) => Start <= date && date <= End;
 
     /// <summary>
     /// Builds a new <see cref="DateOnlyRange"/> that spans from <see cref="DateOnly.MinValue"/> up to <paramref name="date"/>
@@ -130,8 +133,5 @@ public record DateOnlyRange : Range<DateOnly>
 
     ///<inheritdoc/>
     public bool IsInfinite() => (Start, End).Equals((DateOnly.MinValue, DateOnly.MaxValue));
-
-    ///<inheritdoc/>
-    public override bool IsEmpty() => Start == End;
 }
 #endif

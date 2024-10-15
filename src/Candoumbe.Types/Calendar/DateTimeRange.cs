@@ -14,7 +14,10 @@ namespace Candoumbe.Types.Calendar;
 /// spans from <see cref="Range{DateTime}.Start"/> to <see cref="Range{DateTime}.End"/> (inclusive). 
 /// </summary>
 #if !NET5_0_OR_GREATER
-public class DateTimeRange : Range<DateTime>, IEquatable<DateTimeRange>
+public class DateTimeRange : Range<DateTime>
+    , IEquatable<DateTimeRange>
+    , ICanRepresentEmpty<DateTimeRange, DateTime>
+    , IRange<DateTimeRange, DateTime>
 #else
 public record DateTimeRange : Range<DateTime>
 #endif
@@ -56,6 +59,17 @@ public record DateTimeRange : Range<DateTime>
         }
     }
 
+    ///<inheritdoc/>
+    public int CompareTo(DateTimeRange other) => other switch
+    {
+        null => -1,
+        _ => Start.CompareTo(other.Start) switch
+        {
+            int and 0 => End.CompareTo(other.End),
+            int value => value
+        }
+    };
+    
     ///<inheritdoc/>
     public override string ToString() => $"{Start} - {End}";
 
@@ -180,6 +194,9 @@ public record DateTimeRange : Range<DateTime>
         => (IsInfinite() && other.IsEmpty())
            || (IsEmpty() && Infinite.Equals(other))
            || base.Overlaps(other);
+
+    /// <inheritdoc />
+    public bool Overlaps(DateTime other) => Start <= other && other <= End;
 
 #if !NET5_0_OR_GREATER
     ///<inheritdoc/>
