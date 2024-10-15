@@ -100,10 +100,10 @@ public class MultiTimeOnlyRange : IEquatable<MultiTimeOnlyRange>, IEnumerable<Ti
 
     ///<inheritdoc/>
     public IEnumerator<TimeOnlyRange> GetEnumerator() => _ranges.GetEnumerator();
-    
+
     ///<inheritdoc/>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    
+
     /// <summary>
     /// Builds a <see cref="MultiTimeOnlyRange"/> instance that represents the union of the current instance with <paramref name="other"/>.
     /// </summary>

@@ -44,6 +44,14 @@ public abstract record Range<TBound>(TBound Start, TBound End) : IRange<Range<TB
     public TBound End { get; }
 
     ///<inheritdoc/>
+    public override bool Equals(object obj) => Equals(obj as Range<TBound>);
+
+    /// <inheritdoc/>
+    public virtual bool Equals(Range<TBound> other) => other is not null
+                                          && EqualityComparer<TBound>.Default.Equals(Start, other.Start)
+                                          && EqualityComparer<TBound>.Default.Equals(End, other.End);
+
+    ///<inheritdoc/>
 #if !NETSTANDARD2_1
     public override int GetHashCode()
     {
@@ -81,7 +89,7 @@ public abstract record Range<TBound>(TBound Start, TBound End) : IRange<Range<TB
     /// </summary>
     /// <param name="other">The other instance</param>
     /// <returns><see langword="true"/> if the current instance overlaps <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
-    public virtual bool Overlaps(Range<TBound> other) => other is not null && ( Start.CompareTo(other.Start), Start.CompareTo(other.End), End.CompareTo(other.Start), End.CompareTo(other.End) ) switch
+    public virtual bool Overlaps(Range<TBound> other) => other is not null && (Start.CompareTo(other.Start), Start.CompareTo(other.End), End.CompareTo(other.Start), End.CompareTo(other.End)) switch
     {
         (> 0, < 0, _, _) => true,
         // current :   |-------|
@@ -104,9 +112,6 @@ public abstract record Range<TBound>(TBound Start, TBound End) : IRange<Range<TB
 
     ///<inheritdoc/>
     public override string ToString() => $"[{Start} - {End}]";
-
-    /// <inheritdoc/>
-    public virtual bool Equals(Range<TBound> other) => other is not null && Equals(Start, other.Start) && Equals(End, other.End);
 
     /// <inheritdoc/>
     public int CompareTo(Range<TBound> other)
