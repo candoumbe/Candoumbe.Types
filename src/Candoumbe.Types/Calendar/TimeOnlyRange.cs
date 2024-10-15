@@ -153,7 +153,10 @@ public record TimeOnlyRange : Range<TimeOnly>
                 result = this with { Start = GetMinimum(Start, other.Start), End = GetMaximum(other.End, End) };
             }
         }
-        
+        else if (IsContiguousWith(other))
+        {
+            result = Complement(this) == other ? AllDay : (this with { Start = GetMinimum(Start, other.Start), End = GetMaximum(other.End, End) });
+        }
 
         return Normalize(result);
 
@@ -223,19 +226,19 @@ public record TimeOnlyRange : Range<TimeOnly>
                  * right     : |------------|
                  * expected  :    |----|
                  */
-                (true, true) => new TimeOnlyRange(left.Start, left.End),
+                (true, true) => new(left.Start, left.End),
                 /*
                  * left      :    |------------|
                  * right     : |------------|
                  * expected  :    |----|
                  */
-                (true, false) => new TimeOnlyRange(left.Start, right.End),
+                (true, false) => new(left.Start, right.End),
                 /*
                  * left      : |------------|
                  * right     :       |------------|
                  * expected  :       |------|
                  */
-                (false, true) => new TimeOnlyRange(right.Start, left.End),
+                (false, true) => new(right.Start, left.End),
                 /*
                  * left      : |------------|
                  * right     :       |----|
@@ -243,9 +246,9 @@ public record TimeOnlyRange : Range<TimeOnly>
                  */
                 _ => (right.Start.IsBetween(left.Start, left.End), right.End.IsBetween(left.Start, left.End)) switch
                 {
-                    (true, true) => new TimeOnlyRange(right.Start, right.End),
-                    (true, false) => new TimeOnlyRange(right.Start, left.End),
-                    (false, true) => new TimeOnlyRange(left.Start, right.End),
+                    (true, true) => new(right.Start, right.End),
+                    (true, false) => new(right.Start, left.End),
+                    (false, true) => new(left.Start, right.End),
                     _ => Empty
                 }
             };
@@ -263,10 +266,11 @@ public record TimeOnlyRange : Range<TimeOnly>
     {
         (true, _) => AllDay,
         (false, true) => Empty,
-        _ => new TimeOnlyRange(input.End, input.Start)
+        _ => input with { Start = input.End, End = input.Start }
     };
 
-    private TimeOnlyRange ShiftTo(TimeOnly offset) => this with { Start = offset, End = offset.Add(Span) };
+    private TimeOnlyRange ShiftTo(TimeOnly offset)
+        => this with { Start = offset, End = offset.Add(Span) };
 
 #if !NET7_0_OR_GREATER
     /// <summary>

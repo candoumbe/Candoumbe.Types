@@ -395,6 +395,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         overlaps.Should().BeFalse();
     }
 
+
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_an_instance_that_is_not_null_When_adding_a_DateOnlyRange_that_is_infinite_Then_IsInfinite_should_return_true(NonEmptyArray<DateOnlyRange> ranges)
     {

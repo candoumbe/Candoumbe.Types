@@ -76,7 +76,7 @@ public record DateTimeRange : Range<DateTime>, IFormattable
             :$"{Start.ToString(format, provider)} - {End.ToString(format, provider)}";
 
     /// <summary>
-    /// Builds a new <see cref="DateTimeRange"/> that spans from <see cref="DateTime.MinValue"/> up to the specified <paramref name="date"/>
+    /// Builds a new <see cref="DateTimeRange"/> that spans from <see cref="DateTime.MaxValue"/> up to <paramref name="date"/>
     /// </summary>
     /// <param name="date">The desired upper limit</param>
     /// <returns>a <see cref="DateTimeRange"/> that spans up to <paramref name="date"/>.</returns>
@@ -94,7 +94,7 @@ public record DateTimeRange : Range<DateTime>, IFormattable
     /// </summary>
     /// <param name="other">The other <see cref="DateTimeRange"/> to span over</param>
     /// <returns>A new <see cref="DateTimeRange"/> than spans over both current and <paramref name="other"/> range</returns>
-    /// <exception cref="InvalidOperationException">if current instance does not overlap or is not continuous with <paramref name="other"/>.</exception>
+    /// <exception cref="InvalidOperationException">if either : current instance does not overlap or is not continuous with <paramref name="other"/>.</exception>
     public DateTimeRange Merge(DateTimeRange other)
     {
         DateTimeRange result = Empty;
@@ -192,7 +192,7 @@ public record DateTimeRange : Range<DateTime>, IFormattable
 #endif
 
     ///<inheritdoc/>
-    public bool Overlaps(DateTimeRange other)
+    public override bool Overlaps(Range<DateTime> other)
         => (IsInfinite() && other.IsEmpty())
            || (IsEmpty() && other.IsInfinite())
            || base.Overlaps(other);
@@ -218,6 +218,7 @@ public record DateTimeRange : Range<DateTime>, IFormattable
         return hashCode;
     }
 #endif
+
 
     ///<inheritdoc/>
     public virtual bool Equals(DateTimeRange other) => other is not null &&

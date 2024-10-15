@@ -156,7 +156,7 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
         foreach (DateOnlyRange range in values)
         {
             multiDateOnlyRange.Overlaps(range).Should()
-                .BeTrue("the instance must covers every ranges that was used to build it");
+                                              .BeTrue("the instance must covers every ranges that was used to build it");
         }
     }
 
@@ -213,7 +213,7 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
     public void Given_an_instance_that_one_range_eq_Infinite_When_adding_any_other_range_Should_result_in_a_noop_call(NonEmptyArray<DateOnlyRange> ranges)
     {
         // Arrange
-        MultiDateOnlyRange sut = new(DateOnlyRange.Infinite);
+        MultiDateOnlyRange sut = new MultiDateOnlyRange(DateOnlyRange.Infinite);
 
         // Act
         ranges.Item.ForEach(sut.Add);
@@ -307,7 +307,7 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
             yield return
             [
                 new MultiDateOnlyRange(new DateOnlyRange(DateOnly.FromDateTime(6.April(2014)), DateOnly.FromDateTime(9.April(2014))),
-                    new DateOnlyRange(DateOnly.FromDateTime(10.April(2014)), DateOnly.FromDateTime(12.April(2014)))),
+                                       new DateOnlyRange(DateOnly.FromDateTime(10.April(2014)), DateOnly.FromDateTime(12.April(2014)))),
                 new DateOnlyRange(DateOnly.FromDateTime(8.April(2014)), DateOnly.FromDateTime(11.April(2014))),
                 false
             ];
@@ -407,7 +407,7 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
     public void Given_an_instance_that_is_not_null_When_adding_a_DateOnlyRange_that_is_infinite_Then_IsInfinite_should_return_true(NonEmptyArray<DateOnlyRange> ranges)
     {
         // Arrange
-        MultiDateOnlyRange range = new MultiDateOnlyRange(ranges.Get);
+        MultiDateOnlyRange range = new(ranges.Get);
 
         // Act
         range.Add(DateOnlyRange.Infinite);

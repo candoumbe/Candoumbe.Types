@@ -58,10 +58,10 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
 
     /// <inheritdoc/>
     public IEnumerator<DateTimeRange> GetEnumerator() => _ranges.GetEnumerator();
-    
+
     /// <inheritdoc/>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    
+
     /// <summary>
     /// Adds <paramref name="range"/>.
     /// </summary>

@@ -3,9 +3,10 @@
 
 #if NET6_0_OR_GREATER
 // "Copyright (c) Cyrille NDOUMBE.
-// Licenced under GNU General Public Licence, version 3.0"
+// Licenced under GNU Public Licence, version 3.0"
 
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
     , IEqualityOperators<MultiDateOnlyRange, MultiDateOnlyRange, bool>
 #endif
 {
-    private readonly ISet<DateOnlyRange> _ranges;
+    private readonly HashSet<DateOnlyRange> _ranges;
 
     /// <summary> 
     /// A <see cref="MultiDateOnlyRange"/> that contains no <see cref="DateOnlyRange"/>.
@@ -217,7 +218,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
                                     break;
                                 case int _ when i <= ranges.Length - 2:
                                     {
-                                        DateOnlyRange previous = ranges[i - 1];
+                                        DateOnlyRange previous = ranges[i- 1];
                                         DateOnlyRange next = ranges[i + 1];
                                         complement.Add(new DateOnlyRange(previous.End, current.Start));
                                         complement.Add(new DateOnlyRange(current.End, next.Start));
