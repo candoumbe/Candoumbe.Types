@@ -6,18 +6,23 @@ using System.Collections.Generic;
 
 namespace Candoumbe.Types;
 
+#if !NET5_0_OR_GREATER
 /// <summary>
 /// It's quite common to see comparisons where a value is checked against a range of values. Ranges are most of the time handled by a pair of values,
 /// and you check against them both. <see cref="Range{TBound}"/> instead uses a single object to represent the range as a whole, and then provides the relevant operations
-/// to test to see if values fall in the <see cref="Range{TBound}"/> and to compare <see cref="Range{TBound}"/>s.
+/// to check if values fall in the <see cref="Range{TBound}"/> and to compare <see cref="Range{TBound}"/>s.
 /// </summary>
-/// <typeparam name="TBound">Type of the <see cref="Start"/> and <see cref="End"/> bounds.</typeparam>
-#if !NET5_0_OR_GREATER
-public abstract class Range<TBound> : IEquatable<Range<TBound>>, IComparable<Range<TBound>>
+public abstract class Range<TBound> : IRange<Range<TBound>, TBound>, ICanRepresentEmpty<Range<TBound>, TBound>
     where TBound : IComparable<TBound>
 #else
-public abstract record Range<TBound>(TBound Start, TBound End)
-    : IComparable<Range<TBound>> where TBound : IComparable<TBound>
+/// <summary>
+/// Builds a new instance of <see cref="Range{TBound}"/> which spans from <see cref="Start"/> to <see cref="End"/>
+/// </summary>
+/// <param name="Start">The lowest bound</param>    
+/// <param name="End">The highest bound</param>
+/// <typeparam name="TBound">Type of the <see cref="Start"/> and <see cref="End"/> bounds.</typeparam>
+public abstract record Range<TBound>(TBound Start, TBound End): IRange<Range<TBound>, TBound>, ICanRepresentEmpty<Range<TBound>, TBound>
+    where TBound : IComparable<TBound>
 #endif
 {
 #if !NET5_0_OR_GREATER
@@ -32,23 +37,11 @@ public abstract record Range<TBound>(TBound Start, TBound End)
         End = end;
     }
 
-    /// <summary>
-    /// Start of the interval
-    /// </summary>
+    /// <inheritdoc />
     public TBound Start { get; }
 
-    /// <summary>
-    /// End of the interval
-    /// </summary>
+    /// <inheritdoc />
     public TBound End { get; }
-
-    ///<inheritdoc/>
-    public override bool Equals(object obj) => Equals(obj as Range<TBound>);
-
-    /// <inheritdoc/>
-    public virtual bool Equals(Range<TBound> other) => other is not null
-                                          && EqualityComparer<TBound>.Default.Equals(Start, other.Start)
-                                          && EqualityComparer<TBound>.Default.Equals(End, other.End);
 
     ///<inheritdoc/>
 #if !NETSTANDARD2_1
@@ -80,28 +73,11 @@ public abstract record Range<TBound>(TBound Start, TBound End)
     public static bool operator !=(Range<TBound> left, Range<TBound> right) => !(left == right);
 #endif
 
+    /// <inheritdoc />
+    public bool IsEmpty() => Start.Equals(End);
+    
     /// <summary>
-    /// Checks if the current instance reprensents an empty range
-    /// </summary>
-    /// <returns><see langword="true"/> when current instance is empty and <see langword="false"/> otherwise.</returns>
-    public virtual bool IsEmpty() => Start.Equals(End);
-
-    ///<inheritdoc/>
-    public int CompareTo(Range<TBound> other) => Start.CompareTo(other.Start);
-
-    /// <summary>
-    /// Checks if the currrent instance overlaps with <paramref name="other"/>
-    /// </summary>
-    /// <param name="other">The other instance</param>
-    /// <returns><see langword="true"/> if the current instance overlaps <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
-    public virtual bool Overlaps(TBound other) => (Start.CompareTo(other), other.CompareTo(End)) switch
-    {
-        ( <= 0, <= 0) => true,
-        _ => false
-    };
-
-    /// <summary>
-    /// Checks if the currrent instance overlaps with <paramref name="other"/>
+    /// Checks if the current instance overlaps with <paramref name="other"/>
     /// </summary>
     /// <param name="other">The other instance</param>
     /// <returns><see langword="true"/> if the current instance overlaps <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
@@ -128,4 +104,12 @@ public abstract record Range<TBound>(TBound Start, TBound End)
 
     ///<inheritdoc/>
     public override string ToString() => $"[{Start} - {End}]";
+
+    /// <inheritdoc/>
+    public virtual bool Equals(Range<TBound> other) => other is not null && Equals(Start, other.Start) && Equals(End, other.End);
+
+    /// <inheritdoc/>
+    public int CompareTo(Range<TBound> other) => Start.CompareTo(other.Start);
 }
+
+//// <summary>

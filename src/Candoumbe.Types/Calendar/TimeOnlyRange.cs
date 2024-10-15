@@ -7,13 +7,12 @@ using System.Diagnostics;
 #if NET7_0_OR_GREATER
 using System.Numerics;
 #endif
-using System.Text;
 
 namespace Candoumbe.Types.Calendar;
 
 /// <summary>
 /// <para>
-/// A type suitable to represent a "time range"
+/// A type suitable to represent a "time interval"
 /// </para>
 /// </summary>
 /// <remarks>
@@ -31,6 +30,9 @@ namespace Candoumbe.Types.Calendar;
 /// </para>
 /// </remarks>
 public record TimeOnlyRange : Range<TimeOnly>
+    , IRange<TimeOnlyRange, TimeOnly>
+    , ICanRepresentInfinite<TimeOnlyRange, TimeOnly>
+    , ICanRepresentEmpty<TimeOnlyRange, TimeOnly>
 #if NET7_0_OR_GREATER
     , IAdditionOperators<TimeOnlyRange, TimeOnlyRange, TimeOnlyRange>
     , IUnaryNegationOperators<TimeOnlyRange, TimeOnlyRange>
@@ -39,9 +41,12 @@ public record TimeOnlyRange : Range<TimeOnly>
     private TimeSpan Span => Start <= End ? End - Start : Start - End;
 
     /// <summary>
-    /// Represents the largest Time
+    /// Represents the largest time interval that <see cref="TimeOnlyRange"/> can represent
     /// </summary>
-    private static TimeSpan AllDayTimeSpan => TimeOnly.MaxValue - TimeOnly.MinValue;
+    private static TimeSpan AllDayTimeSpan => Infinite.Span;
+
+    /// <inheritdoc />
+    public static TimeOnlyRange Infinite => new(TimeOnly.MinValue, TimeOnly.MaxValue);
 
     /// <summary>
     /// Builds a new <see cref="TimeOnlyRange"/> instance.
@@ -59,7 +64,7 @@ public record TimeOnlyRange : Range<TimeOnly>
     /// <returns><see langword="true"/> when current instance and <paramref name="other"/> overlaps each other and <see langword="false"/> otherwise.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="other"/> is <see langword="null"/>.</exception>
     public bool Overlaps(TimeOnlyRange other)
-        => IsAllDay() || other.IsAllDay() || (!(IsEmpty() || other.IsEmpty()) && (Start < End) switch
+        => IsInfinite() || other.IsInfinite() || (!(IsEmpty() || other.IsEmpty()) && (Start < End) switch
         {
             true => (Start.IsBetween(other.Start, other.End) && Start != other.Start && Start != other.End)
                                || (End.IsBetween(other.Start, other.End) && End != other.Start && End != other.End)
@@ -75,8 +80,8 @@ public record TimeOnlyRange : Range<TimeOnly>
                                || (other.Start <= End && Start <= other.End)
         });
 
-    ///<inheritdoc/>
-    public override bool Overlaps(TimeOnly other) => other.IsBetween(Start, End);
+    /// <inheritdoc />
+    public bool Overlaps(TimeOnly other) => other.IsBetween(Start, End);
 
     ///<inheritdoc/>
     public sealed override string ToString() => $"{Start} - {End}";
@@ -84,14 +89,14 @@ public record TimeOnlyRange : Range<TimeOnly>
     /// <summary>
     /// Builds a <see cref="TimeOnlyRange"/> that spans from <see cref="TimeOnly.MinValue"/> up to <paramref name="reference"/>
     /// </summary>
-    /// <param name="reference">The desired updper bound of the bound</param>
+    /// <param name="reference">The desired upper bound of the interval</param>
     /// <returns>A new <see cref="TimeOnlyRange"/> that spans from <see cref="TimeOnly.MinValue"/> to <paramref name="reference"/></returns>
     public static TimeOnlyRange UpTo(TimeOnly reference) => new(TimeOnly.MinValue, reference);
 
     /// <summary>
     /// Builds a <see cref="TimeOnlyRange"/> that expands from <paramref name="reference"/> to <see cref="TimeOnly.MaxValue"/>.
     /// </summary>
-    /// <param name="reference">The desired updper bound of the bound</param>
+    /// <param name="reference">The desired lower bound of the interval</param>
     /// <returns>A new <see cref="TimeOnlyRange"/> that spans from <paramref name="reference"/> to <see cref="TimeOnly.MaxValue"/>.</returns>
     public static TimeOnlyRange DownTo(TimeOnly reference) => new(reference, TimeOnly.MaxValue);
 
@@ -104,7 +109,7 @@ public record TimeOnlyRange : Range<TimeOnly>
     public TimeOnlyRange Merge(TimeOnlyRange other)
     {
         TimeOnlyRange result = Empty;
-        if (other.IsAllDay())
+        if (other.IsInfinite())
         {
             result = AllDay;
         }
@@ -191,16 +196,14 @@ public record TimeOnlyRange : Range<TimeOnly>
     /// </summary>
     public static TimeOnlyRange AllDay => new(TimeOnly.MinValue, TimeOnly.MaxValue);
 
-    /// <summary>
-    /// An empty <see cref="TimeOnlyRange"/>.
-    /// </summary>
+    /// <inheritdoc />
     public static TimeOnlyRange Empty => new(TimeOnly.MinValue, TimeOnly.MinValue);
 
     /// <summary>
     /// Computes  <see cref="TimeOnlyRange"/> value that is common between the current instance and <paramref name="other"/>.
     /// </summary>
     /// <remarks>
-    /// This methods relies on <see cref="Overlaps(TimeOnlyRange)"/> to see if there can be a intersection with <paramref name="other"/>.
+    /// This method relies on <see cref="Overlaps(TimeOnlyRange)"/> to see if there can be an intersection with <paramref name="other"/>.
     /// </remarks>
     /// <param name="other">The other instance to test</param>
     /// <returns>a <see cref="TimeOnlyRange"/> that represent the overlap between the current instance and <paramref name="other"/> or <see cref="Empty"/> when no intersection found.</returns>
@@ -219,19 +222,19 @@ public record TimeOnlyRange : Range<TimeOnly>
                  * right     : |------------|
                  * expected  :    |----|
                  */
-                (true, true) => new(left.Start, left.End),
+                (true, true) => new TimeOnlyRange(left.Start, left.End),
                 /*
                  * left      :    |------------|
                  * right     : |------------|
                  * expected  :    |----|
                  */
-                (true, false) => new(left.Start, right.End),
+                (true, false) => new TimeOnlyRange(left.Start, right.End),
                 /*
                  * left      : |------------|
                  * right     :       |------------|
                  * expected  :       |------|
                  */
-                (false, true) => new(right.Start, left.End),
+                (false, true) => new TimeOnlyRange(right.Start, left.End),
                 /*
                  * left      : |------------|
                  * right     :       |----|
@@ -239,9 +242,9 @@ public record TimeOnlyRange : Range<TimeOnly>
                  */
                 _ => (right.Start.IsBetween(left.Start, left.End), right.End.IsBetween(left.Start, left.End)) switch
                 {
-                    (true, true) => new(right.Start, right.End),
-                    (true, false) => new(right.Start, left.End),
-                    (false, true) => new(left.Start, right.End),
+                    (true, true) => new TimeOnlyRange(right.Start, right.End),
+                    (true, false) => new TimeOnlyRange(right.Start, left.End),
+                    (false, true) => new TimeOnlyRange(left.Start, right.End),
                     _ => Empty
                 }
             };
@@ -262,8 +265,7 @@ public record TimeOnlyRange : Range<TimeOnly>
         _ => input with { Start = input.End, End = input.Start }
     };
 
-    private TimeOnlyRange ShiftTo(TimeOnly offset)
-        => this with { Start = offset, End = offset.Add(Span) };
+    private TimeOnlyRange ShiftTo(TimeOnly offset) => this with { Start = offset, End = offset.Add(Span) };
 
 #if !NET7_0_OR_GREATER
     /// <summary>
@@ -276,15 +278,19 @@ public record TimeOnlyRange : Range<TimeOnly>
 #endif
     public static TimeOnlyRange operator -(TimeOnlyRange source) => Complement(source);
 
-    /// <summary>
-    /// Checks if the current instance covers all other <see cref="TimeOnlyRange"/>s
-    /// </summary>
-    /// <returns><see langword="true"/> when the current instance covers all day and <see langword="false"/> otherwise.</returns>
-    public bool IsAllDay() => (Start < End, Start > End) switch
+    /// <inheritdoc />
+    public bool IsInfinite() => (Start < End, Start > End) switch
     {
         (true, _) => Span == AllDayTimeSpan,
         (_, true) => Complement(new TimeOnlyRange(Start, End)).Span <= TimeOnly.MinValue.ToTimeSpan(),
         _ => Span == AllDayTimeSpan,
+    };
+
+    /// <inheritdoc />
+    public int CompareTo(TimeOnlyRange other) => Start.CompareTo(other.Start) switch
+    {
+        0 => End.CompareTo(other.End),
+        int value => value
     };
 }
 #endif

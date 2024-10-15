@@ -75,7 +75,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public FsCheck.Property Given_two_DateOnlyRange_instances_Overlaps_should_be_symetric(DateOnlyRange left, DateOnlyRange right)
+    public Property Given_two_DateOnlyRange_instances_Overlaps_should_be_symmetric(DateOnlyRange left, DateOnlyRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
         outputHelper.WriteLine($"{nameof(right)}: {right}");
@@ -99,7 +99,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public FsCheck.Property Given_two_DateOnlyRange_instances_IsContiguous_should_be_symetric(DateOnlyRange left, DateOnlyRange right)
+    public Property Given_two_DateOnlyRange_instances_IsContiguous_should_be_symmetric(DateOnlyRange left, DateOnlyRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
         outputHelper.WriteLine($"{nameof(right)}: {right}");
@@ -220,7 +220,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public FsCheck.Property Overlaps_should_be_symetric(DateOnlyRange left, DateOnlyRange right)
+    public Property Overlaps_should_be_symmetric(DateOnlyRange left, DateOnlyRange right)
         => (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -443,7 +443,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public FsCheck.Property Intersect_should_be_symetric(DateOnlyRange left, DateOnlyRange right)
+    public Property Intersect_should_be_symmetric(DateOnlyRange left, DateOnlyRange right)
         => (left.Intersect(right) == right.Intersect(left)).ToProperty();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
