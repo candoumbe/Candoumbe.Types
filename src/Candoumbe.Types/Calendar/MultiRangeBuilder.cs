@@ -1,11 +1,10 @@
-#if NET6_0_OR_GREATER
 using System;
-using System.Linq;
 
 namespace Candoumbe.Types.Calendar;
 
 internal static class MultiRangeBuilder
 {
+#if NET6_0_OR_GREATER
     internal static MultiDateOnlyRange CreateForDateOnly(ReadOnlySpan<DateOnlyRange> ranges)
     {
         switch (ranges)
@@ -13,6 +12,8 @@ internal static class MultiRangeBuilder
             case []:
             case [DateOnlyRange element] when element.IsEmpty():
                 return MultiDateOnlyRange.Empty;
+            case [DateOnlyRange element] when element.IsInfinite():
+                return MultiDateOnlyRange.Infinite;
             default:
             {
                 int i = 0;
@@ -47,6 +48,8 @@ internal static class MultiRangeBuilder
             case []:
             case [TimeOnlyRange element] when element.IsEmpty():
                 return MultiTimeOnlyRange.Empty;
+            case [TimeOnlyRange element] when element.IsInfinite():
+                return MultiTimeOnlyRange.Infinite;
             default:
             {
                 int i = 0;
@@ -73,7 +76,8 @@ internal static class MultiRangeBuilder
             }
         }
     }
-    
+#endif
+
     internal static MultiDateTimeRange CreateForTimeOnly(ReadOnlySpan<DateTimeRange> ranges)
     {
         switch (ranges)
@@ -81,6 +85,8 @@ internal static class MultiRangeBuilder
             case []:
             case [DateTimeRange element] when element.IsEmpty():
                 return MultiDateTimeRange.Empty;
+            case [DateTimeRange element] when element.IsInfinite():
+                return MultiDateTimeRange.Infinite;
             default:
             {
                 int i = 0;
@@ -108,6 +114,3 @@ internal static class MultiRangeBuilder
         }
     }
 }
-
-
-#endif
