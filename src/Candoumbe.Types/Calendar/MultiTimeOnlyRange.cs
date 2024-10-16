@@ -18,7 +18,7 @@ namespace Candoumbe.Types.Calendar;
 /// <summary>
 /// A type that optimize the storage of several <see cref="TimeOnlyRange"/>.
 /// </summary>
-public class MultiTimeOnlyRange : IEquatable<MultiTimeOnlyRange>
+public class MultiTimeOnlyRange : IEquatable<MultiTimeOnlyRange>, IEnumerable<TimeOnlyRange>
 #if NET7_0_OR_GREATER
     , IAdditionOperators<MultiTimeOnlyRange, MultiTimeOnlyRange, MultiTimeOnlyRange>
     , IAdditionOperators<MultiTimeOnlyRange, TimeOnlyRange, MultiTimeOnlyRange>
@@ -26,29 +26,24 @@ public class MultiTimeOnlyRange : IEquatable<MultiTimeOnlyRange>
 #endif
 
 {
-    /// <summary>
-    /// Ranges holded by the current instance.
-    /// </summary>
-    public IEnumerable<TimeOnlyRange> Ranges => _ranges.ToArray();
-
-    private readonly ISet<TimeOnlyRange> _ranges;
+    private readonly HashSet<TimeOnlyRange> _ranges;
 
     /// <summary>
     /// A <see cref="MultiTimeOnlyRange"/> that contains no <see cref="TimeOnlyRange"/>.
     /// </summary>
-    public static MultiTimeOnlyRange Empty => new();
+    public static MultiTimeOnlyRange Empty => [];
 
     /// <summary>
     /// A <see cref="MultiTimeOnlyRange"/> that covers any other <see cref="MultiTimeOnlyRange"/>s.
     /// </summary>
-    public static MultiTimeOnlyRange Infinite => new(TimeOnlyRange.AllDay);
+    public static MultiTimeOnlyRange Infinite => [TimeOnlyRange.AllDay];
 
     /// <summary>
     /// Builds a new <see cref="MultiTimeOnlyRange"/> instance
     /// </summary>
     public MultiTimeOnlyRange(params TimeOnlyRange[] ranges)
     {
-        _ranges = new HashSet<TimeOnlyRange>();
+        _ranges = [];
         IReadOnlySet<TimeOnlyRange> localRanges = ranges.OrderBy(x => x.Start)
                                                         .ToHashSet();
         localRanges.ForEach(Add);
@@ -58,7 +53,7 @@ public class MultiTimeOnlyRange : IEquatable<MultiTimeOnlyRange>
     /// Adds <paramref name="range"/>.
     /// </summary>
     /// <remarks>
-    /// The algorithm will first tries to find if any other <see cref="TimeOnlyRange"/> overlaps or abuts with <paramref name="range"/> and if so,
+    /// The algorithm will first try to find if any other <see cref="TimeOnlyRange"/> overlaps or abuts with <paramref name="range"/> and if so,
     /// will swap that element with the result of <c>range.Union(element)</c>
     /// </remarks>
     /// <param name="range"></param>
@@ -67,28 +62,30 @@ public class MultiTimeOnlyRange : IEquatable<MultiTimeOnlyRange>
     {
         ArgumentNullException.ThrowIfNull(range);
 
-        if (!IsInfinite() && !range.IsEmpty())
+        if (IsInfinite() || range.IsEmpty())
         {
-            if (range.IsAllDay())
+            return;
+        }
+
+        if (range.IsInfinite())
+        {
+            _ranges.Clear();
+            _ranges.Add(range);
+        }
+        else
+        {
+            TimeOnlyRange[] previous = _ranges.Where(item => item.IsContiguousWith(range) || item.Overlaps(range))
+                .OrderBy(x => x.Start)
+                .ToArray();
+            if (previous.Length != 0)
             {
-                _ranges.Clear();
-                _ranges.Add(range);
+                previous.ForEach(item => _ranges.Remove(item));
+                TimeOnlyRange union = previous.Aggregate(range, (left, right) => left.Merge(right));
+                _ranges.Add(union);
             }
             else
             {
-                TimeOnlyRange[] previous = _ranges.Where(item => item.IsContiguousWith(range) || item.Overlaps(range))
-                                                  .OrderBy(x => x.Start)
-                                                  .ToArray();
-                if (previous.Length != 0)
-                {
-                    previous.ForEach(item => _ranges.Remove(item));
-                    TimeOnlyRange union = previous.Aggregate(range, (left, right) => left.Merge(right));
-                    _ranges.Add(union);
-                }
-                else
-                {
-                    _ranges.Add(range);
-                }
+                _ranges.Add(range);
             }
         }
     }
@@ -100,6 +97,12 @@ public class MultiTimeOnlyRange : IEquatable<MultiTimeOnlyRange>
 
         return left;
     }
+
+    ///<inheritdoc/>
+    public IEnumerator<TimeOnlyRange> GetEnumerator() => _ranges.GetEnumerator();
+
+    ///<inheritdoc/>
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
     /// Builds a <see cref="MultiTimeOnlyRange"/> instance that represents the union of the current instance with <paramref name="other"/>.
@@ -132,8 +135,7 @@ public class MultiTimeOnlyRange : IEquatable<MultiTimeOnlyRange>
                     else
                     {
                         union = new();
-                        IEnumerable<TimeOnlyRange> ranges = _ranges.Concat(other.Ranges)
-                                                                   .OrderBy(range => range.Start);
+                        IReadOnlyList<TimeOnlyRange> ranges = [.. _ranges, .. other._ranges];
                         ranges.ForEach(union.Add);
                     }
                 }
@@ -251,10 +253,10 @@ public class MultiTimeOnlyRange : IEquatable<MultiTimeOnlyRange>
     public bool IsInfinite() => Covers(TimeOnlyRange.AllDay);
 
     /// <summary>
-    /// Checks if the current instance contains one or more <see cref="TimeOnlyRange"/>s which, combined together, covers the specified <paramref name="range"/>.
+    /// Checks if the current instance contains one or more <see cref="TimeOnlyRange"/>s which, once combined, covers the specified <paramref name="range"/>.
     /// </summary>
     /// <param name="range">The range to test</param>
-    /// <returns><see langword="true"/> if the current instance contains <see cref="TimeOnlyRange"/>s which combined together covers <paramref name="range"/> and <see langword="false"/> otherwise.</returns>
+    /// <returns><see langword="true"/> if the current instance contains <see cref="TimeOnlyRange"/>s which, once combined, covers <paramref name="range"/> and <see langword="false"/> otherwise.</returns>
     public bool Covers(TimeOnlyRange range) => _ranges.Count != 0
                                                && _ranges.AsParallel().Any(item => item == range
                                                                                    || (item.Overlaps(range) && item.Start <= range.Start && range.End <= item.End));
@@ -265,15 +267,15 @@ public class MultiTimeOnlyRange : IEquatable<MultiTimeOnlyRange>
     /// <param name="other">The range to test</param>
     /// <returns><see langword="true"/> if the current instance contains <see cref="TimeOnlyRange"/>s which combined together covers <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
     public bool Covers(MultiTimeOnlyRange other) => other is not null
-                                                    && other.Ranges.AsParallel().All(range => Covers(range))
-                                                    && _ranges.AsParallel().All(range => other.Covers(range));
+                                                    && other.AsParallel().All(Covers)
+                                                    && _ranges.AsParallel().All(other.Covers);
 
     ///<inheritdoc/>
     public override string ToString()
     {
         StringBuilder sb = new();
 
-        foreach (TimeOnlyRange item in _ranges)
+        foreach (TimeOnlyRange item in this)
         {
             if (sb.Length > 0)
             {
@@ -294,7 +296,7 @@ public class MultiTimeOnlyRange : IEquatable<MultiTimeOnlyRange>
         bool equals = false;
         if (other is not null)
         {
-            equals = !ReferenceEquals(this, other) ? Covers(other) && other.Covers(this) : true;
+            equals = ReferenceEquals(this, other) || (Covers(other) && other.Covers(this));
         }
         return equals;
     }

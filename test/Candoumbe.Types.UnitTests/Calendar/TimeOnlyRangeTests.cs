@@ -556,6 +556,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
             _ => new TimeOnlyRange(start, end)
         };
 
+        outputHelper.WriteLine("Checking if {0} contains {1}" , timeRange, value);
         // Act
         bool result = timeRange.Overlaps(value);
 
@@ -620,7 +621,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
         outputHelper.WriteLine($"Span is {input.End - input.Start}");
 
         // Act
-        bool actual = range.IsAllDay();
+        bool actual = range.IsInfinite();
 
         // Assert
         actual.Should().Be(expected, reason);
