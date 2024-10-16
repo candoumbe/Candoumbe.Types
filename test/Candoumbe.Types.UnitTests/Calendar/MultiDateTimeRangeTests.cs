@@ -144,15 +144,10 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         // Arrange
         DateTimeRange left = leftSource.Item;
         DateTimeRange right = rightSource.Item;
-        MultiDateTimeRange range =
-        [
-            left,
-            // Act
-            right
-            // Assert
-        ];
+        MultiDateTimeRange range = [left];
 
         // Act
+        range.Add(right);
 
         // Assert
         _ = (left.IsContiguousWith(right) || left.Overlaps(right)) switch
@@ -171,7 +166,7 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
     public void Given_an_instance_that_one_range_eq_Infinite_When_adding_any_other_range_Should_result_in_a_noop_call(NonEmptyArray<DateTimeRange> ranges)
     {
         // Arrange
-        MultiDateTimeRange sut = new(DateTimeRange.Infinite);
+        MultiDateTimeRange sut = MultiDateTimeRange.Infinite;
 
         // Act
         ranges.Item.ForEach(range => sut.Add(range));
@@ -364,13 +359,10 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
     public void Given_non_null_instance_When_adding_a_DateTimeRange_that_is_infinite_Then_IsInfinite_should_return_true()
     {
         // Arrange
-        MultiDateTimeRange range =
-        [
-            DateTimeRange.Infinite
-            // Assert
-        ];
+        MultiDateTimeRange range = [];
 
         // Act
+        range.Add(DateTimeRange.Infinite);
 
         // Assert
         range.IsInfinite().Should().BeTrue();
@@ -414,39 +406,32 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         range.IsEmpty().Should().BeTrue();
     }
 
-    [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public void Given_an_instance_that_is_not_null_Then_ToString_should_produce_expected_output(MultiDateTimeRange range)
-    {
-        // Arrange
-        string expected;
-        if (range.IsInfinite())
+    public static TheoryData<MultiDateTimeRange, string, string> ToStringCases
+        => new()
         {
-            expected = "{infinite}";
-        }
-        else if (range.IsEmpty())
-        {
-            expected = "{empty}";
-        }
-        else
-        {
-            StringBuilder sb = new StringBuilder();
-            int i = 0;
-            foreach (DateTimeRange item in range)
             {
-                if (i > 0)
-                {
-                    sb.Append(',');
-                }
-
-                sb.Append(item);
-                i++;
+                MultiDateTimeRange.Infinite,
+                "{infinite}",
+                "The planning is an infinite range."
+            },
+            {
+                MultiDateTimeRange.Empty,
+                "{empty}",
+                "The planning is empty"
+            },
+            {
+                [DateTimeRange.UpTo(18.February(2018)), DateTimeRange.DownTo(18.February(2018))],
+                "{infinite}",
+                "The combined interval represent an infinite range"
             }
+        };
 
-            expected = sb.Insert(0, '{').Append('}').ToString();
-        }
-
+    [Theory]
+    [MemberData(nameof(ToStringCases))]
+    public void Given_an_instance_that_is_not_null_Then_ToString_should_produce_expected_output(MultiDateTimeRange planning, string expected, string reason)
+    {
         // Act
-        string actual = range.ToString();
+        string actual = planning.ToString();
 
         // Assert
         actual.Should().Be(expected);
@@ -479,5 +464,41 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         
         // Assert
         actual.Should().BeEquivalentTo(expected);
+    }
+    
+    [Fact]
+    public void Overlaps_returns_false_when_no_overlapping_date_time_ranges()
+    {
+        // Arrange
+        MultiDateTimeRange first =
+        [
+            new DateTimeRange(1.January(2022), 5.January(2022)),
+            new DateTimeRange(10.January(2022), 15.January(2022))
+        ];
+        MultiDateTimeRange other =
+        [
+            new DateTimeRange(15.January(2022), 20.January(2022)),
+            new DateTimeRange(25.January(2022), 30.January(2022))
+        ];
+
+        // Act
+        bool result = first.Overlaps(other);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Overlaps_returns_false_when_other_is_null(DateTime startTime)
+    {
+        // Arrange
+        DateTime endTime = startTime + 1.Hours();
+        MultiDateTimeRange multiRange = [new DateTimeRange(startTime, endTime)];
+
+        // Act
+        bool result = multiRange.Overlaps((MultiDateTimeRange)null);
+
+        // Assert
+        result.Should().BeFalse();
     }
 }
