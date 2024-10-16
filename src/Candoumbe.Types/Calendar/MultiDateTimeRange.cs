@@ -129,7 +129,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
     /// <param name="other">The other instance to add</param>
     /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/></exception>
     /// <returns>a <see cref="MultiDateTimeRange"/> that represents the union of the current instance with <paramref name="other"/>.</returns>
-    public MultiDateTimeRange Merge(MultiDateTimeRange other) => new([.. _ranges, .. other._ranges]);
+    public MultiDateTimeRange Merge(MultiDateTimeRange other) => [.. this, .. other];
 
     /// <summary>
     /// Performs a "union" operation between <paramref name="left"/> and <paramref name="right"/> elements.

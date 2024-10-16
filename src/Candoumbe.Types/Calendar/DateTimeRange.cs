@@ -76,7 +76,7 @@ public record DateTimeRange : Range<DateTime>, IFormattable
             :$"{Start.ToString(format, provider)} - {End.ToString(format, provider)}";
 
     /// <summary>
-    /// Builds a new <see cref="DateTimeRange"/> that spans from <see cref="DateTime.MaxValue"/> up to <paramref name="date"/>
+    /// Builds a new <see cref="DateTimeRange"/> that spans from <see cref="DateTime.MinValue"/> up to the specified <paramref name="date"/>
     /// </summary>
     /// <param name="date">The desired upper limit</param>
     /// <returns>a <see cref="DateTimeRange"/> that spans up to <paramref name="date"/>.</returns>
@@ -192,7 +192,7 @@ public record DateTimeRange : Range<DateTime>, IFormattable
 #endif
 
     ///<inheritdoc/>
-    public override bool Overlaps(Range<DateTime> other)
+    public bool Overlaps(DateTimeRange other)
         => (IsInfinite() && other.IsEmpty())
            || (IsEmpty() && other.IsInfinite())
            || base.Overlaps(other);
@@ -218,7 +218,6 @@ public record DateTimeRange : Range<DateTime>, IFormattable
         return hashCode;
     }
 #endif
-
 
     ///<inheritdoc/>
     public virtual bool Equals(DateTimeRange other) => other is not null &&
