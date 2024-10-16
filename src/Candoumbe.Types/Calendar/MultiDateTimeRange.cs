@@ -27,12 +27,12 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
     /// <summary>
     /// A <see cref="MultiDateTimeRange"/> that contains no <see cref="DateTimeRange"/>.
     /// </summary>
-    public static MultiDateTimeRange Empty => new();
+    public static MultiDateTimeRange Empty => [];
 
     /// <summary>
     /// A <see cref="MultiDateTimeRange"/> that overlaps any other <see cref="MultiDateTimeRange"/>.
     /// </summary>
-    public static MultiDateTimeRange Infinite => new(DateTimeRange.Infinite);
+    public static MultiDateTimeRange Infinite => [DateTimeRange.Infinite];
 
     /// <summary>
     /// Builds a new <see cref="MultiDateTimeRange"/> instance
@@ -84,10 +84,11 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
         }
         else
         {
-            DateTimeRange[] previous = _ranges.Where(item => item.IsContiguousWith(range) || item.Overlaps(range))
-                                              .OrderBy(x => x.Start)
-                                              .ToArray();
-            if (previous.Length != 0)
+            IReadOnlyList<DateTimeRange> previous = [ .. _ranges.Where(item => item.IsContiguousWith(range) || item.Overlaps(range))
+                                                                .OrderBy(x => x.Start)
+            ];
+
+            if (previous.Count != 0)
             {
                 previous.ForEach(item => _ranges.Remove(item));
                 DateTimeRange union = previous.Aggregate(range, (a, b) => a.Merge(b));
@@ -123,7 +124,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
     /// <param name="other">The other instance to add</param>
     /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/></exception>
     /// <returns>a <see cref="MultiDateTimeRange"/> that represents the union of the current instance with <paramref name="other"/>.</returns>
-    public MultiDateTimeRange Merge(MultiDateTimeRange other) => new([.. _ranges, .. other._ranges]);
+    public MultiDateTimeRange Merge(MultiDateTimeRange other) => [.. this, .. other];
 
     /// <summary>
     /// Performs a "union" operation between <paramref name="left"/> and <paramref name="right"/> elements.
@@ -148,10 +149,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
         }
         else
         {
-            covers = _ranges
-#if !NETSTANDARD1_0
-        .AsParallel()
-#endif
+            covers = _ranges.AsParallel()
                             .Any(item => (item.Overlaps(range) && item.Start <= range.Start && range.End <= item.End)
                                          || item == range);
         }
@@ -181,9 +179,9 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
         {
             StringBuilder sb = new();
 
-            foreach (DateTimeRange item in _ranges)
+            foreach (DateTimeRange item in this)
             {
-                if (sb.Length > 0)
+                if (sb.Length > 0 && !item.IsEmpty())
                 {
                     sb.Append(',');
                 }
