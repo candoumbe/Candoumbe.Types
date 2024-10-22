@@ -31,7 +31,7 @@ public interface IRange<TInterval, TBound> : IComparable<TInterval>, IEquatable<
         ( <= 0, <= 0) => true,
         _ => false
     };
-    
+
     /// <summary>
     /// Checks if the current instance overlaps with <paramref name="other"/>
     /// </summary>
