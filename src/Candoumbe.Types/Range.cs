@@ -21,7 +21,7 @@ public abstract class Range<TBound> : IRange<Range<TBound>, TBound>, ICanReprese
 /// <param name="Start">The lowest bound</param>    
 /// <param name="End">The highest bound</param>
 /// <typeparam name="TBound">Type of the <see cref="Start"/> and <see cref="End"/> bounds.</typeparam>
-public abstract record Range<TBound>(TBound Start, TBound End): IRange<Range<TBound>, TBound>, ICanRepresentEmpty<Range<TBound>, TBound>
+public abstract record Range<TBound>(TBound Start, TBound End) : IRange<Range<TBound>, TBound>, ICanRepresentEmpty<Range<TBound>, TBound>
     where TBound : IComparable<TBound>
 #endif
 {
@@ -75,21 +75,21 @@ public abstract record Range<TBound>(TBound Start, TBound End): IRange<Range<TBo
 
     /// <inheritdoc />
     public bool IsEmpty() => Start.Equals(End);
-    
+
     /// <summary>
     /// Checks if the current instance overlaps with <paramref name="other"/>
     /// </summary>
     /// <param name="other">The other instance</param>
     /// <returns><see langword="true"/> if the current instance overlaps <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
-    public virtual bool Overlaps(Range<TBound> other) => other is not null && (Start.CompareTo(other.Start), Start.CompareTo(other.End), End.CompareTo(other.Start), End.CompareTo(other.End)) switch
+    public virtual bool Overlaps(Range<TBound> other) => other is not null && ( Start.CompareTo(other.Start), Start.CompareTo(other.End), End.CompareTo(other.Start), End.CompareTo(other.End) ) switch
     {
-        ( > 0, < 0, _, _) => true,
+        (> 0, < 0, _, _) => true,
         // current :   |-------|
         // other   :        |-------|
         (_, _, > 0, < 0) => true,
         // current :   |---------------|
         // other   :        |-------|
-        ( <= 0, _, _, >= 0) => true,
+        (<= 0, _, _, >= 0) => true,
         // current :   |
         // other   :   |
         _ => other is not null && IsEmpty() && other.IsEmpty() && Start.Equals(other.Start),
@@ -109,7 +109,16 @@ public abstract record Range<TBound>(TBound Start, TBound End): IRange<Range<TBo
     public virtual bool Equals(Range<TBound> other) => other is not null && Equals(Start, other.Start) && Equals(End, other.End);
 
     /// <inheritdoc/>
-    public int CompareTo(Range<TBound> other) => Start.CompareTo(other.Start);
+    public int CompareTo(Range<TBound> other)
+        => other switch
+        {
+            null => -1,
+            _ => Start.CompareTo(other.Start) switch
+            {
+                0 => End.CompareTo(other.End),
+                int value => value
+            }
+        };
 }
 
 //// <summary>

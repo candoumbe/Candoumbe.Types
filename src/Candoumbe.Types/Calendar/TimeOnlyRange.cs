@@ -287,10 +287,15 @@ public record TimeOnlyRange : Range<TimeOnly>
     };
 
     /// <inheritdoc />
-    public int CompareTo(TimeOnlyRange other) => Start.CompareTo(other.Start) switch
-    {
-        0 => End.CompareTo(other.End),
-        int value => value
-    };
+    public int CompareTo(TimeOnlyRange other)
+        => other switch
+        {
+            null => -1,
+            _ => Start.CompareTo(other.Start) switch
+            {
+                0 => End.CompareTo(other.End),
+                int value => value
+            }
+        };
 }
 #endif
