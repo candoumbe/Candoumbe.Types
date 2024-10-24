@@ -238,14 +238,6 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
                                 case 0:
                                     complement.Add(DateTimeRange.UpTo(current.Start));
                                     break;
-                                case int _ when i <= ranges.Length - 2:
-                                    {
-                                        DateTimeRange previous = ranges[i - 1];
-                                        DateTimeRange next = ranges[i + 1];
-                                        complement.Add(new DateTimeRange(previous.End, current.Start));
-                                        complement.Add(new DateTimeRange(current.End, next.Start));
-                                    }
-                                    break;
                                 default:
                                     {
                                         DateTimeRange previous = ranges[i - 1];
