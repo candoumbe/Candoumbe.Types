@@ -556,6 +556,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
             _ => new TimeOnlyRange(start, end)
         };
 
+        outputHelper.WriteLine("Checking if {0} contains {1}" , timeRange, value);
         // Act
         bool result = timeRange.Overlaps(value);
 
@@ -620,10 +621,36 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
         outputHelper.WriteLine($"Span is {input.End - input.Start}");
 
         // Act
-        bool actual = range.IsAllDay();
+        bool actual = range.IsInfinite();
 
         // Assert
         actual.Should().Be(expected, reason);
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_current_instance_is_not_null_When_comparing_to_null_Then_result_should_be_negative(NonNull<TimeOnlyRange> timeOnlyRangeGenerator)
+    {
+        // Arrange
+        TimeOnlyRange range = timeOnlyRangeGenerator.Item;
+
+        // Act
+        int actual = range.CompareTo(null);
+
+        // Assert
+        actual.Should().Be(-1);
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_current_instance_is_not_null_When_comparing_to_itself_Then_result_should_be_zero(NonNull<TimeOnlyRange> rangeGenerator)
+    {
+        // Arrange
+        TimeOnlyRange range = rangeGenerator.Item;
+
+        // Act
+        int actual = range.CompareTo(range);
+
+        // Assert
+        actual.Should().Be(0);
     }
 }
 #endif

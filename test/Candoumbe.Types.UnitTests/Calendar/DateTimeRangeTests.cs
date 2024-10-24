@@ -35,7 +35,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
         DateTime end = start.AddDays(1);
 
         // Act
-        Action action = () => new DateTimeRange(start: end, end: start);
+        Action action = () => _ = new DateTimeRange(start: end, end: start);
 
         // Assert
         action.Should().Throw<ArgumentOutOfRangeException>("start cannot be greater than end");
@@ -72,9 +72,35 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
         overlaps.Should()
                 .BeTrue("Two DateTime ranges that are equal overlaps");
     }
+    
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_current_instance_is_not_null_When_comparing_to_null_Then_result_should_be_negative(NonNull<DateTimeRange> dateTimeRangeGenerator)
+    {
+        // Arrange
+        DateTimeRange dateTimeRange = dateTimeRangeGenerator.Item;
+
+        // Act
+        int actual = dateTimeRange.CompareTo(null);
+        
+        // Assert
+        actual.Should().Be(-1);
+    }
+    
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_current_instance_is_not_null_When_comparing_to_itself_Then_result_should_be_zero(NonNull<DateTimeRange> dateTimeRangeGenerator)
+    {
+        // Arrange
+        DateTimeRange dateTimeRange = dateTimeRangeGenerator.Item;
+        
+        // Act
+        int actual = dateTimeRange.CompareTo(dateTimeRange);
+        
+        // Assert
+        actual.Should().Be(0);
+    }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public FsCheck.Property Given_two_DateTimeRange_instances_Overlaps_should_be_symetric(DateTimeRange left, DateTimeRange right)
+    public FsCheck.Property Given_two_DateTimeRange_instances_Overlaps_should_be_symmetric(DateTimeRange left, DateTimeRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
         outputHelper.WriteLine($"{nameof(right)}: {right}");
