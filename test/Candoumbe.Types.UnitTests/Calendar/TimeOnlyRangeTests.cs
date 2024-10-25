@@ -236,7 +236,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public Property Overlaps_should_be_symetric(TimeOnlyRange left, TimeOnlyRange right)
+    public Property Overlaps_should_be_symmetric(TimeOnlyRange left, TimeOnlyRange right)
         => (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -500,6 +500,20 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
         intersection.Should()
                     .NotBeNull().And
                     .Be(expected);
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)], Replay = "(17628562706427934021,810874360186659209)")]
+    public void Given_a_non_null_instance_When_merging_its_complement_Then_the_resulting_range_should_equal_infinite(NonNull<TimeOnlyRange> rangeGenerator)
+    {
+        // Arrange
+        TimeOnlyRange initial = rangeGenerator.Item;
+        TimeOnlyRange complement = -initial;
+
+        // Act
+        TimeOnlyRange actual = initial + complement;
+
+        // Assert
+        actual.Span.Should().Be(TimeOnlyRange.Infinite.Span);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
