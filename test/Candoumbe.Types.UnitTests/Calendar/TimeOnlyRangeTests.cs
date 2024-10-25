@@ -517,7 +517,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public Property Intersect_should_be_symetric(TimeOnlyRange left, TimeOnlyRange right)
+    public Property Intersect_should_be_symmetric(TimeOnlyRange left, TimeOnlyRange right)
         => (left.Intersect(right) == right.Intersect(left)).ToProperty();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]

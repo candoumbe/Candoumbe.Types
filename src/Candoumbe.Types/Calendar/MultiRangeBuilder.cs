@@ -1,7 +1,9 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Candoumbe.Types.Calendar;
 
+[ExcludeFromCodeCoverage]
 internal static class MultiRangeBuilder
 {
 #if NET6_0_OR_GREATER
