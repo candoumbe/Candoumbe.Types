@@ -38,7 +38,7 @@ public record TimeOnlyRange : Range<TimeOnly>
     , IUnaryNegationOperators<TimeOnlyRange, TimeOnlyRange>
 #endif
 {
-    private TimeSpan Span => Start <= End ? End - Start : Start - End;
+    public TimeSpan Span => Start <= End ? End - Start : Start - End;
 
     /// <summary>
     /// Represents the largest time interval that <see cref="TimeOnlyRange"/> can represent
@@ -117,6 +117,10 @@ public record TimeOnlyRange : Range<TimeOnly>
         {
             result = this;
         }
+        else if (IsContiguousWith(other))
+        {
+            result = Complement(this) == other ? AllDay : (this with { Start = GetMinimum(Start, other.Start), End = GetMaximum(other.End, End) });
+        }
         else if (Overlaps(other))
         {
             if (Start > End)
@@ -149,10 +153,7 @@ public record TimeOnlyRange : Range<TimeOnly>
                 result = this with { Start = GetMinimum(Start, other.Start), End = GetMaximum(other.End, End) };
             }
         }
-        else if (IsContiguousWith(other))
-        {
-            result = Complement(this) == other ? AllDay : (this with { Start = GetMinimum(Start, other.Start), End = GetMaximum(other.End, End) });
-        }
+        
 
         return Normalize(result);
 
@@ -262,7 +263,7 @@ public record TimeOnlyRange : Range<TimeOnly>
     {
         (true, _) => AllDay,
         (false, true) => Empty,
-        _ => input with { Start = input.End, End = input.Start }
+        _ => new TimeOnlyRange(input.End, input.Start)
     };
 
     private TimeOnlyRange ShiftTo(TimeOnly offset) => this with { Start = offset, End = offset.Add(Span) };
