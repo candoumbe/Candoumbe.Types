@@ -262,7 +262,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
         bool equals = false;
         if (other is not null)
         {
-            equals = ReferenceEquals(this, other) || (Overlaps(other) && other.Overlaps(this));
+            equals = ReferenceEquals(this, other) || (IsEmpty() && other.IsEmpty()) || (Overlaps(other) && other.Overlaps(this));
         }
         return equals;
     }
