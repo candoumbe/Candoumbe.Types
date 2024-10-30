@@ -26,6 +26,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
     , IAdditionOperators<MultiDateOnlyRange, MultiDateOnlyRange, MultiDateOnlyRange>
     , IAdditionOperators<MultiDateOnlyRange, DateOnlyRange, MultiDateOnlyRange>
     , IUnaryNegationOperators<MultiDateOnlyRange, MultiDateOnlyRange>
+    , IEqualityOperators<MultiDateOnlyRange, MultiDateOnlyRange, bool>
 #endif
 {
     private readonly HashSet<DateOnlyRange> _ranges;
@@ -281,6 +282,36 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
 
         return hashCode.ToHashCode();
     }
+
+#if !NET8_0_OR_GREATER
+    ///<summary>
+    /// Compares two values to determine equality
+    /// </summary>
+    /// <param name="left">The value to compare to <paramref name="right"/></param>
+    /// <param name="right">The value to compare to <paramref name="left"/></param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is equal to <paramref name="right"/>; otherwise, <see langword="false"/></returns>
+#else
+    /// <inheritdoc /> 
+#endif
+    public static bool operator ==(MultiDateOnlyRange left, MultiDateOnlyRange right)
+        => ( left, right ) switch
+        {
+            (null, null) => true,
+            (null, not null) => false,
+            _ => left.Equals(right),
+        };
+
+#if !NET8_0_OR_GREATER
+    ///<summary>
+    /// Compares two values to determine inequality
+    /// </summary>
+    /// <param name="left">The value to compare to <paramref name="right"/></param>
+    /// <param name="right">The value to compare to <paramref name="left"/></param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is not equal to <paramref name="right"/>; otherwise, <see langword="false"/></returns>
+#else
+    /// <inheritdoc /> 
+#endif
+    public static bool operator !=(MultiDateOnlyRange left, MultiDateOnlyRange right) => !(left == right);
 }
 
 #endif
