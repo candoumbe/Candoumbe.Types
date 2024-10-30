@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using FsCheck.Fluent;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
@@ -477,6 +478,27 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
         actual.Should()
             .BeEquivalentTo(MultiDateOnlyRange.Infinite)
             .And.HaveCount(1);
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Given_a_non_null_range_When_calling_Complement_Then_the_result_should_be_equivalent_to_calling_the_unary_operator(NonNull<MultiDateOnlyRange> rangeGenerator)
+    {
+        // Arrange
+        MultiDateOnlyRange range = rangeGenerator.Item;
+
+        // Assert
+        return (range.Complement() == (-range)).ToProperty();
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Equals_should_behave_the_same_way_as_equality_operator(NonNull<MultiDateOnlyRange> leftGenerator, NonNull<MultiDateOnlyRange> rightGenerator)
+    {
+        // Arrange
+        MultiDateOnlyRange left = leftGenerator.Item;
+        MultiDateOnlyRange right = rightGenerator.Item;
+
+        // Act
+        return (left.Equals(right) == (left == right)).ToProperty();
     }
 }
 
