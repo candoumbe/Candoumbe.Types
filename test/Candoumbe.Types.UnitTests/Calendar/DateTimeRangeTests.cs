@@ -1,22 +1,15 @@
 ﻿// "Copyright (c) Cyrille NDOUMBE.
 // Licenced under GNU General Public Licence, version 3.0"
 
+using System;
 using Bogus;
-
 using Candoumbe.Types.Calendar;
 using Candoumbe.Types.UnitTests.Generators;
-
 using FluentAssertions;
-using FluentAssertions.Equivalency;
 using FluentAssertions.Extensions;
-
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
-
-using System;
-using System.Collections.Generic;
-using Bogus.DataSets;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
@@ -72,7 +65,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
         overlaps.Should()
                 .BeTrue("Two DateTime ranges that are equal overlaps");
     }
-    
+
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_current_instance_is_not_null_When_comparing_to_null_Then_result_should_be_negative(NonNull<DateTimeRange> dateTimeRangeGenerator)
     {
@@ -81,26 +74,26 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
 
         // Act
         int actual = dateTimeRange.CompareTo(null);
-        
+
         // Assert
         actual.Should().Be(-1);
     }
-    
+
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_current_instance_is_not_null_When_comparing_to_itself_Then_result_should_be_zero(NonNull<DateTimeRange> dateTimeRangeGenerator)
     {
         // Arrange
         DateTimeRange dateTimeRange = dateTimeRangeGenerator.Item;
-        
+
         // Act
         int actual = dateTimeRange.CompareTo(dateTimeRange);
-        
+
         // Assert
         actual.Should().Be(0);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public FsCheck.Property Given_two_DateTimeRange_instances_Overlaps_should_be_symmetric(DateTimeRange left, DateTimeRange right)
+    public Property Given_two_DateTimeRange_instances_Overlaps_should_be_symmetric(DateTimeRange left, DateTimeRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
         outputHelper.WriteLine($"{nameof(right)}: {right}");
@@ -128,7 +121,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public FsCheck.Property Given_two_DateTimeRange_instances_IsContiguous_should_be_symetric(DateTimeRange left, DateTimeRange right)
+    public Property Given_two_DateTimeRange_instances_IsContiguous_should_be_symetric(DateTimeRange left, DateTimeRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
         outputHelper.WriteLine($"{nameof(right)}: {right}");
@@ -288,7 +281,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public FsCheck.Property Overlaps_should_be_symetric(DateTimeRange left, DateTimeRange right)
+    public Property Overlaps_should_be_symetric(DateTimeRange left, DateTimeRange right)
         => (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -474,7 +467,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public FsCheck.Property Intersect_should_be_symetric(DateTimeRange left, DateTimeRange right)
+    public Property Intersect_should_be_symetric(DateTimeRange left, DateTimeRange right)
         => (left.Intersect(right) == right.Intersect(left)).ToProperty();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -556,5 +549,19 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
 
         // Assert
         actual.Should().BeFalse($"{dateRange} does not contains {value} value");
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_a_non_empty_DateTimeRange_When_merging_with_AdditiveIdentity_Then_the_result_should_be_the_initial_range(NonNull<DateTimeRange> rangeGenerator)
+    {
+        // Arrange
+        DateTimeRange range = rangeGenerator.Item;
+
+        // Act
+        DateTimeRange actual = range.Merge(DateTimeRange.AdditiveIdentity);
+
+        // Assert
+        actual.Should().Be(range);
+
     }
 }
