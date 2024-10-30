@@ -74,26 +74,26 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
 
         // Act
         int actual = dateTimeRange.CompareTo(null);
-        
+
         // Assert
         actual.Should().Be(-1);
     }
-    
+
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_current_instance_is_not_null_When_comparing_to_itself_Then_result_should_be_zero(NonNull<DateTimeRange> dateTimeRangeGenerator)
     {
         // Arrange
         DateTimeRange dateTimeRange = dateTimeRangeGenerator.Item;
-        
+
         // Act
         int actual = dateTimeRange.CompareTo(dateTimeRange);
-        
+
         // Assert
         actual.Should().Be(0);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public FsCheck.Property Given_two_DateTimeRange_instances_Overlaps_should_be_symmetric(DateTimeRange left, DateTimeRange right)
+    public Property Given_two_DateTimeRange_instances_Overlaps_should_be_symmetric(DateTimeRange left, DateTimeRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
         outputHelper.WriteLine($"{nameof(right)}: {right}");
