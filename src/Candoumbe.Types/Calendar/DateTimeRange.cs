@@ -94,7 +94,7 @@ public record DateTimeRange : Range<DateTime>, IFormattable
     /// </summary>
     /// <param name="other">The other <see cref="DateTimeRange"/> to span over</param>
     /// <returns>A new <see cref="DateTimeRange"/> than spans over both current and <paramref name="other"/> range</returns>
-    /// <exception cref="InvalidOperationException">if either : current instance does not overlap or is not continuous with <paramref name="other"/>.</exception>
+    /// <exception cref="InvalidOperationException">if current instance does not overlap or is not continuous with <paramref name="other"/>.</exception>
     public DateTimeRange Merge(DateTimeRange other)
     {
         DateTimeRange result = Empty;
@@ -194,7 +194,7 @@ public record DateTimeRange : Range<DateTime>, IFormattable
     ///<inheritdoc/>
     public bool Overlaps(DateTimeRange other)
         => (IsInfinite() && other.IsEmpty())
-           || (IsEmpty() && Infinite.Equals(other))
+           || (IsEmpty() && other.IsInfinite())
            || base.Overlaps(other);
 
     /// <inheritdoc />

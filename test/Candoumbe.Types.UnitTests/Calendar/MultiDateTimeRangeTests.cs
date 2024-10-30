@@ -120,7 +120,21 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
                     ],
                      ranges => ranges.Once()
                         && ranges.Once(range => range == new DateTimeRange(5.April(2014), 18.April(2014)))
-                    
+                },
+                /*
+                 * inputs :  |--|
+                 *                   |------|
+                 *              |----|
+                 * ranges :  |--------------|
+                 */
+                {
+                    [
+                        new DateTimeRange(1.April(2014), 9.April(2014)),
+                        new DateTimeRange(14.April(2014), 18.April(2014)),
+                        new DateTimeRange(9.April(2014), 14.April(2014)),
+                    ],
+                    ranges => ranges.Once()
+                              && ranges.Once(range => range == new DateTimeRange(1.April(2014), 18.April(2014)))
                 }
             };
         }
@@ -500,5 +514,57 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
 
         // Assert
         result.Should().BeFalse();
+    }
+
+    public static TheoryData<MultiDateTimeRange, object, bool, string> EqualsCases
+        => new TheoryData<MultiDateTimeRange, object, bool, string> ()
+        {
+            {
+                
+                
+                /*
+                 * multirange : |
+                 * other    : |
+                 * expected   : true
+                 */
+                MultiDateTimeRange.Empty,
+                MultiDateTimeRange.Empty,
+                true,
+                "Both plannings represent empty ranges"
+            },
+            {
+                /*
+                 * multirange : |----------------------|
+                 * other      : |----|
+                 *                        |------------|
+                 *                   |----|
+                 * 
+                 * expected   : true
+                 */
+                [
+                    new DateTimeRange(1.January(2012), 5.January(2012))
+                ],
+                new MultiDateTimeRange
+                {
+                    new DateTimeRange(1.January(2012), 2.January(2012)),
+                    new DateTimeRange(3.January(2012), 5.January(2012)),
+                    new DateTimeRange(2.January(2012), 3.January(2012)),
+                },
+                true,
+                "The current multirange covers each ranges of the other instance"
+            }
+        };
+
+    [Theory]
+    [MemberData(nameof(EqualsCases))]
+    public void Given_two_instances_of_MultiDateTimeRange_When_calling_Equals_Then_it_should_return_expected_result(MultiDateTimeRange first, object other, bool expected, string reason)
+    {
+        outputHelper.WriteLine($"{first} equal to {other}");
+
+        // Act
+        bool actual = first.Equals(other);
+
+        // Assert
+        actual.Should().Be(expected, reason);
     }
 }
