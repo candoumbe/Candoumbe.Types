@@ -158,9 +158,8 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         // Arrange
         TimeOnlyRange left = leftSource.Item;
         TimeOnlyRange right = rightSource.Item;
-        MultiTimeOnlyRange range = new();
-        range.Add(left);
-
+        MultiTimeOnlyRange range = [left];
+        
         // Act
         range.Add(right);
 
@@ -184,6 +183,88 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
                        .ContainSingle(range => range == right).And
                        .ContainSingle(range => range == left)
         };
+    }
+    
+    public static TheoryData<MultiTimeOnlyRange, MultiTimeOnlyRange, MultiTimeOnlyRange> MergeCases
+    {
+        get =>
+            new()
+            {
+                /*
+                 * current   : |---------------|
+                 * other     :         |---------------|
+                 * expected  : |-----------------------|
+                 */
+
+                {
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(1.Hours()), TimeOnly.FromTimeSpan(6.Hours())) ],
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(4.Hours()), TimeOnly.FromTimeSpan(8.Hours())) ],
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(1.Hours()), TimeOnly.FromTimeSpan(8.Hours())) ]
+                },
+                /*
+                 * current   :         |---------------|
+                 * other     : |---------------|
+                 * expected  : |-----------------------|
+                 */
+                {
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(4.Hours()), TimeOnly.FromTimeSpan(8.Hours())) ],
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(1.Hours()), TimeOnly.FromTimeSpan(6.Hours())) ],
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(1.Hours()), TimeOnly.FromTimeSpan(8.Hours())) ]
+                },
+                /*
+                 * current   :                 |---------------|
+                 * other     : |---------------|
+                 * expected  : |-------------------------------|
+                 */
+
+                {
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(6.Hours()), TimeOnly.FromTimeSpan(8.Hours())) ],
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(1.Hours()), TimeOnly.FromTimeSpan(6.Hours())) ],
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(1.Hours()), TimeOnly.FromTimeSpan(8.Hours())) ]
+                },
+                /*
+                 * current     : |---------------|
+                 * other       :                 |---------------|
+                 * expected    : |-------------------------------|
+                 */
+                {
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(1.Hours()), TimeOnly.FromTimeSpan(6.Hours())) ],
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(6.Hours()), TimeOnly.FromTimeSpan(8.Hours())) ],
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(1.Hours()), TimeOnly.FromTimeSpan(8.Hours())) ]
+                },
+                /*
+                 * current     : |---------------------|
+                 * other       :         |---------|
+                 * expected    : |---------------------|
+                 */
+                {
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(1.Hours()), TimeOnly.FromTimeSpan(6.Hours())) ],
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(4.Hours()), TimeOnly.FromTimeSpan(5.Hours())) ],
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(1.Hours()), TimeOnly.FromTimeSpan(6.Hours())) ]
+                },
+                /*
+                 * current     : ---------------------
+                 * other       :         |---------|
+                 * expected    : ---------------------
+                 */
+                {
+                    [ TimeOnlyRange.Infinite ],
+                    [ new TimeOnlyRange(TimeOnly.FromTimeSpan(3.Hours()), TimeOnly.FromTimeSpan(5.Hours())) ],
+                    [ TimeOnlyRange.Infinite ]
+                }
+            };
+    }
+
+    [Theory]
+    [MemberData(nameof(MergeCases))]
+    public void Given_two_instances_Merge_should_behave_as_expected(MultiTimeOnlyRange current, MultiTimeOnlyRange other, MultiTimeOnlyRange expected)
+    {
+        // Act
+        MultiTimeOnlyRange actual = current.Merge(other);
+        outputHelper.WriteLine($"Result: {actual}");
+
+        // Assert
+        actual.Should().BeEquivalentTo(expected);
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -359,7 +440,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public void Equals_should_be_symetric(MultiTimeOnlyRange first, MultiTimeOnlyRange other)
+    public void Equals_should_be_symmetric(MultiTimeOnlyRange first, MultiTimeOnlyRange other)
     {
         // Act
         bool firstEqualsOther = first.Equals(other);
