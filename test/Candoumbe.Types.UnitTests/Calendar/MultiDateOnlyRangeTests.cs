@@ -527,6 +527,20 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
         // Assert
         actual.Should().BeFalse();
     }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_left_is_null_When_right_is_null_Then_Equal_operator_should_return_true()
+    {
+        // Act
+        MultiDateOnlyRange left = null;
+        MultiDateOnlyRange right = null;
+
+        // Act
+        bool actual = left == right;
+
+        // Assert
+        actual.Should().BeTrue();
+    }
 }
 
 #endif
