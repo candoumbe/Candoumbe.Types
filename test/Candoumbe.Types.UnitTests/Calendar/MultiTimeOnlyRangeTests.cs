@@ -437,6 +437,42 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         // Assert
         actual.Should().BeEquivalentTo(range);
     }
+
+    public static TheoryData<MultiTimeOnlyRange, MultiTimeOnlyRange, MultiTimeOnlyRange> DifferenceCases
+        => new()
+        {
+            {
+                MultiTimeOnlyRange.Empty,
+                MultiTimeOnlyRange.Empty,
+                MultiTimeOnlyRange.Empty
+            },
+            {
+                MultiTimeOnlyRange.Infinite,
+                MultiTimeOnlyRange.Infinite,
+                MultiTimeOnlyRange.Empty
+            },
+            {
+                MultiTimeOnlyRange.Infinite,
+                MultiTimeOnlyRange.Empty,
+                MultiTimeOnlyRange.Infinite
+            },
+            {
+                MultiTimeOnlyRange.Empty,
+                MultiTimeOnlyRange.Infinite,
+                MultiTimeOnlyRange.Infinite
+            }
+        };
+
+    [Theory]
+    [MemberData(nameof(DifferenceCases))]
+    public void Given_left_instance_When_subtracting_right_Then_result_should_match_expectation(MultiTimeOnlyRange left, MultiTimeOnlyRange right, MultiTimeOnlyRange expected)
+    {
+        // Act
+        MultiTimeOnlyRange actual = left - right;
+
+        // Assert
+        actual.Should().BeEquivalentTo(expected);
+    }
 }
 
 #endif
