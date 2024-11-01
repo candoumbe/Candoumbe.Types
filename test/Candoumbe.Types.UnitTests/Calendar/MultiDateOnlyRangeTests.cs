@@ -500,6 +500,33 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
         // Act
         return (left.Equals(right) == (left == right)).ToProperty();
     }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_left_is_not_null_When_right_is_null_Then_Equal_operator_should_return_false(NonNull<MultiDateOnlyRange> leftGenerator)
+    {
+        // Act
+        MultiDateOnlyRange left = leftGenerator.Item;
+
+        // Act
+        bool actual = left == null;
+
+        // Assert
+        actual.Should().BeFalse();
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_left_is_null_When_right_is_not_null_Then_Equal_operator_should_return_false(NonNull<MultiDateOnlyRange> rightGenerator)
+    {
+        // Act
+        MultiDateOnlyRange left = null;
+        MultiDateOnlyRange right = rightGenerator.Item;
+
+        // Act
+        bool actual = left == right;
+
+        // Assert
+        actual.Should().BeFalse();
+    }
 }
 
 #endif
