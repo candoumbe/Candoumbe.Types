@@ -297,9 +297,8 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
 
     public static TheoryData<DateTimeRange, DateTimeRange, DateTimeRange> MergeCases
     {
-        get
-        {
-            return new TheoryData<DateTimeRange, DateTimeRange, DateTimeRange>()
+        get =>
+            new()
             {
                 /*
                  * current   : |---------------|
@@ -367,7 +366,6 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
                     new DateTimeRange(1.January(1990), 6.January(1990))
                 }
             };
-        }
     }
 
     [Theory]

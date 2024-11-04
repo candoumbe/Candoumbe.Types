@@ -100,7 +100,7 @@ public abstract record Range<TBound>(TBound Start, TBound End) : IRange<Range<TB
         (<= 0, _, _, >= 0) => true,
         // current :   |
         // other   :   |
-        _ => other is not null && IsEmpty() && other.IsEmpty() && Start.Equals(other.Start),
+        _ => IsEmpty() && other.IsEmpty() && Start.Equals(other.Start),
     };
 
     /// <summary>
@@ -121,7 +121,7 @@ public abstract record Range<TBound>(TBound Start, TBound End) : IRange<Range<TB
             _ => Start.CompareTo(other.Start) switch
             {
                 0 => End.CompareTo(other.End),
-                int value => value
+                var value => value
             }
         };
 }
