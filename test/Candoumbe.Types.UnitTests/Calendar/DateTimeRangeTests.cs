@@ -505,27 +505,15 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
         actual.Should().BeTrue($"The {nameof(DateTimeRange.Infinite)} contains all {nameof(DateTime)} values");
     }
 
-    [Property]
-    public void Given_DateTimeRange_is_not_empty_and_not_infinite_When_value_is_between_Start_and_End_Overlaps_should_returns_Yes(DateTime date)
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Given_a_range_When_testing_against_a_DateTime_that_is_between_lower_and_upper_bound_Then_Overlaps_should_return_true(NonNull<DateTimeRange> rangeGenerator)
     {
         // Arrange
-        DateTime start = Faker.PickRandom(Faker.Date.Recent(refDate: date),
-                                          Faker.Date.Past(refDate: date));
-
-        DateTime end = Faker.PickRandom(Faker.Date.Soon(refDate: date),
-                                        Faker.Date.Future(refDate: date));
-
-        DateTimeRange dateRange = (start == end) switch
-        {
-            true => new DateTimeRange(start.AddMicroseconds(-1), end.AddMicroseconds(1)),
-            _ => new DateTimeRange(start, end)
-        };
-
-        // Act
-        bool actual = dateRange.Overlaps(date);
+        DateTimeRange range = rangeGenerator.Item;
+        DateTime value = Faker.Date.Between(range.Start, range.Start);
 
         // Assert
-        actual.Should().BeTrue($"{dateRange} contains {date} value");
+        return range.Overlaps(value).ToProperty();
     }
 
     [Fact]

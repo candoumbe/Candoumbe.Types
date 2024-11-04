@@ -234,6 +234,17 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
               .BeTrue($"{nameof(DateOnlyRange.Infinite)} range overlaps every other {nameof(DateOnlyRange)}s");
     }
 
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Given_a_range_When_testing_against_a_DateOnly_that_is_between_lower_and_upper_bound_Then_Overlaps_should_return_true(NonNull<DateOnlyRange> rangeGenerator)
+    {
+        // Arrange
+        DateOnlyRange range = rangeGenerator.Item;
+        DateOnly value = Faker.Date.BetweenDateOnly(range.Start, range.Start);
+
+        // Assert
+        return range.Overlaps(value).ToProperty();
+    }
+
     public static TheoryData<DateOnlyRange, DateOnlyRange, DateOnlyRange> MergeCases
     {
         get
