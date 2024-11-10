@@ -159,7 +159,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         TimeOnlyRange left = leftSource.Item;
         TimeOnlyRange right = rightSource.Item;
         MultiTimeOnlyRange range = [left];
-        
+
         // Act
         range.Add(right);
 
@@ -184,7 +184,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
                        .ContainSingle(range => range == left)
         };
     }
-    
+
     public static TheoryData<MultiTimeOnlyRange, MultiTimeOnlyRange, MultiTimeOnlyRange> MergeCases
     {
         get =>
@@ -331,8 +331,8 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
                     bool overlaps = range.Overlaps(ranges[i]);
                     bool abuts = range.IsContiguousWith(ranges[i]);
 
-                    overlaps.Should().BeFalse($"{nameof(MultiTimeOnlyRange)} internal storage is optimized to not hold two {nameof(TimeOnlyRange)}s that overlap each other");
-                    abuts.Should().BeFalse($"{nameof(MultiTimeOnlyRange)} internal storage is optimized to not hold two {nameof(TimeOnlyRange)}s that abuts each other");
+                    overlaps.Should().BeFalse($"{nameof(MultiTimeOnlyRange)} internal storage is optimized to never hold two {nameof(TimeOnlyRange)}s that overlap each other");
+                    abuts.Should().BeFalse($"{nameof(MultiTimeOnlyRange)} internal storage is optimized to never hold two {nameof(TimeOnlyRange)}s that abuts each other");
                 }
             }
         });
@@ -368,7 +368,7 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
                  * expected    : true
                  */
                 {
-                    new MultiTimeOnlyRange(TimeOnlyRange.AllDay),
+                    [TimeOnlyRange.AllDay],
                     TimeOnlyRange.AllDay,
                     true
                 },
@@ -379,9 +379,10 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
                  * expected    : false
                  */
                 {
-                    new MultiTimeOnlyRange(
+                    [
                         new TimeOnlyRange(TimeOnly.FromTimeSpan(06.Hours()), TimeOnly.FromTimeSpan(09.Hours())),
-                        new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))),
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))
+                    ],
                     new TimeOnlyRange(TimeOnly.FromTimeSpan(8.Hours()), TimeOnly.FromTimeSpan(11.Hours())),
                     false
                 },
@@ -393,9 +394,10 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
                  * expected    : false
                  */
                 {
-                    new MultiTimeOnlyRange(
+                    [
                         new TimeOnlyRange(TimeOnly.FromTimeSpan(22.Hours()), TimeOnly.FromTimeSpan(08.Hours())),
-                        new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))),
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))
+                    ],
                     new TimeOnlyRange(TimeOnly.FromTimeSpan(11.Hours()), TimeOnly.FromTimeSpan(23.Hours())),
                     false
                 },
@@ -408,9 +410,10 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
                  * expected   : false
                  */
                 {
-                    new MultiTimeOnlyRange(
+                    [
                         new TimeOnlyRange(TimeOnly.FromTimeSpan(22.Hours()), TimeOnly.FromTimeSpan(08.Hours())),
-                        new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))),
+                        new TimeOnlyRange(TimeOnly.FromTimeSpan(10.Hours()), TimeOnly.FromTimeSpan(12.Hours()))
+                    ],
                     new TimeOnlyRange(TimeOnly.FromTimeSpan(11.Hours()), TimeOnly.FromTimeSpan(23.Hours())),
                     false
                 }

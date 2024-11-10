@@ -388,6 +388,48 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_left_is_not_null_When_right_is_null_Then_Merge_should_throw_ArgumentNullException(NonNull<MultiDateOnlyRange> rangeGenerator)
+    {
+        // Arrange
+        MultiDateOnlyRange left = rangeGenerator.Get;
+
+        // Act
+        Action mergingWithNull = () => _ = left.Merge(null);
+
+        // Assert
+        mergingWithNull.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Should().Be("other");
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_left_is_not_null_When_right_is_null_Then_Plus_operator_should_throw_ArgumentNullException(NonNull<MultiDateOnlyRange> rangeGenerator)
+    {
+        // Arrange
+        MultiDateOnlyRange left = rangeGenerator.Get;
+
+        // Act
+        Action mergingWithNull = () => _ = left + (MultiDateOnlyRange)null;
+
+        // Assert
+        mergingWithNull.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Should().Be("right");
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_right_is_not_null_When_left_is_null_Then_Plus_operator_should_throw_ArgumentNullException(NonNull<MultiDateOnlyRange> rangeGenerator)
+    {
+        // Arrange
+        MultiDateOnlyRange right = rangeGenerator.Get;
+
+        // Act
+        Action mergingWithNull = () => _ = null + right;
+
+        // Assert
+        mergingWithNull.Should().Throw<ArgumentNullException>()
+            .And.ParamName.Should().Be("left");
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_any_MultiDateOnlyRange_instance_When_adding_its_complement_Then_result_should_be_Infinite(MultiDateOnlyRange value)
     {
         // Arrange
@@ -400,14 +442,14 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
         // Assert
         result.Should()
             .BeEquivalentTo(MultiDateOnlyRange.Infinite)
-            .And.HaveCount(1);
+            .And.HaveCount(1,"+ operator should merge complementary values");
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_an_instance_that_is_not_null_When_adding_a_DateOnlyRange_that_is_infinite_Then_IsInfinite_should_return_true(NonEmptyArray<DateOnlyRange> ranges)
     {
         // Arrange
-        MultiDateOnlyRange range = new(ranges.Get);
+        MultiDateOnlyRange range = [.. ranges.Get];
 
         // Act
         range.Add(DateOnlyRange.Infinite);
@@ -442,7 +484,7 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
         }
         else
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             int i = 0;
             foreach (DateOnlyRange item in range)
             {

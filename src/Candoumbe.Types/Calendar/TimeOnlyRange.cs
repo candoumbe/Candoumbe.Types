@@ -153,7 +153,6 @@ public record TimeOnlyRange : Range<TimeOnly>
                 result = this with { Start = GetMinimum(Start, other.Start), End = GetMaximum(other.End, End) };
             }
         }
-        
 
         return Normalize(result);
 
