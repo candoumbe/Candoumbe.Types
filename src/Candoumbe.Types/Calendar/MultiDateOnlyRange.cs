@@ -2,11 +2,8 @@
 // Licenced under GNU General Public Licence, version 3.0"
 
 #if NET6_0_OR_GREATER
-// "Copyright (c) Cyrille NDOUMBE.
-// Licenced under GNU Public Licence, version 3.0"
 
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +11,6 @@ using System.Linq;
 using System.Numerics;
 #endif
 using System.Text;
-using System.Text.Unicode;
 
 namespace Candoumbe.Types.Calendar;
 
@@ -115,7 +111,11 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
     /// <param name="other">The other instance to add</param>
     /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/></exception>
     /// <returns>a <see cref="MultiDateOnlyRange"/> that represents the union of the current instance with <paramref name="other"/>.</returns>
-    public MultiDateOnlyRange Merge(MultiDateOnlyRange other) => new([.. _ranges.Union(other._ranges)]);
+    public MultiDateOnlyRange Merge(MultiDateOnlyRange other)
+    {
+        ArgumentNullException.ThrowIfNull(other);
+        return new MultiDateOnlyRange([.. _ranges.Union(other._ranges)]);
+    }
 
 #if !NET7_0_OR_GREATER
     /// <summary>
@@ -127,7 +127,13 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
 #else
     ///<inheritdoc/>
 #endif
-    public static MultiDateOnlyRange operator +(MultiDateOnlyRange left, MultiDateOnlyRange right) => left.Merge(right);
+    public static MultiDateOnlyRange operator +(MultiDateOnlyRange left, MultiDateOnlyRange right)
+    {
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
+
+        return left.Merge(right);
+    }
 
     /// <summary>
     /// Checks if the current instance contains one or more <see cref="DateOnlyRange"/>s which, once combined, overlap the specified <paramref name="range"/>.
