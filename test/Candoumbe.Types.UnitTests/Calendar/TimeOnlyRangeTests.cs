@@ -16,7 +16,7 @@ using Xunit.Abstractions;
 using Xunit.Categories;
 
 namespace Candoumbe.Types.UnitTests.Calendar;
-#if NET6_0_OR_GREATER
+
 [UnitTest]
 public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
 {
@@ -667,4 +667,3 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
         actual.Should().Be(0);
     }
 }
-#endif

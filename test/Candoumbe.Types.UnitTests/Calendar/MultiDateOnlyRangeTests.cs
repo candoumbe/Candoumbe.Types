@@ -1,7 +1,6 @@
 ﻿// "Copyright (c) Cyrille NDOUMBE.
 // Licenced under GNU General Public Licence, version 3.0"
 
-#if NET6_0_OR_GREATER
 using Candoumbe.Types.Calendar;
 using Candoumbe.Types.UnitTests.Generators;
 using FluentAssertions;
@@ -584,5 +583,3 @@ public class MultiDateOnlyRangeTests(ITestOutputHelper outputHelper)
         actual.Should().BeTrue();
     }
 }
-
-#endif

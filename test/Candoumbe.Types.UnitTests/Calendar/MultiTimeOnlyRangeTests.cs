@@ -1,7 +1,6 @@
 ﻿// "Copyright (c) Cyrille NDOUMBE.
 // Licenced under GNU General Public Licence, version 3.0"
 
-#if NET6_0_OR_GREATER
 using Candoumbe.Types.Calendar;
 using Candoumbe.Types.UnitTests.Generators;
 
@@ -558,5 +557,3 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
         actual.Should().BeEquivalentTo(expected);
     }
 }
-
-#endif
