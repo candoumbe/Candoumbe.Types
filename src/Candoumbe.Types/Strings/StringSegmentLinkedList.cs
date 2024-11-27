@@ -71,7 +71,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     }
 
     /// <summary>
-    /// Appends <paramref name="value"/> to the end of the list
+    /// Appends <paramref name="value"/> to the end of the list.
     /// </summary>
     /// <param name="value"></param>
     /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
@@ -85,6 +85,13 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
         return this;
     }
+
+    /// <summary>
+    /// Appends <paramref name="value"/> to the end of the list.
+    /// </summary>
+    /// <param name="value">The value to append</param>
+    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
+    public StringSegmentLinkedList Append(StringSegment value) => Append((ReadOnlyMemory<char>) value);
 
     private void AppendInternal(StringSegmentNode newNode)
     {
