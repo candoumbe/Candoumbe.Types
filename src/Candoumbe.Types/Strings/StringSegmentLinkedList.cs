@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Primitives;
 
 namespace Candoumbe.Types.Strings;
@@ -14,12 +15,12 @@ namespace Candoumbe.Types.Strings;
 /// <remarks>
 /// This implementation is specifically designed to not allow appending <see cref="StringSegment.Empty"/> values.
 /// </remarks>
-public class StringSegmentLinkedList : IEnumerable<StringSegment>
+public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 {
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
 
-    private static readonly StringSegmentNode EmptyNode = new StringSegmentNode(StringSegment.Empty);
+    private static readonly StringSegmentNode EmptyNode = new(ReadOnlyMemory<char>.Empty);
 
     private readonly IDictionary<string, string> _replacements;
 
@@ -30,6 +31,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     {
         _head = EmptyNode;
         Count = 0;
+        _replacements = new Dictionary<string, string>();
     }
 
     /// <summary>
@@ -37,7 +39,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     /// </summary>
     /// <param name="head">the value of the head</param>
     /// <param name="others">Additional <see cref="StringSegment"/>s to append to the list</param>
-    public StringSegmentLinkedList(StringSegment head, params StringSegment[] others)
+    public StringSegmentLinkedList(StringSegment head, params StringSegment[] others) : this()
     {
         _head = new StringSegmentNode(head);
         Count = 1;
@@ -51,15 +53,33 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     }
 
     /// <summary>
+    /// Builds a new instance of <see cref="StringSegmentLinkedList"/>.
+    /// </summary>
+    /// <param name="head">the value of the head</param>
+    /// <param name="others">Additional <see cref="ReadOnlyMemory{T}"/>s to append to the list</param>
+    internal StringSegmentLinkedList(ReadOnlyMemory<char> head, params ReadOnlyMemory<char>[] others)
+    {
+        _head = new StringSegmentNode(head);
+        Count = 1;
+
+        foreach (ReadOnlyMemory<char> next in others)
+        {
+            Append(next);
+        }
+
+        _replacements = new Dictionary<string, string>();
+    }
+
+    /// <summary>
     /// Appends <paramref name="value"/> to the end of the list
     /// </summary>
     /// <param name="value"></param>
     /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
-    public StringSegmentLinkedList Append(StringSegment value)
+    public StringSegmentLinkedList Append(ReadOnlyMemory<char> value)
     {
         if (value is { Length: > 0 })
         {
-            StringSegmentNode newNode = new StringSegmentNode(value);
+            StringSegmentNode newNode = new(value);
             AppendInternal(newNode);
         }
 
@@ -194,12 +214,12 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     /// <returns></returns>
     public string ToStringValue()
     {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new();
         StringSegmentNode current = _head;
         while (current is not null)
         {
-            StringSegment segment = current.Value;
-            sb = sb.Append(segment.Value);
+            ReadOnlyMemory<char> segment = current.Value;
+            sb = sb.Append(new string(segment.Span));
             current = current.Next;
         }
 
@@ -212,12 +232,13 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     }
 
     /// <inheritdoc />
-    public IEnumerator<StringSegment> GetEnumerator()
+    public IEnumerator<ReadOnlyMemory<char>> GetEnumerator()
     {
         if (_head == EmptyNode)
         {
             yield break;
         }
+
         yield return _head.Value;
 
         StringSegmentNode current = _head.Next;
@@ -241,36 +262,54 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
     /// the current instance.
     /// </remarks>
-    public StringSegmentLinkedList Replace(char oldChar, char newChar) => Replace(oldChar, newChar.ToString());
+    public StringSegmentLinkedList Replace(char oldChar, char newChar) => Replace(oldChar, [newChar]);
 
     /// <summary>
-    /// Replaces all <paramref name="oldChar"/> by <paramref name="newString"/>.
+    /// Replaces all <paramref name="oldChar"/> by <paramref name="replacement"/>.
     /// </summary>
     /// <param name="oldChar"><see langword="character"/> to replace.</param>
-    /// <param name="newString"><see langword="string"/> that will replace <paramref name="oldChar"/>.</param>
+    /// <param name="replacement"><see langword="string"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
     /// This method does its best to never allocated.
     /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
     /// the current instance.
     /// </remarks>
-    public StringSegmentLinkedList Replace(char oldChar, string newString)
+    public StringSegmentLinkedList Replace(char oldChar, ReadOnlySpan<char> replacement)
     {
         StringSegmentLinkedList replacementList = this;
         StringSegmentNode current = _head;
-        StringSegment replacement = newString;
+        ReadOnlyMemory<char> replacementMemory = replacement.ToArray();
+
         while (current is not null)
         {
-            int indexOfOldChar = current.Value.IndexOf(oldChar);
+            int indexOfOldChar = -1;
+            IEnumerable<int> occurrences = [];
+            Parallel.Invoke(() => indexOfOldChar = current.Value.Span.IndexOf(oldChar),
+                            () => occurrences = current.Value.Occurrences(oldChar));
+
             if (indexOfOldChar >= 0)
             {
-                StringTokenizer tokenizer = current.Value.Split([oldChar]);
-                replacementList = new(tokenizer.First());
+                ReadOnlyMemory<char> valueToKeep = current.Value[..indexOfOldChar];
+                replacementList = new StringSegmentLinkedList(valueToKeep, replacementMemory);
 
-                foreach (StringSegment segment in tokenizer.Skip(1))
+                int index = indexOfOldChar + 1;
+                foreach (int occurrence in occurrences.Skip(1))
                 {
-                    replacementList.Append(replacement)
-                        .Append(segment);
+                    replacementList = replacementList.Append(replacementMemory);
+                    if (index < occurrence)
+                    {
+                        valueToKeep = current.Value.Slice(index, occurrence);
+                        replacementList.Append(valueToKeep);
+                    }
+
+                    // move the cursor right after the current occurrence
+                    index = occurrence + 1;
+                }
+
+                if (index < current.Value.Length)
+                {
+                    replacementList = replacementList.Append(current.Value[index..]);
                 }
 
                 current = replacementList._head;
@@ -305,7 +344,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
     /// </summary>
     /// <param name="predicate">filter</param>
     /// <returns>A new <see cref="StringSegmentLinkedList"/> where all candidates <paramref name="predicate"/> were removed.</returns>
-    public StringSegmentLinkedList RemoveBy(Func<StringSegment, bool> predicate)
+    public StringSegmentLinkedList RemoveBy(Func<ReadOnlyMemory<char>, bool> predicate)
     {
         StringSegmentNode current = _head;
         StringSegmentNode previous = null;
@@ -344,8 +383,7 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
             throw new ArgumentNullException(nameof(other));
         }
 
-
-        StringSegmentLinkedList result = new ();
+        StringSegmentLinkedList result = new();
         StringSegmentNode current = _head;
         if (current != EmptyNode)
         {
@@ -373,5 +411,98 @@ public class StringSegmentLinkedList : IEnumerable<StringSegment>
         }
 
         return result;
+    }
+
+    /// <inheritdoc />
+    public bool Equals(StringSegmentLinkedList other, StringComparison comparison = StringComparison.InvariantCultureIgnoreCase)
+    {
+        bool equals = false;
+
+        if (other is not null)
+        {
+            using IEnumerator<ReadOnlyMemory<char>> currentEnumerator = GetEnumerator();
+            using IEnumerator<ReadOnlyMemory<char>> otherEnumerator = other.GetEnumerator();
+
+            if (!currentEnumerator.MoveNext() && !otherEnumerator.MoveNext())
+            {
+                equals = true;
+            }
+            else
+            {
+                ReadOnlyMemory<char> current = currentEnumerator.Current;
+                ReadOnlyMemory<char> otherCurrent = otherEnumerator.Current;
+
+                if (current.Length == otherCurrent.Length)
+                {
+                    equals = current.Equals(otherCurrent);
+                }
+                else if (current.Length < otherCurrent.Length && otherCurrent.StartsWith(current.Span))
+                {
+                    bool mismatchFound = false;
+                    int index = current.Length;
+                    while (currentEnumerator.MoveNext() && !mismatchFound)
+                    {
+                        current = currentEnumerator.Current;
+                        int j = 0;
+                        while (j < current.Length && index < otherCurrent.Length && !mismatchFound)
+                        {
+                            mismatchFound = !current.Span.Slice(j, 1).Equals(otherCurrent.Span.Slice(index, 1), comparison);
+                            j++;
+                            index++;
+
+                            // No mismatch found, but we read current to the end => grab the next node (if any) and starts again.
+                            if (!mismatchFound && j == current.Length && currentEnumerator.MoveNext())
+                            {
+                                current = currentEnumerator.Current;
+                                j = 0;
+                            }
+
+                            // No mismatch found, but we read otherCurrent to the end => grab the next node (if any) and starts again.
+                            if (!mismatchFound && index == otherCurrent.Length && otherEnumerator.MoveNext())
+                            {
+                                otherCurrent = otherEnumerator.Current;
+                                index = 0;
+                            }
+                        }
+                    }
+
+                    equals = !mismatchFound;
+                }
+                else
+                {
+                    bool mismatchFound = false;
+                    int index = otherCurrent.Length;
+                    while (otherEnumerator.MoveNext() && !mismatchFound)
+                    {
+                        otherCurrent = otherEnumerator.Current;
+                        int j = 0;
+                        while (j < otherCurrent.Length && index < current.Length && !mismatchFound)
+                        {
+                            mismatchFound = !current.Span.Slice(index, 1).Equals(otherCurrent.Span.Slice(j, 1), comparison);
+                            j++;
+                            index++;
+
+                            // No mismatch found, and we read current to the end => grab the next node (if any) and starts again.
+                            if (!mismatchFound && index == current.Length && currentEnumerator.MoveNext())
+                            {
+                                current = currentEnumerator.Current;
+                                index = 0;
+                            }
+
+                            // No mismatch found, and we read otherCurrent to the end => grab the next node (if any) and starts again.
+                            if (!mismatchFound && j == otherCurrent.Length && otherEnumerator.MoveNext())
+                            {
+                                otherCurrent = otherEnumerator.Current;
+                                j = 0;
+                            }
+                        }
+                    }
+
+                    equals = !mismatchFound;
+                }
+            }
+        }
+
+        return equals;
     }
 }

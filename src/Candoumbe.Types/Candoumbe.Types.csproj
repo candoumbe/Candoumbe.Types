@@ -4,5 +4,10 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net8.0;</TargetFrameworks>
   </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'"/>
+        <PackageReference Update="Candoumbe.MiscUtilities" Version="0.14.0-rc.49" />
+    </ItemGroup>
 
 </Project>
