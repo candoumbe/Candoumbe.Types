@@ -226,13 +226,16 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
         while (current is not null)
         {
             ReadOnlyMemory<char> segment = current.Value;
-            sb = sb.Append(new string(segment.Span));
+            sb.Append(segment.Span);
             current = current.Next;
         }
 
-        foreach (( string key, string value ) in _replacements)
+        if (_replacements is not null)
         {
-            sb = sb.Replace(key, value);
+            foreach (( string key, string value ) in _replacements)
+            {
+                sb = sb.Replace(key, value);
+            }
         }
 
         return sb.ToString();
