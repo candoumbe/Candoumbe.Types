@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Candoumbe.MiscUtilities.Comparers;
 using Microsoft.Extensions.Primitives;
 
 namespace Candoumbe.Types.Strings;
@@ -259,6 +260,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
         }
     }
 
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
@@ -286,8 +288,18 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// the current instance.
     /// </remarks>
     public StringSegmentLinkedList Replace(char oldChar, ReadOnlySpan<char> replacement)
+        => Replace(chr => chr == oldChar, replacement);
+
+    /// <summary>
+    /// Replaces all <see langword="char"/>s that matches <paramref name="predicate"/>
+    /// with the specified <paramref name="replacement"/>.
+    /// </summary>
+    /// <param name="predicate"></param>
+    /// <param name="replacement"></param>
+    /// <returns></returns>
+    public StringSegmentLinkedList Replace(Func<char, bool> predicate, ReadOnlySpan<char> replacement)
     {
-        StringSegmentLinkedList replacementList = this;
+        StringSegmentLinkedList replacementList = [];
         StringSegmentNode current = _head;
         ReadOnlyMemory<char> replacementMemory = replacement.ToArray();
 
@@ -295,13 +307,13 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
         {
             int indexOfOldChar = -1;
             IEnumerable<int> occurrences = [];
-            Parallel.Invoke(() => indexOfOldChar = current.Value.Span.IndexOf(oldChar),
-                            () => occurrences = current.Value.Occurrences(oldChar));
+            Parallel.Invoke(() => indexOfOldChar = current.Value.FirstOccurrence(predicate),
+                            () => occurrences = current.Value.Occurrences(predicate));
 
             if (indexOfOldChar >= 0)
             {
                 ReadOnlyMemory<char> valueToKeep = current.Value[..indexOfOldChar];
-                replacementList = new StringSegmentLinkedList(valueToKeep, replacementMemory);
+                replacementList.Append(valueToKeep).Append(replacementMemory);
 
                 int index = indexOfOldChar + 1;
                 foreach (int occurrence in occurrences.Skip(1))
@@ -317,15 +329,15 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                     index = occurrence + 1;
                 }
 
+                // we did all substitutions, but we did not reach the end of the original input
+                // => copy all remaining original chars starting at index position  
                 if (index < current.Value.Length)
                 {
                     replacementList = replacementList.Append(current.Value[index..]);
                 }
 
-                current = replacementList._head;
+                current = current.Next;
             }
-
-            current = current.Next;
         }
 
         return replacementList;
@@ -424,7 +436,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     }
 
     /// <inheritdoc />
-    public bool Equals(StringSegmentLinkedList other, StringComparison comparison = StringComparison.InvariantCultureIgnoreCase)
+    public bool Equals(StringSegmentLinkedList other, IEqualityComparer<char> comparer = null)
     {
         bool equals = false;
 
@@ -446,17 +458,22 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                 {
                     equals = current.Equals(otherCurrent);
                 }
-                else if (current.Length < otherCurrent.Length && otherCurrent.StartsWith(current.Span))
+                else if (current.Length < otherCurrent.Length && otherCurrent.StartsWith(current))
                 {
                     bool mismatchFound = false;
                     int index = current.Length;
+                    Func<char, char, bool> predicate = comparer switch
+                    {
+                        null => (x, y) => Equals(x, y),
+                        _ => comparer.Equals,
+                    };
                     while (currentEnumerator.MoveNext() && !mismatchFound)
                     {
                         current = currentEnumerator.Current;
                         int j = 0;
                         while (j < current.Length && index < otherCurrent.Length && !mismatchFound)
                         {
-                            mismatchFound = !current.Span.Slice(j, 1).Equals(otherCurrent.Span.Slice(index, 1), comparison);
+                            mismatchFound = !current.Slice(j, 1).StartsWith(otherCurrent.Slice(index, 1), comparer);
                             j++;
                             index++;
 
@@ -488,7 +505,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                         int j = 0;
                         while (j < otherCurrent.Length && index < current.Length && !mismatchFound)
                         {
-                            mismatchFound = !current.Span.Slice(index, 1).Equals(otherCurrent.Span.Slice(j, 1), comparison);
+                            mismatchFound = !current.Slice(index, 1).StartsWith(otherCurrent.Slice(j, 1), comparer);
                             j++;
                             index++;
 
