@@ -92,7 +92,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// </summary>
     /// <param name="value">The value to append</param>
     /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
-    public StringSegmentLinkedList Append(StringSegment value) => Append((ReadOnlyMemory<char>) value);
+    public StringSegmentLinkedList Append(StringSegment value) => Append((ReadOnlyMemory<char>)value);
 
     private void AppendInternal(StringSegmentNode newNode)
     {
@@ -294,9 +294,12 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// Replaces all <see langword="char"/>s that matches <paramref name="predicate"/>
     /// with the specified <paramref name="replacement"/>.
     /// </summary>
-    /// <param name="predicate"></param>
-    /// <param name="replacement"></param>
-    /// <returns></returns>
+    /// <param name="predicate">The predicate used to test which <see langword="char"/> to replace</param>
+    /// <param name="replacement">The value that will be used to replace <see langword="char"/>s that matches <paramref name="predicate"/>.</param>
+    /// <returns>
+    /// The <see cref="StringSegmentLinkedList"/> where each <see langword="char"/> that matches <paramref name="predicate"/>
+    /// has been replaced with <paramref name="predicate"/>.
+    /// </returns>
     public StringSegmentLinkedList Replace(Func<char, bool> predicate, ReadOnlySpan<char> replacement)
     {
         StringSegmentLinkedList replacementList = [];
@@ -335,9 +338,68 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                 {
                     replacementList = replacementList.Append(current.Value[index..]);
                 }
-
-                current = current.Next;
             }
+            else
+            {
+                replacementList = replacementList.Append(current.Value);
+            }
+
+            current = current.Next;
+        }
+
+        return replacementList;
+    }
+
+    public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> replacement)
+    {
+        StringSegmentLinkedList replacementList = [];
+        StringSegmentNode current = _head;
+
+        while (current is not null)
+        {
+            int indexOfOldChar = -1;
+            IEnumerable<int> occurrences = [];
+            Parallel.Invoke(() => indexOfOldChar = current.Value.FirstOccurrence(predicate),
+                () => occurrences = current.Value.Occurrences(predicate));
+
+            if (indexOfOldChar >= 0)
+            {
+                ReadOnlyMemory<char> valueToKeep = current.Value[..indexOfOldChar];
+
+                if (!replacement.TryGetValue(current.Value.Span[indexOfOldChar], out ReadOnlyMemory<char> replacementMemory))
+                {
+                    replacementMemory = ReadOnlyMemory<char>.Empty;
+                }
+
+                replacementList.Append(valueToKeep).Append(replacementMemory);
+
+                int index = indexOfOldChar + 1;
+                foreach (int occurrence in occurrences.Skip(1))
+                {
+                    replacementList = replacementList.Append(replacementMemory);
+                    if (index < occurrence)
+                    {
+                        valueToKeep = current.Value.Slice(index, occurrence);
+                        replacementList.Append(valueToKeep);
+                    }
+
+                    // move the cursor right after the current occurrence
+                    index = occurrence + 1;
+                }
+
+                // we did all substitutions, but we did not reach the end of the original input
+                // => copy all remaining original chars starting at index position  
+                if (index < current.Value.Length)
+                {
+                    replacementList = replacementList.Append(current.Value[index..]);
+                }
+            }
+            else
+            {
+                replacementList = replacementList.Append(current.Value);
+            }
+
+            current = current.Next;
         }
 
         return replacementList;

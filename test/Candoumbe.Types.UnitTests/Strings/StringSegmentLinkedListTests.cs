@@ -449,6 +449,12 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
                 chr => chr is 'A' or 'a',
                 'E',
                 new StringSegmentLinkedList("E", "lEzy fox")
+            },
+            {
+                new StringSegmentLinkedList("A", "lazy fox"),
+                chr => chr is 'W' or 'w',
+                'E',
+                new StringSegmentLinkedList("A", "lazy fox")
             }
         };
 
@@ -462,6 +468,45 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         // Assert
         string actualStr = actual.ToStringValue();
         outputHelper.WriteLine($"{nameof(actualStr)}: '{actualStr}'");
+        actualStr.Should().Be(expected.ToStringValue());
+    }
+
+    public static TheoryData<StringSegmentLinkedList, Func<char, bool>, IReadOnlyDictionary<char, ReadOnlyMemory<char>>, StringSegmentLinkedList> ReplaceCharByCharWithPredicateAndReplaceFunctionCases
+        => new()
+        {
+            {
+                new StringSegmentLinkedList("A", "lazy fox"),
+                chr => chr is 'A' or 'a',
+                new Dictionary<char, ReadOnlyMemory<char>>
+                {
+                    ['A'] = new(['a']),
+                    ['a'] = new(['A'])
+                },
+                new StringSegmentLinkedList("a", "lAzy fox")
+            },
+            {
+                new StringSegmentLinkedList("A", "lazy fox"),
+                chr => chr is 'W' or 'w',
+                new Dictionary<char, ReadOnlyMemory<char>>
+                {
+                    ['W'] = new(['a']),
+                    ['z'] = new(['A'])
+                },
+                new StringSegmentLinkedList("A", "lazy fox")
+            }
+        };
+
+    [Theory]
+    [MemberData(nameof(ReplaceCharByCharWithPredicateAndReplaceFunctionCases))]
+    public void Given_a_StringSegmentLinkedList_When_replacing_a_char_using_a_predicate_Then_the_result_should_match_expectation(StringSegmentLinkedList input, Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> replacement, StringSegmentLinkedList expected)
+    {
+        // Act
+        StringSegmentLinkedList actual = input.Replace(predicate, replacement);
+
+        // Assert
+        string actualStr = actual.ToStringValue();
+        outputHelper.WriteLine($"{nameof(actualStr)}: '{actualStr}'");
+
         actualStr.Should().Be(expected.ToStringValue());
     }
 }
