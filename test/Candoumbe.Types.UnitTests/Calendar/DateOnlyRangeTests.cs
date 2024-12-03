@@ -559,4 +559,24 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
         // Assert
         actual.Should().Be(0);
     }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_two_ranges_non_null_left_and_right_When_left_is_before_right_Then_Compare_should_return_minus_one()
+    {
+        // Arrange
+        DateOnly reference = Faker.Date.FutureDateOnly();
+        DateOnlyRange left = new(Faker.Date.PastDateOnly(refDate: reference), Faker.Date.FutureDateOnly(refDate: reference));
+
+        DateOnly rightStart = Faker.Date.FutureDateOnly(refDate: reference);
+        DateOnlyRange right = new(rightStart, Faker.Date.FutureDateOnly(refDate: rightStart));
+
+        outputHelper.WriteLine($"left is {left}");
+        outputHelper.WriteLine($"right is {right}");
+
+        // Act
+        int actual = left.CompareTo(right);
+
+        // Assert
+        actual.Should().Be(-1, $"{nameof(left)} starts before {nameof(right)}");
+    }
 }

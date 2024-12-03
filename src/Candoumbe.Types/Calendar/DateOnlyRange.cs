@@ -3,7 +3,6 @@
 #if NET6_0_OR_GREATER
 
 using System;
-using System.Diagnostics;
 using System.Numerics;
 
 namespace Candoumbe.Types.Calendar;
@@ -11,7 +10,7 @@ namespace Candoumbe.Types.Calendar;
 /// <summary>
 /// Represents a <see cref="DateOnly"/> range
 /// </summary>
-public record DateOnlyRange : Range<DateOnly>
+public record DateOnlyRange : Range<DateOnly>, IRange<DateOnlyRange, DateOnly>, ICanRepresentInfinite<DateOnlyRange, DateOnly>
 #if NET7_0_OR_GREATER
     , IAdditionOperators<DateOnlyRange, DateOnlyRange, DateOnlyRange>
 #endif
@@ -68,7 +67,7 @@ public record DateOnlyRange : Range<DateOnly>
     /// <exception cref="InvalidOperationException">if current instance does not overlap or is not contiguous with <paramref name="other"/>.</exception>
     public DateOnlyRange Merge(DateOnlyRange other)
     {
-        DateOnlyRange result = Empty;
+        DateOnlyRange result;
 
         if (other.IsEmpty())
         {
@@ -115,7 +114,7 @@ public record DateOnlyRange : Range<DateOnly>
     /// Computes  <see cref="DateOnlyRange"/> value that is common between the current instance and <paramref name="other"/>.
     /// </summary>
     /// <remarks>
-    /// This methods relies on <see cref="Range{T}.Overlaps(Range{T})"/> to see if there can be a intersection with <paramref name="other"/>.
+    /// This method relies on <see cref="Range{T}.Overlaps(Range{T})"/> to see if there can be an intersection with <paramref name="other"/>.
     /// </remarks>
     /// <param name="other">The other instance to test</param>
     /// <returns>a <see cref="DateOnlyRange"/> that represent the overlap between the current instance and <paramref name="other"/> or <see cref="Empty"/> when no intersection found.</returns>
@@ -133,5 +132,8 @@ public record DateOnlyRange : Range<DateOnly>
 
     ///<inheritdoc/>
     public bool IsInfinite() => (Start, End).Equals((DateOnly.MinValue, DateOnly.MaxValue));
+
+    /// <inheritdoc />
+    public int CompareTo(DateOnlyRange other) => base.CompareTo(other);
 }
 #endif
