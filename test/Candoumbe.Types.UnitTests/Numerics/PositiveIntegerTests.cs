@@ -1,6 +1,9 @@
 ﻿namespace Candoumbe.Types.UnitTests.Numerics;
 
+using Bogus;
+
 using Candoumbe.Types.Numerics;
+using Candoumbe.Types.UnitTests.Generators;
 
 using FluentAssertions;
 
@@ -11,6 +14,8 @@ using System;
 
 public class PositiveIntegerTests
 {
+    private readonly static Faker Faker = new();
+
     [Property]
     public void Given_PositiveIntegers_When_Addition_Then_ShouldReturnCorrectResult(int left, int right)
     {
@@ -61,6 +66,45 @@ public class PositiveIntegerTests
 
         // Assert
         result.Value.Should().Be(left * right);
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_PositiveInteger_When_multiplying_by_NonNegativeZero_Then_result_should_be_NonNegativeZero(PositiveInteger left)
+    {
+        // Arrange
+        NonNegativeInteger zero = NonNegativeInteger.Zero;
+
+        // Act
+        NonNegativeInteger actual = left * zero;
+
+        // Assert
+        actual.Should().Be(NonNegativeInteger.Zero);
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_PositiveInteger_When_multiplying_by_NonNegativeInteger_Then_result_should_be_a_NonNegativeInteger_which_value_is_left_times_right(PositiveInteger left, NonNegativeInteger right)
+    {
+        // Arrange
+        NonNegativeInteger expected = NonNegativeInteger.From(left * right);
+
+        // Act
+        NonNegativeInteger actual = left * right;
+
+        // Assert
+        actual.Should().Be(expected);
+    }
+
+    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    public void Given_PositiveInteger_When_multiplying_by_NonNegative_identity_Then_result_should_be_the_left_value(PositiveInteger left)
+    {
+        // Arrange
+        NonNegativeInteger identity = NonNegativeInteger.MultiplicativeIdentity;
+
+        // Act
+        NonNegativeInteger actual = left * identity;
+
+        // Assert
+        actual.Should().Be(NonNegativeInteger.From(left));
     }
 
     [Property]
@@ -122,16 +166,95 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_PositiveIntegers_When_CompareTo_Then_ShouldReturnCorrectResult(PositiveInt leftValue, PositiveInt rightValue)
+    public void Given_a_PositiveInteger_When_implicitely_casting_to_int32_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
     {
         // Arrange
-        PositiveInteger left = PositiveInteger.From(leftValue.Item);
-        PositiveInteger right = PositiveInteger.From(rightValue.Item);
+        PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
 
         // Act
-        int result = left.CompareTo(right);
+        int actual = initial;
 
         // Assert
-        result.Should().Be(left.Value.CompareTo(right.Value));
+        actual.Should().Be(initial.Value);
+    }
+
+    [Property]
+    public void Given_a_PositiveInteger_When_implicitely_casting_to_long_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    {
+        // Arrange
+        PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
+
+        // Act
+        long actual = initial;
+
+        // Assert
+        actual.Should().Be(initial.Value);
+    }
+
+    [Property]
+    public void Given_a_PositiveInteger_When_implicitely_casting_to_decimal_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    {
+        // Arrange
+        PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
+
+        // Act
+        decimal actual = initial;
+
+        // Assert
+        actual.Should().Be(initial.Value);
+    }
+
+    [Property]
+    public void Given_a_PositiveInteger_When_implicitely_casting_to_uint_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    {
+        // Arrange
+        PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
+
+        // Act
+        uint actual = initial;
+
+        // Assert
+        actual.Should().Be(initial);
+    }
+
+    [Property]
+    public void Given_a_PositiveInteger_When_implicitely_casting_to_ulong_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    {
+        // Arrange
+        PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
+
+        // Act
+        ulong actual = initial;
+
+        // Assert
+        actual.Should().Be(initial);
+    }
+
+    [Property]
+    public void Given_a_PositiveInteger_When_adding_a_non_negative_value_Then_result_should_be_gte_the_original_value(PositiveInt positiveIntGenerator, NonNegativeInt nonNegativeIntGenerator)
+    {
+        // Arrange
+        PositiveInteger positiveInteger = PositiveInteger.From(positiveIntGenerator.Item);
+        NonNegativeInteger nonNegativeInteger = NonNegativeInteger.From(nonNegativeIntGenerator.Item);
+
+        // Act
+        PositiveInteger actual = positiveInteger + nonNegativeInteger;
+
+        // Assert
+        actual.Should().Be(PositiveInteger.From(positiveInteger.Value + nonNegativeInteger.Value));
+    }
+
+    [Property]
+    public void Given_a_PositiveInteger_When_dividing_by_a_PositiveInteger_Then_result_should_be_NonNegativeInteger(PositiveInt leftGenerator, PositiveInt rightGenerator)
+    {
+        // Arrange
+        PositiveInteger left = PositiveInteger.From(leftGenerator.Item);
+        PositiveInteger right = PositiveInteger.From(rightGenerator.Item);
+
+        // Act
+        NonNegativeInteger actual = left / right;
+
+        // Assert
+        actual.Should().Be(NonNegativeInteger.From(left.Value / right.Value));
     }
 }

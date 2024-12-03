@@ -2,6 +2,7 @@
 // Licenced under GNU General Public Licence, version 3.0"
 
 using Candoumbe.Types.Calendar;
+using Candoumbe.Types.Numerics;
 
 using FsCheck;
 using FsCheck.Fluent;
@@ -33,7 +34,7 @@ internal static class ValueGenerators
                          .Generator
                          .Zip(ArbMap.Default.ArbFor<NonNegativeInt>().Generator)
                          .Select(tuple => (dateTime: tuple.Item1, milliseconds: tuple.Item2.Get))
-                         .Select((dateTimeAndMillisecobds) => TimeOnly.FromDateTime(dateTimeAndMillisecobds.dateTime).Add(TimeSpan.FromMilliseconds(dateTimeAndMillisecobds.milliseconds)))
+                         .Select((dateTimeAndMilliseconds) => TimeOnly.FromDateTime(dateTimeAndMilliseconds.dateTime).Add(TimeSpan.FromMilliseconds(dateTimeAndMilliseconds.milliseconds)))
                          .ToArbitrary();
 
     public static Arbitrary<DateOnlyRange> DateOnlyRanges()
@@ -140,13 +141,17 @@ internal static class ValueGenerators
                     Gen.Constant(DateTimeRange.Empty))
         .ToArbitrary();
 
-    public static Arbitrary<Array> Arrays() => ArbMap.Default.ArbFor<int>().Generator.ArrayOf<int>()
-                                                  .Select(numbers =>
-                                                  {
-                                                      Array array = Array.CreateInstance(typeof(int), numbers.Length);
+    public static Arbitrary<Array> Arrays() => ArbMap.Default.ArbFor<int>().Generator.ArrayOf()
+                                                  .Select(Array (numbers) => numbers)
+                                                  .ToArbitrary();
 
-                                                      numbers.CopyTo(array, 0);
+    public static Arbitrary<PositiveInteger> PositiveIntegers() => ArbMap.Default.ArbFor<PositiveInt>()
+                                                                         .Generator
+                                                                         .Select(value => PositiveInteger.From(value.Item))
+        .ToArbitrary();
 
-                                                      return array;
-                                                  }).ToArbitrary();
+    public static Arbitrary<NonNegativeInteger> NonNegativeIntegers() => ArbMap.Default.ArbFor<NonNegativeInt>()
+                                                                         .Generator
+                                                                         .Select(value => NonNegativeInteger.From(value.Item))
+        .ToArbitrary();
 }

@@ -1,22 +1,15 @@
 ﻿// "Copyright (c) Cyrille NDOUMBE.
 // Licenced under GNU General Public Licence, version 3.0"
 
+using System;
 using Bogus;
-
 using Candoumbe.Types.Calendar;
 using Candoumbe.Types.UnitTests.Generators;
-
 using FluentAssertions;
-using FluentAssertions.Equivalency;
 using FluentAssertions.Extensions;
-
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
-
-using System;
-using System.Collections.Generic;
-
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
@@ -24,30 +17,24 @@ using Xunit.Categories;
 namespace Candoumbe.Types.UnitTests.Calendar;
 
 [UnitTest]
-public class DateTimeRangeTests
+public class DateTimeRangeTests(ITestOutputHelper outputHelper)
 {
-    private readonly ITestOutputHelper _outputHelper;
     private static readonly Faker Faker = new();
 
-    public DateTimeRangeTests(ITestOutputHelper outputHelper)
-    {
-        _outputHelper = outputHelper;
-    }
-
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_start_gt_end_Constructor_should_feed_Properties_accordingly(DateTime start)
     {
         // Arrange
         DateTime end = start.AddDays(1);
 
         // Act
-        Action action = () => new DateTimeRange(start: end, end: start);
+        Action action = () => _ = new DateTimeRange(start: end, end: start);
 
         // Assert
         action.Should().Throw<ArgumentOutOfRangeException>("start cannot be greater than end");
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_start_and_end_Constructor_should_feed_Properties_accordingly(DateTime start)
     {
         // Arrange
@@ -61,7 +48,7 @@ public class DateTimeRangeTests
         range.End.Should().Be(end);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_non_empty_DateTimeRange_that_are_equals_Overlaps_should_return_true(DateTime reference)
     {
         // Arrange
@@ -79,16 +66,42 @@ public class DateTimeRangeTests
                 .BeTrue("Two DateTime ranges that are equal overlaps");
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public FsCheck.Property Given_two_DateTimeRange_instances_Overlaps_should_be_symetric(DateTimeRange left, DateTimeRange right)
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_current_instance_is_not_null_When_comparing_to_null_Then_result_should_be_negative(NonNull<DateTimeRange> dateTimeRangeGenerator)
     {
-        _outputHelper.WriteLine($"{nameof(left)}: {left}");
-        _outputHelper.WriteLine($"{nameof(right)}: {right}");
+        // Arrange
+        DateTimeRange dateTimeRange = dateTimeRangeGenerator.Item;
+
+        // Act
+        int actual = dateTimeRange.CompareTo(null);
+
+        // Assert
+        actual.Should().Be(-1);
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_current_instance_is_not_null_When_comparing_to_itself_Then_result_should_be_zero(NonNull<DateTimeRange> dateTimeRangeGenerator)
+    {
+        // Arrange
+        DateTimeRange dateTimeRange = dateTimeRangeGenerator.Item;
+
+        // Act
+        int actual = dateTimeRange.CompareTo(dateTimeRange);
+
+        // Assert
+        actual.Should().Be(0);
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Given_two_DateTimeRange_instances_Overlaps_should_be_symmetric(DateTimeRange left, DateTimeRange right)
+    {
+        outputHelper.WriteLine($"{nameof(left)}: {left}");
+        outputHelper.WriteLine($"{nameof(right)}: {right}");
 
         return (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
 
     public void Given_two_non_empty_DateTimeRange_instances_when_first_ends_where_other_starts_Abuts_should_return_true(DateTime reference)
     {
@@ -107,16 +120,16 @@ public class DateTimeRangeTests
             .BeTrue();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public FsCheck.Property Given_two_DateTimeRange_instances_IsContiguous_should_be_symetric(DateTimeRange left, DateTimeRange right)
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Given_two_DateTimeRange_instances_IsContiguous_should_be_symetric(DateTimeRange left, DateTimeRange right)
     {
-        _outputHelper.WriteLine($"{nameof(left)}: {left}");
-        _outputHelper.WriteLine($"{nameof(right)}: {right}");
+        outputHelper.WriteLine($"{nameof(left)}: {left}");
+        outputHelper.WriteLine($"{nameof(right)}: {right}");
 
         return (left.IsContiguousWith(right) == right.IsContiguousWith(left)).ToProperty();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateTimeRange_instance_When_Start_eq_End_IsEmpty_should_be_True(DateTime reference)
     {
         // Arrange
@@ -130,7 +143,7 @@ public class DateTimeRangeTests
                .BeTrue();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateTime_value_UpTo_should_build_a_DateTimeRange_up_to_that_value(DateTime reference)
     {
         // Act
@@ -143,7 +156,7 @@ public class DateTimeRangeTests
                  .Be(reference);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateTime_value_DownTo_should_build_a_DateTimeRange_down_to_that_value(DateTime reference)
     {
         // Act
@@ -172,96 +185,86 @@ public class DateTimeRangeTests
               .Should().NotBeNullOrEmpty("the message can be usefull for troubleshooting purposes");
     }
 
-    public static IEnumerable<object[]> OverlapsCases
+    public static TheoryData<DateTimeRange, DateTimeRange, bool> OverlapsCases
     {
         get
         {
-            /* 
-             * first: |---------------|
-             * other:         |---------------| 
-             */
-            yield return new object[]
+            return new TheoryData<DateTimeRange, DateTimeRange, bool>()
             {
-                new DateTimeRange(1.April(1832), 5.April(1945)),
-                new DateTimeRange(3.April(1888), 5.April(1950)),
-                true
-            };
+                /*
+                 * first: |---------------|
+                 * other:         |---------------|
+                 */
+                {
+                    new DateTimeRange(1.April(1832), 5.April(1945)),
+                    new DateTimeRange(3.April(1888), 5.April(1950)),
+                    true
+                },
+                /*
+                 * first: |---------------|
+                 * other:                     |---------------|
+                 */
+                {
+                    new DateTimeRange(1.April(1832), 5.April(1945)),
+                    new DateTimeRange(3.July(1970), 5.April(1980)),
+                    false
+                },
+                /*
+                 * first: |---------------|
+                 * other:                 |---------------|
+                 */
+                {
+                    new DateTimeRange(1.April(1832), 5.April(1945)),
+                    new DateTimeRange(5.April(1945), 5.April(1950)),
+                    false
+                },
+                /*
+                 * first:         |--------|
+                 * other:      |---------------|
+                 */
+                {
+                    new DateTimeRange(1.April(1832), 5.April(1945)),
+                    new DateTimeRange(14.July(1789), 5.April(1950)),
+                    true
+                },
 
-            /* 
-             * first: |---------------|
-             * other:                     |---------------| 
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(1.April(1832), 5.April(1945)),
-                new DateTimeRange(3.July(1970), 5.April(1980)),
-                false
-            };
+                /*
+                 * first:    |
+                 * other:      |---------------|
+                 */
+                {
+                    new DateTimeRange(1.April(1430), 1.April(1430)),
+                    new DateTimeRange(14.July(1789), 5.April(1950)),
+                    false
+                },
 
-            /* 
-             * first: |---------------|
-             * other:                 |---------------| 
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(1.April(1832), 5.April(1945)),
-                new DateTimeRange(5.April(1945), 5.April(1950)),
-                false
-            };
-
-            /* 
-             * first:         |--------|
-             * other:      |---------------| 
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(1.April(1832), 5.April(1945)),
-                new DateTimeRange(14.July(1789), 5.April(1950)),
-                true
-            };
-
-            /* 
-             * first:    |
-             * other:      |---------------| 
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(1.April(1430), 1.April(1430)),
-                new DateTimeRange(14.July(1789), 5.April(1950)),
-                false
-            };
-
-            /* 
-             * first:          |
-             * other:      |---------------| 
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(17.July(1859), 17.July(1859)),
-                new DateTimeRange(14.July(1789), 5.April(1950)),
-                true
-            };
-
-            /* 
-             * first:      |
-             * other:      |---------------| 
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(14.July(1859), 14.July(1859)),
-                new DateTimeRange(14.July(1789), 5.April(1950)),
-                true
-            };
-
-            /* 
-             * first:                      |
-             * other:      |---------------| 
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(5.July(1859), 5.July(1950)),
-                new DateTimeRange(14.July(1789), 5.April(1950)),
-                true
+                /*
+                 * first:          |
+                 * other:      |---------------|
+                 */
+                {
+                    new DateTimeRange(17.July(1859), 17.July(1859)),
+                    new DateTimeRange(14.July(1789), 5.April(1950)),
+                    true
+                },
+                /*
+                 * first:      |
+                 * other:      |---------------|
+                 */
+                {
+                    new DateTimeRange(14.July(1859), 14.July(1859)),
+                    new DateTimeRange(14.July(1789), 5.April(1950)),
+                    true
+                },
+                /*
+                 * first:                      |
+                 * other:      |---------------|
+                 */
+                {
+                    new DateTimeRange(5.July(1859), 5.July(1950)),
+                    new DateTimeRange(14.July(1789), 5.April(1950)),
+                    true
+                }
             };
         }
     }
@@ -277,11 +280,24 @@ public class DateTimeRangeTests
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public FsCheck.Property Overlaps_should_be_symetric(DateTimeRange left, DateTimeRange right)
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_a_range_When_a_datetime_value_is_between_start_and_end_Then_Overlaps_should_return_true(DateTimeRange range)
+    {
+        // Arrange
+        DateTime value = Faker.Date.Between(range.Start, range.End);
+
+        // Act
+        bool actual = range.Overlaps(value);
+
+        // Assert
+        actual.Should().BeTrue($"{value:u} is between {range.Start:u} and {range.End:u}");
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Overlaps_should_be_symmetric(DateTimeRange left, DateTimeRange right)
         => (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_AllTime_when_testing_overlap_with_any_other_DateTimeRange_Overlaps_should_be_true(DateTimeRange other)
     {
         // Act
@@ -292,82 +308,77 @@ public class DateTimeRangeTests
               .BeTrue($"AllTime range overlaps every other {nameof(DateTimeRange)}s");
     }
 
-    public static IEnumerable<object[]> MergeCases
+    public static TheoryData<DateTimeRange, DateTimeRange, DateTimeRange> MergeCases
     {
-        get
-        {
-            /* 
-             * current   : |---------------|
-             * other     :         |---------------| 
-             * expected  : |-----------------------| 
-             */
-            yield return new object[]
+        get =>
+            new()
             {
-                new DateTimeRange(1.January(1990), 6.January(1990)),
-                new DateTimeRange(4.January(1990), 8.January(1990)),
-                new DateTimeRange(1.January(1990), 8.January(1990)),
-            };
+                /*
+                 * current   : |---------------|
+                 * other     :         |---------------|
+                 * expected  : |-----------------------|
+                 */
+                {
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    new DateTimeRange(4.January(1990), 8.January(1990)),
+                    new DateTimeRange(1.January(1990), 8.January(1990))
+                },
 
-            /* 
-             * current   :         |---------------| 
-             * other     : |---------------|
-             * expected  : |-----------------------| 
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(4.January(1990), 8.January(1990)),
-                new DateTimeRange(1.January(1990), 6.January(1990)),
-                new DateTimeRange(1.January(1990), 8.January(1990)),
-            };
+                /*
+                 * current   :         |---------------|
+                 * other     : |---------------|
+                 * expected  : |-----------------------|
+                 */
+                {
+                    new DateTimeRange(4.January(1990), 8.January(1990)),
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    new DateTimeRange(1.January(1990), 8.January(1990))
+                },
 
-            /* 
-             * current   :                 |---------------| 
-             * other     : |---------------|
-             * expected  : |-------------------------------| 
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(1.January(1990), 6.January(1990)),
-                new DateTimeRange(6.January(1990), 8.January(1990)),
-                new DateTimeRange(1.January(1990), 8.January(1990)),
-            };
+                /*
+                 * current   :                 |---------------|
+                 * other     : |---------------|
+                 * expected  : |-------------------------------|
+                 */
+                {
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    new DateTimeRange(6.January(1990), 8.January(1990)),
+                    new DateTimeRange(1.January(1990), 8.January(1990))
+                },
 
-            /* 
-             * current     : |---------------|
-             * other       :                 |---------------| 
-             * expected    : |-------------------------------| 
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(6.January(1990), 8.January(1990)),
-                new DateTimeRange(1.January(1990), 6.January(1990)),
-                new DateTimeRange(1.January(1990), 8.January(1990)),
-            };
+                /*
+                 * current     : |---------------|
+                 * other       :                 |---------------|
+                 * expected    : |-------------------------------|
+                 */
+                {
+                    new DateTimeRange(6.January(1990), 8.January(1990)),
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    new DateTimeRange(1.January(1990), 8.January(1990))
+                },
 
-            /* 
-             * current     : |---------------------|
-             * other       :         |---------| 
-             * expected    : |---------------------|
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(1.January(1990), 6.January(1990)),
-                new DateTimeRange(3.January(1990), 5.January(1990)),
-                new DateTimeRange(1.January(1990), 6.January(1990)),
-            };
+                /*
+                 * current     : |---------------------|
+                 * other       :         |---------|
+                 * expected    : |---------------------|
+                 */
+                {
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    new DateTimeRange(3.January(1990), 5.January(1990)),
+                    new DateTimeRange(1.January(1990), 6.January(1990))
+                },
 
-            /* 
-             * current     : |---------------------|
-             * other       :         | 
-             * expected    : |---------------------|
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(1.January(1990), 6.January(1990)),
-                new DateTimeRange(4.January(1990), 4.January(1990)),
-                new DateTimeRange(1.January(1990), 6.January(1990)),
+                /*
+                 * current     : |---------------------|
+                 * other       :         |
+                 * expected    : |---------------------|
+                 */
+                {
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    new DateTimeRange(4.January(1990), 4.January(1990)),
+                    new DateTimeRange(1.January(1990), 6.January(1990))
+                }
             };
-        }
     }
 
     [Theory]
@@ -376,86 +387,79 @@ public class DateTimeRangeTests
     {
         // Act
         DateTimeRange actual = current.Merge(other);
-        _outputHelper.WriteLine($"Result: {actual}");
+        outputHelper.WriteLine($"Result: {actual}");
 
         // Assert
         actual.Should().Be(expected);
     }
 
-    public static IEnumerable<object[]> IntersectCases
+    public static TheoryData<DateTimeRange, DateTimeRange, DateTimeRange> IntersectCases
     {
         get
         {
-            /*
-             * current  :     |
-             * other    :  |
-             * expected :  |
-             */
-            yield return new object[]
+            return new TheoryData<DateTimeRange, DateTimeRange, DateTimeRange>()
             {
-                DateTimeRange.Empty,
-                DateTimeRange.Empty,
-                DateTimeRange.Empty
-            };
+                /*
+                 * current  :     |
+                 * other    :  |
+                 * expected :  |
+                 */
+                {
+                    DateTimeRange.Empty,
+                    DateTimeRange.Empty,
+                    DateTimeRange.Empty
+                },
+                /*
+                 * current   :  |-----------|
+                 * other     :          |------------|
+                 * expected  :          |---|
+                 */
+                {
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    new DateTimeRange(4.January(1990), 8.February(1990)),
+                    new DateTimeRange(4.January(1990), 6.January(1990))
+                },
+                /*
+                 * current   :          |------------|
+                 * other     :  |-----------|
+                 * expected  :          |---|
+                 */
+                {
+                    new DateTimeRange(3.January(1990), 5.January(1990)),
+                    new DateTimeRange(1.January(1990), 4.January(1990)),
+                    new DateTimeRange(3.January(1990), 4.January(1990))
+                },
+                /*
+                 * current   :  |-----------|
+                 * other     :      |-----|
+                 * expected  :      |-----|
+                 */
+                {
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    new DateTimeRange(3.January(1990), 5.January(1990)),
+                    new DateTimeRange(3.January(1990), 5.January(1990))
+                },
 
-            /*
-             * current   :  |-----------|
-             * other     :          |------------|
-             * expected  :          |---|
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(1.January(1990), 6.January(1990)),
-                new DateTimeRange(4.January(1990), 8.February(1990)),
-                new DateTimeRange(4.January(1990), 6.January(1990)),
-            };
-
-            /*
-             * current   :          |------------|
-             * other     :  |-----------|
-             * expected  :          |---|
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(3.January(1990), 5.January(1990)),
-                new DateTimeRange(1.January(1990), 4.January(1990)),
-                new DateTimeRange(3.January(1990), 4.January(1990)),
-            };
-
-            /*
-             * current   :  |-----------|
-             * other     :      |-----|
-             * expected  :      |-----|
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(1.January(1990), 6.January(1990)),
-                new DateTimeRange(3.January(1990), 5.January(1990)),
-                new DateTimeRange(3.January(1990), 5.January(1990)),
-            };
-
-            /*
-             * current   :  |----|
-             * other     :          |------------|
-             * expected  :  |
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(1.January(1990), 6.January(1990)),
-                new DateTimeRange(18.February(1990), 25.July(1990)),
-                DateTimeRange.Empty
-            };
-
-            /*
-             * current   :  |----|
-             * other     :  ----------------------
-             * expected  :  |----|
-             */
-            yield return new object[]
-            {
-                new DateTimeRange(1.January(1990), 6.January(1990)),
-                DateTimeRange.Infinite,
-                new DateTimeRange(1.January(1990), 6.January(1990)),
+                /*
+                 * current   :  |----|
+                 * other     :          |------------|
+                 * expected  :  |
+                 */
+                {
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    new DateTimeRange(18.February(1990), 25.July(1990)),
+                    DateTimeRange.Empty
+                },
+                /*
+                 * current   :  |----|
+                 * other     :  ----------------------
+                 * expected  :  |----|
+                 */
+                {
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    DateTimeRange.Infinite,
+                    new DateTimeRange(1.January(1990), 6.January(1990))
+                }
             };
         }
     }
@@ -473,11 +477,11 @@ public class DateTimeRangeTests
                     .Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public FsCheck.Property Intersect_should_be_symetric(DateTimeRange left, DateTimeRange right)
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Intersect_should_be_symetric(DateTimeRange left, DateTimeRange right)
         => (left.Intersect(right) == right.Intersect(left)).ToProperty();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Empty_should_be_the_neutral_element_of_DateTimeRange(DateTimeRange range)
     {
         // Act
@@ -488,7 +492,7 @@ public class DateTimeRangeTests
               .Be(range);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_DateTimeRange_is_empty_When_value_is_anything_Overlaps_should_returns_Inconclusive(DateTime date)
     {
         // Arrange
@@ -514,27 +518,15 @@ public class DateTimeRangeTests
         actual.Should().BeTrue($"The {nameof(DateTimeRange.Infinite)} contains all {nameof(DateTime)} values");
     }
 
-    [Property]
-    public void Given_DateTimeRange_is_not_empty_and_not_infinite_When_value_is_between_Start_and_End_Overlaps_should_returns_Yes(DateTime date)
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Given_a_range_When_testing_against_a_DateTime_that_is_between_lower_and_upper_bound_Then_Overlaps_should_return_true(NonNull<DateTimeRange> rangeGenerator)
     {
         // Arrange
-        DateTime start = Faker.PickRandom(Faker.Date.Recent(refDate: date),
-                                          Faker.Date.Past(refDate: date));
-
-        DateTime end = Faker.PickRandom(Faker.Date.Soon(refDate: date),
-                                        Faker.Date.Future(refDate: date));
-
-        DateTimeRange dateRange = (start == end) switch
-        {
-            true => new DateTimeRange(start.AddMicroseconds(-1), end.AddMicroseconds(1)),
-            _ => new DateTimeRange(start, end)
-        };
-
-        // Act
-        bool actual = dateRange.Overlaps(date);
+        DateTimeRange range = rangeGenerator.Item;
+        DateTime value = Faker.Date.Between(range.Start, range.Start);
 
         // Assert
-        actual.Should().BeTrue($"{dateRange} contains {date} value");
+        return range.Overlaps(value).ToProperty();
     }
 
     [Fact]
@@ -556,5 +548,19 @@ public class DateTimeRangeTests
 
         // Assert
         actual.Should().BeFalse($"{dateRange} does not contains {value} value");
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_a_non_empty_DateTimeRange_When_merging_with_AdditiveIdentity_Then_the_result_should_be_the_initial_range(NonNull<DateTimeRange> rangeGenerator)
+    {
+        // Arrange
+        DateTimeRange range = rangeGenerator.Item;
+
+        // Act
+        DateTimeRange actual = range.Merge(DateTimeRange.AdditiveIdentity);
+
+        // Assert
+        actual.Should().Be(range);
+
     }
 }

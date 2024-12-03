@@ -2,22 +2,23 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace></RootNamespace>
     <NoWarn>CS0649;CS0169</NoWarn>
     <NukeRootDirectory>..</NukeRootDirectory>
     <NukeScriptDirectory>..</NukeScriptDirectory>
     <NukeTelemetryVersion>1</NukeTelemetryVersion>
-  </PropertyGroup>
+      <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+</PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="6.3.0" />
-    <PackageReference Include="Candoumbe.Pipelines" Version="0.3.0-alpha0011" />
+    <PackageReference Include="Candoumbe.Pipelines" Version="0.11.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageDownload Include="GitVersion.Tool" Version="[6.0.5]" />
     <PackageDownload Include="CodeCov.Tool" Version="[1.13.0]" />
-    <PackageDownload Include="GitVersion.Tool" Version="[5.11.1]" />
+    <PackageDownload Include="CodecovUploader" Version="[0.8.0]" />
     <PackageDownload Include="ReportGenerator" Version="[5.1.13]" />
   </ItemGroup>
 

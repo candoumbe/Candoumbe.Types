@@ -14,9 +14,11 @@ namespace Candoumbe.Types.Calendar;
 /// spans from <see cref="Range{DateTime}.Start"/> to <see cref="Range{DateTime}.End"/> (inclusive). 
 /// </summary>
 #if !NET5_0_OR_GREATER
-public class DateTimeRange : Range<DateTime>, IEquatable<DateTimeRange>
+public class DateTimeRange : Range<DateTime>, IFormattable
+    , ICanRepresentEmpty<DateTimeRange, DateTime>
+    , IRange<DateTimeRange, DateTime>
 #else
-public record DateTimeRange : Range<DateTime>
+public record DateTimeRange : Range<DateTime>, IFormattable
 #endif
 #if NET7_0_OR_GREATER
     , IAdditionOperators<DateTimeRange, DateTimeRange, DateTimeRange>
@@ -57,10 +59,24 @@ public record DateTimeRange : Range<DateTime>
     }
 
     ///<inheritdoc/>
-    public override string ToString() => $"{Start} - {End}";
+    public int CompareTo(DateTimeRange other) => other switch
+    {
+        null => -1,
+        _ => Start.CompareTo(other.Start) switch
+        {
+            int and 0 => End.CompareTo(other.End),
+            int value => value
+        }
+    };
+
+    ///<inheritdoc/>
+    public string ToString(string format, IFormatProvider provider)
+        => (Start == End)
+            ? Start.ToString(format, provider)
+            :$"{Start.ToString(format, provider)} - {End.ToString(format, provider)}";
 
     /// <summary>
-    /// Builds a new <see cref="DateTimeRange"/> that spans from <see cref="DateTime.MaxValue"/> up to <paramref name="date"/>
+    /// Builds a new <see cref="DateTimeRange"/> that spans from <see cref="DateTime.MinValue"/> up to the specified <paramref name="date"/>
     /// </summary>
     /// <param name="date">The desired upper limit</param>
     /// <returns>a <see cref="DateTimeRange"/> that spans up to <paramref name="date"/>.</returns>
@@ -78,7 +94,7 @@ public record DateTimeRange : Range<DateTime>
     /// </summary>
     /// <param name="other">The other <see cref="DateTimeRange"/> to span over</param>
     /// <returns>A new <see cref="DateTimeRange"/> than spans over both current and <paramref name="other"/> range</returns>
-    /// <exception cref="InvalidOperationException">if either : current instance does not overlap or is not continuous with <paramref name="other"/>.</exception>
+    /// <exception cref="InvalidOperationException">if current instance does not overlap or is not continuous with <paramref name="other"/>.</exception>
     public DateTimeRange Merge(DateTimeRange other)
     {
         DateTimeRange result = Empty;
@@ -176,10 +192,13 @@ public record DateTimeRange : Range<DateTime>
 #endif
 
     ///<inheritdoc/>
-    public override bool Overlaps(Range<DateTime> other)
+    public bool Overlaps(DateTimeRange other)
         => (IsInfinite() && other.IsEmpty())
-           || (IsEmpty() && Infinite.Equals(other))
+           || (IsEmpty() && other.IsInfinite())
            || base.Overlaps(other);
+
+    /// <inheritdoc />
+    public bool Overlaps(DateTime other) => Start <= other && other <= End;
 
 #if !NET5_0_OR_GREATER
     ///<inheritdoc/>
@@ -199,7 +218,6 @@ public record DateTimeRange : Range<DateTime>
         return hashCode;
     }
 #endif
-
 
     ///<inheritdoc/>
     public virtual bool Equals(DateTimeRange other) => other is not null &&

@@ -2,13 +2,14 @@
 // Licenced under GNU General Public Licence, version 3.0"
 
 #if NET6_0_OR_GREATER
-// "Copyright (c) Cyrille NDOUMBE.
-// Licenced under GNU General Public Licence, version 3.0"
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+#if NET8_0_OR_GREATER
 using System.Numerics;
+#endif
 using System.Text;
 
 namespace Candoumbe.Types.Calendar;
@@ -16,24 +17,20 @@ namespace Candoumbe.Types.Calendar;
 /// <summary>
 /// A type that optimize the storage of several <see cref="DateOnlyRange"/>s.
 /// </summary>
-public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
+public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<DateOnlyRange>
 #if NET7_0_OR_GREATER
     , IAdditionOperators<MultiDateOnlyRange, MultiDateOnlyRange, MultiDateOnlyRange>
     , IAdditionOperators<MultiDateOnlyRange, DateOnlyRange, MultiDateOnlyRange>
     , IUnaryNegationOperators<MultiDateOnlyRange, MultiDateOnlyRange>
+    , IEqualityOperators<MultiDateOnlyRange, MultiDateOnlyRange, bool>
 #endif
 {
-    /// <summary>
-    /// Ranges holded by the current instance.
-    /// </summary>
-    public IEnumerable<DateOnlyRange> Ranges => _ranges.ToArray();
-
-    private readonly ISet<DateOnlyRange> _ranges;
+    private readonly HashSet<DateOnlyRange> _ranges;
 
     /// <summary> 
     /// A <see cref="MultiDateOnlyRange"/> that contains no <see cref="DateOnlyRange"/>.
     /// </summary>
-    public static MultiDateOnlyRange Empty => new();
+    public static MultiDateOnlyRange Empty => [];
 
     /// <summary>
     /// A <see cref="MultiDateOnlyRange"/> that overlaps any other <see cref="MultiDateOnlyRange"/>.
@@ -52,6 +49,12 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
             Add(range);
         }
     }
+
+    /// <inheritdoc />
+    public IEnumerator<DateOnlyRange> GetEnumerator() => _ranges.OrderBy(x => x.Start).GetEnumerator();
+
+    /// <inheritdoc />
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
     /// Adds <paramref name="range"/>.
@@ -108,7 +111,11 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
     /// <param name="other">The other instance to add</param>
     /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/></exception>
     /// <returns>a <see cref="MultiDateOnlyRange"/> that represents the union of the current instance with <paramref name="other"/>.</returns>
-    public MultiDateOnlyRange Merge(MultiDateOnlyRange other) => new(_ranges.Union(other.Ranges).ToArray());
+    public MultiDateOnlyRange Merge(MultiDateOnlyRange other)
+    {
+        ArgumentNullException.ThrowIfNull(other);
+        return new MultiDateOnlyRange([.. _ranges.Union(other._ranges)]);
+    }
 
 #if !NET7_0_OR_GREATER
     /// <summary>
@@ -120,13 +127,19 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
 #else
     ///<inheritdoc/>
 #endif
-    public static MultiDateOnlyRange operator +(MultiDateOnlyRange left, MultiDateOnlyRange right) => left.Merge(right);
+    public static MultiDateOnlyRange operator +(MultiDateOnlyRange left, MultiDateOnlyRange right)
+    {
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
+
+        return left.Merge(right);
+    }
 
     /// <summary>
-    /// Checks if the current instance contains one or more <see cref="DateOnlyRange"/>s which, combined together, overlap the specified <paramref name="range"/>.
+    /// Checks if the current instance contains one or more <see cref="DateOnlyRange"/>s which, once combined, overlap the specified <paramref name="range"/>.
     /// </summary>
     /// <param name="range">The range to test</param>
-    /// <returns><see langword="true"/> if the current instance contains <see cref="DateOnlyRange"/>s which combined together overlap <paramref name="range"/> and <see langword="false"/> otherwise.</returns>
+    /// <returns><see langword="true"/> if the current instance contains <see cref="DateOnlyRange"/>s which, once combined, overlap <paramref name="range"/> and <see langword="false"/> otherwise.</returns>
     public bool Overlaps(DateOnlyRange range)
     {
         return _ranges.Count != 0
@@ -135,10 +148,10 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
     }
 
     /// <summary>
-    /// Checks if the current instance contains one or more <see cref="TimeOnlyRange"/>s which, combined together, covers the specified <paramref name="other"/>.
+    /// Checks if the current instance contains one or more <see cref="TimeOnlyRange"/>s which, once combined, cover the specified <paramref name="other"/>.
     /// </summary>
     /// <param name="other">The range to test</param>
-    /// <returns><see langword="true"/> if the current instance contains <see cref="TimeOnlyRange"/>s which combined together covers <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
+    /// <returns><see langword="true"/> if the current instance contains <see cref="TimeOnlyRange"/>s which, once combined, cover <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
     public bool Overlaps(MultiDateOnlyRange other) => other is not null
                                                     && _ranges.AsParallel().All(other.Overlaps);
 
@@ -209,9 +222,9 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
                                 case 0:
                                     complement.Add(DateOnlyRange.UpTo(current.Start));
                                     break;
-                                case int index when index <= ranges.Length - 2:
+                                case int _ when i <= ranges.Length - 2:
                                     {
-                                        DateOnlyRange previous = ranges[i - 1];
+                                        DateOnlyRange previous = ranges[i- 1];
                                         DateOnlyRange next = ranges[i + 1];
                                         complement.Add(new DateOnlyRange(previous.End, current.Start));
                                         complement.Add(new DateOnlyRange(current.End, next.Start));
@@ -255,7 +268,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
         bool equals = false;
         if (other is not null)
         {
-            equals = ReferenceEquals(this, other) || (Overlaps(other) && other.Overlaps(this));
+            equals = ReferenceEquals(this, other) || (IsEmpty() && other.IsEmpty()) || (Overlaps(other) && other.Overlaps(this));
         }
         return equals;
     }
@@ -275,6 +288,36 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>
 
         return hashCode.ToHashCode();
     }
+
+#if !NET8_0_OR_GREATER
+    ///<summary>
+    /// Compares two values to determine equality
+    /// </summary>
+    /// <param name="left">The value to compare to <paramref name="right"/></param>
+    /// <param name="right">The value to compare to <paramref name="left"/></param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is equal to <paramref name="right"/>; otherwise, <see langword="false"/></returns>
+#else
+    /// <inheritdoc /> 
+#endif
+    public static bool operator ==(MultiDateOnlyRange left, MultiDateOnlyRange right)
+        => ( left, right ) switch
+        {
+            (null, null) => true,
+            (null, not null) => false,
+            _ => left.Equals(right),
+        };
+
+#if !NET8_0_OR_GREATER
+    ///<summary>
+    /// Compares two values to determine inequality
+    /// </summary>
+    /// <param name="left">The value to compare to <paramref name="right"/></param>
+    /// <param name="right">The value to compare to <paramref name="left"/></param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is not equal to <paramref name="right"/>; otherwise, <see langword="false"/></returns>
+#else
+    /// <inheritdoc /> 
+#endif
+    public static bool operator !=(MultiDateOnlyRange left, MultiDateOnlyRange right) => !(left == right);
 }
 
 #endif

@@ -1,9 +1,5 @@
 {
   "stryker-config": {
-    "reporters": [
-      "progress",
-      "html"
-    ],
-    "target-framework": "net7.0"
+    "concurrency": 10
   }
 }

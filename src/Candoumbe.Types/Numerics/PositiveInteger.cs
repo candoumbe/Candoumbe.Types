@@ -7,39 +7,35 @@ using System.Numerics;
 namespace Candoumbe.Types.Numerics
 {
     /// <summary>
-    /// A numeric type which value is garantied to never be less than <c>0</c>
+    /// A numeric type which value is garantied to always be greater than <c>0</c>
     /// </summary>
     public record PositiveInteger : IEquatable<PositiveInteger>, IComparable<PositiveInteger>
 #if NET7_0_OR_GREATER
         , IAdditionOperators<PositiveInteger, PositiveInteger, PositiveInteger>
+        , IAdditionOperators<PositiveInteger, NonNegativeInteger, PositiveInteger>
         , ISubtractionOperators<PositiveInteger, PositiveInteger, PositiveInteger>
         , IMultiplyOperators<PositiveInteger, PositiveInteger, PositiveInteger>
+        , IDivisionOperators<PositiveInteger, PositiveInteger, NonNegativeInteger>
+        , IMultiplyOperators<PositiveInteger, NonNegativeInteger, NonNegativeInteger>
         , IComparisonOperators<PositiveInteger, PositiveInteger, bool>
         , IMinMaxValue<PositiveInteger>
         , IMultiplicativeIdentity<PositiveInteger, PositiveInteger>
 
 #endif
     {
-
-
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
 #else
         /// <summary>
         /// The multiplicative identity of the current type
-        /// </summary> 
+        /// </summary>
 #endif
         public static PositiveInteger MultiplicativeIdentity => One;
 
         /// <summary>
-        /// The zero value
-        /// </summary>
-        public static PositiveInteger Zero => new(0);
-
-        /// <summary>
         /// The one value
         /// </summary>
-        public static PositiveInteger One => new(1);
+        public static PositiveInteger One => From(1);
 
         private PositiveInteger(int value)
         {
@@ -79,7 +75,7 @@ namespace Candoumbe.Types.Numerics
         /// </summary>
         /// <param name="value"></param>
         /// <returns>a <see cref="PositiveInteger"/> which initial value is <paramref name="value"/>.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> &lt; <c>1</c>.</exception>
         public static PositiveInteger From(int value) => new PositiveInteger(value);
 
 #if NET7_0_OR_GREATER
@@ -92,7 +88,19 @@ namespace Candoumbe.Types.Numerics
         /// <param name="right">The right value</param>
         /// <returns>the sum of <paramref name="left"/> and <paramref name="right"/>.</returns>
 #endif
-        public static PositiveInteger operator +(PositiveInteger left, PositiveInteger right) => new PositiveInteger(left.Value + right.Value);
+        public static PositiveInteger operator +(PositiveInteger left, PositiveInteger right) => From(left.Value + right.Value);
+
+#if NET7_0_OR_GREATER
+        ///<inheritdoc/>
+#else
+        /// <summary>
+        /// Adds two values together and computes their sum
+        /// </summary>
+        /// <param name="left">The left value</param>
+        /// <param name="right">The right value</param>
+        /// <returns>the sum of <paramref name="left"/> and <paramref name="right"/>.</returns>
+#endif
+        public static PositiveInteger operator +(PositiveInteger left, NonNegativeInteger right) => From(left.Value + right.Value);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -122,7 +130,38 @@ namespace Candoumbe.Types.Numerics
         /// <returns>The result of <paramref name="left"/> multiplied by <paramref name="right"/>.</returns>
 #endif
         public static PositiveInteger operator *(PositiveInteger left, PositiveInteger right)
-            => new PositiveInteger(left.Value * right.Value);
+            => From(left.Value * right.Value);
+
+#if NET7_0_OR_GREATER
+        ///<inheritdoc/>
+#else
+        /// <summary>
+        /// Divides two values together to compute their fraction.
+        /// </summary>
+        /// <param name="left">The left value</param>
+        /// <param name="right">The right value</param>
+        /// <returns>The result of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
+#endif
+        public static NonNegativeInteger operator /(PositiveInteger left, PositiveInteger right)
+            => NonNegativeInteger.From(left.Value / right.Value);
+
+#if NET7_0_OR_GREATER
+        ///<inheritdoc/>
+#else
+        /// <summary>
+        /// Multiplies two values together to compute their product.
+        /// </summary>
+        /// <param name="left">The left value</param>
+        /// <param name="right">The right value</param>
+        /// <returns>The result of <paramref name="left"/> multiplied by <paramref name="right"/>.</returns>
+#endif
+        public static NonNegativeInteger operator *(PositiveInteger left, NonNegativeInteger right)
+            => right switch
+            {
+                { Value: 0 } => right,
+                { Value: 1 } => left,
+                _ => From(left.Value * right.Value)
+            };
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -182,5 +221,26 @@ namespace Candoumbe.Types.Numerics
                 ? throw new ArgumentNullException(nameof(other), $"{nameof(other)} cannot be null")
                 : Value.CompareTo(other.Value);
         }
+
+        ///<inheritdoc/>
+        public static implicit operator int(PositiveInteger x) => x.Value;
+
+        ///<inheritdoc/>
+        public static implicit operator long(PositiveInteger x) => x.Value;
+
+        ///<inheritdoc/>
+        public static implicit operator ulong(PositiveInteger x) => (ulong)x.Value;
+
+        ///<inheritdoc/>
+        public static implicit operator decimal(PositiveInteger x) => x.Value;
+
+        ///<inheritdoc/>
+        public static implicit operator uint(PositiveInteger x) => (uint)x.Value;
+
+        /// <summary>
+        /// Implicitely cast to <see cref="NonNegativeInteger"/> type
+        /// </summary>
+        /// <param name="x"></param>
+        public static implicit operator NonNegativeInteger(PositiveInteger x) => NonNegativeInteger.From(x.Value);
     }
 }

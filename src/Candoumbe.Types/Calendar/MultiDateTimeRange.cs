@@ -2,6 +2,7 @@
 // Licenced under GNU General Public Licence, version 3.0"
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 #if NET7_0_OR_GREATER
@@ -14,7 +15,7 @@ namespace Candoumbe.Types.Calendar;
 /// <summary>
 /// A type that optimize the storage of several <see cref="DateTimeRange"/>.
 /// </summary>
-public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
+public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<DateTimeRange>
 #if NET7_0_OR_GREATER
     , IAdditionOperators<MultiDateTimeRange, MultiDateTimeRange, MultiDateTimeRange>
     , IAdditionOperators<MultiDateTimeRange, DateTimeRange, MultiDateTimeRange>
@@ -31,12 +32,12 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
     /// <summary>
     /// A <see cref="MultiDateTimeRange"/> that contains no <see cref="DateTimeRange"/>.
     /// </summary>
-    public static MultiDateTimeRange Empty => new();
+    public static MultiDateTimeRange Empty => [];
 
     /// <summary>
     /// A <see cref="MultiDateTimeRange"/> that overlaps any other <see cref="MultiDateTimeRange"/>.
     /// </summary>
-    public static MultiDateTimeRange Infinite => new(DateTimeRange.Infinite);
+    public static MultiDateTimeRange Infinite => [DateTimeRange.Infinite];
 
     /// <summary>
     /// Builds a new <see cref="MultiDateTimeRange"/> instance
@@ -54,6 +55,12 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
             Add(range);
         }
     }
+
+    /// <inheritdoc/>
+    public IEnumerator<DateTimeRange> GetEnumerator() => _ranges.GetEnumerator();
+
+    /// <inheritdoc/>
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
     /// Adds <paramref name="range"/>.
@@ -82,10 +89,11 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
         }
         else
         {
-            DateTimeRange[] previous = _ranges.Where(item => item.IsContiguousWith(range) || item.Overlaps(range))
-                                              .OrderBy(x => x.Start)
-                                              .ToArray();
-            if (previous.Length != 0)
+            IReadOnlyList<DateTimeRange> previous = [ .. _ranges.Where(item => item.IsContiguousWith(range) || item.Overlaps(range))
+                                                                .OrderBy(x => x.Start)
+            ];
+
+            if (previous.Count != 0)
             {
                 previous.ForEach(item => _ranges.Remove(item));
                 DateTimeRange union = previous.Aggregate(range, (a, b) => a.Merge(b));
@@ -121,7 +129,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
     /// <param name="other">The other instance to add</param>
     /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/></exception>
     /// <returns>a <see cref="MultiDateTimeRange"/> that represents the union of the current instance with <paramref name="other"/>.</returns>
-    public MultiDateTimeRange Merge(MultiDateTimeRange other) => new(_ranges.Union(other.Ranges).ToArray());
+    public MultiDateTimeRange Merge(MultiDateTimeRange other) => [.. this, .. other];
 
     /// <summary>
     /// Performs a "union" operation between <paramref name="left"/> and <paramref name="right"/> elements.
@@ -132,13 +140,13 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
     public static MultiDateTimeRange operator +(MultiDateTimeRange left, MultiDateTimeRange right) => left.Merge(right);
 
     /// <summary>
-    /// Tests if the current instance contains one or more <see cref="DateTimeRange"/> which, combined together, overlap the specified <paramref name="range"/>.
+    /// Tests if the current instance contains one or more <see cref="DateTimeRange"/> which, once combined, overlap the specified <paramref name="range"/>.
     /// </summary>
     /// <param name="range">The range to test</param>
-    /// <returns><see langword="true"/> if the current instance contains <see cref="DateTimeRange"/>s which combined together overlap <paramref name="range"/> and <see langword="false"/> otherwise.</returns>
+    /// <returns><see langword="true"/> if the current instance contains <see cref="DateTimeRange"/>s which, once combined, overlap <paramref name="range"/> and <see langword="false"/> otherwise.</returns>
     public bool Overlaps(DateTimeRange range)
     {
-        bool covers = false;
+        bool covers;
 
         if (_ranges.Count == 0)
         {
@@ -146,10 +154,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
         }
         else
         {
-            covers = _ranges
-#if !NETSTANDARD1_0
-        .AsParallel()
-#endif
+            covers = _ranges.AsParallel()
                             .Any(item => (item.Overlaps(range) && item.Start <= range.Start && range.End <= item.End)
                                          || item == range);
         }
@@ -158,20 +163,13 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
     }
 
     /// <summary>
-    /// Checks if the current instance contains one or more <see cref="DateTimeRange"/>s which, combined together, covers the specified <paramref name="other"/>.
+    /// Checks if the current instance contains one or more <see cref="DateTimeRange"/>s which, once combined, cover the specified <paramref name="other"/>.
     /// </summary>
     /// <param name="other">The range to test</param>
-    /// <returns><see langword="true"/> if the current instance contains <see cref="DateTimeRange"/>s which combined together covers <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
+    /// <returns><see langword="true"/> if the current instance contains <see cref="DateTimeRange"/>s which, once combined, cover <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
     public bool Overlaps(MultiDateTimeRange other) => other is not null
-#if NETSTANDARD1_0
-                                                    && other.Ranges.All(range => Overlaps(range))
-                                                    && _ranges.All(range => other.Overlaps(range))
-#else
-                                                    && other.Ranges.AsParallel().All(Overlaps)
-                                                    && _ranges.AsParallel().All(range => other.Overlaps(range))
-
-#endif
-        ;
+                                                    && other._ranges.AsParallel().All(Overlaps)
+                                                    && _ranges.AsParallel().All(other.Overlaps);
 
     ///<inheritdoc/>
     public override string ToString()
@@ -186,9 +184,9 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
         {
             StringBuilder sb = new();
 
-            foreach (DateTimeRange item in _ranges)
+            foreach (DateTimeRange item in this)
             {
-                if (sb.Length > 0)
+                if (sb.Length > 0 && !item.IsEmpty())
                 {
                     sb.Append(',');
                 }
@@ -239,14 +237,6 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
                             {
                                 case 0:
                                     complement.Add(DateTimeRange.UpTo(current.Start));
-                                    break;
-                                case int index when index <= ranges.Length - 2:
-                                    {
-                                        DateTimeRange previous = ranges[i - 1];
-                                        DateTimeRange next = ranges[i + 1];
-                                        complement.Add(new DateTimeRange(previous.End, current.Start));
-                                        complement.Add(new DateTimeRange(current.End, next.Start));
-                                    }
                                     break;
                                 default:
                                     {
@@ -302,7 +292,6 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
     ///<inheritdoc/>
     public override int GetHashCode()
     {
-#if NET5_0_OR_GREATER
         HashCode hashCode = new();
 
         foreach (DateTimeRange range in _ranges)
@@ -311,8 +300,5 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>
         }
 
         return hashCode.ToHashCode();
-#else
-        return Ranges.GetHashCode();
-#endif
     }
 }
