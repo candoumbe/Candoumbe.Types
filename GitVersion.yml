@@ -5,20 +5,24 @@ branches:
   coldfix:
     regex: "^coldfix(es)?[/-]"
     mode: ContinuousDelivery
-    tag: useBranchName
+    label: '{BranchName}'
     increment: Inherit
-    prevent-increment-of-merged-branch-version: false
+    prevent-increment:
+      of-merged-branch: false
     track-merge-target: false
     source-branches: [ 'develop', 'feature', 'support', 'hotfix' ]
     tracks-release-branches: false
     is-release-branch: false
-    is-mainline: false
     pre-release-weight: 30000
   release:
     regex: "^release(s)?[/-]"
-    tag: "rc"
+    label: "rc"
+    is-release-branch: true
+    mode: ContinuousDelivery
+    source-branches:
+      - develop
   develop: 
-    tag: "alpha"
+    label: "alpha"
 ignore:
   sha: []
 merge-message-formats: {}

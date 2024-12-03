@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.Primitives;
 
 namespace Candoumbe.Types.Strings;
@@ -10,7 +11,7 @@ internal record StringSegmentNode
     /// <summary>
     /// Value of the current node
     /// </summary>
-    public StringSegment Value { get; }
+    public ReadOnlyMemory<char> Value { get; }
 
     /// <summary>
     /// Pointer to the next node (if any).
@@ -21,7 +22,7 @@ internal record StringSegmentNode
     /// Initializes a new instance of the StringSegmentNode class with the specified value.
     /// </summary>
     /// <param name="value">The StringSegment value to be stored in the node.</param>
-    public StringSegmentNode(StringSegment value)
+    public StringSegmentNode(ReadOnlyMemory<char> value)
     {
         Value = value;
         Next = null;

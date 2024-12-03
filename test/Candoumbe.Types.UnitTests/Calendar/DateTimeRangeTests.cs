@@ -281,7 +281,20 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public Property Overlaps_should_be_symetric(DateTimeRange left, DateTimeRange right)
+    public void Given_a_range_When_a_datetime_value_is_between_start_and_end_Then_Overlaps_should_return_true(DateTimeRange range)
+    {
+        // Arrange
+        DateTime value = Faker.Date.Between(range.Start, range.End);
+
+        // Act
+        bool actual = range.Overlaps(value);
+
+        // Assert
+        actual.Should().BeTrue($"{value:u} is between {range.Start:u} and {range.End:u}");
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Overlaps_should_be_symmetric(DateTimeRange left, DateTimeRange right)
         => (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using Bogus;
+using Candoumbe.MiscUtilities.Comparers;
 using Candoumbe.Types.Strings;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -189,8 +190,11 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     public static TheoryData<StringSegmentLinkedList, (char oldChar, char newChar), string> ReplaceCharByCharCases
         => new()
         {
-            { new StringSegmentLinkedList("Hello"), ('e', 'a'), "Hallo" },
+            { new StringSegmentLinkedList("Hello"), ('H', 'h'), "hello" },
             { new StringSegmentLinkedList("Hello"), ('l', 'r'), "Herro" },
+            { new StringSegmentLinkedList("Hello"), ('e', 'a'), "Hallo" },
+            { new StringSegmentLinkedList("Hello"), ('o', 'a'), "Hella" },
+            { new StringSegmentLinkedList("Hello", "world"), ('o', 'a'), "Hellawarld" },
         };
 
     [Theory]
@@ -208,7 +212,8 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         => new()
         {
             { new StringSegmentLinkedList("Hello"), ('e', "a"), "Hallo" },
-            { new StringSegmentLinkedList("Hello"), ('H', "Tr"), "Trello" }
+            { new StringSegmentLinkedList("Hello"), ('H', "Tr"), "Trello" },
+            { new StringSegmentLinkedList("Hello", "world"), ('o', "a"), "Hellawarld" }
         };
 
     [Theory]
@@ -225,10 +230,11 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     public static TheoryData<StringSegmentLinkedList, (string oldString, string newString), string> ReplaceStringByStringCases
         => new()
         {
-            { new StringSegmentLinkedList("Hello"), ("e", "a"), "Hallo" },
+            { new StringSegmentLinkedList("Hello", "world"), ("e", "a"), "Halloworld" },
             { new StringSegmentLinkedList("Hello"), ("llo", "ro"), "Hero" },
             { new StringSegmentLinkedList("Hello"), ("ll", "r"), "Hero" },
-            { new StringSegmentLinkedList("Hel", "lo"), ("ll", "r"), "Hero" }
+            { new StringSegmentLinkedList("Hel", "lo"), ("ll", "r"), "Hero" },
+            { new StringSegmentLinkedList("Hello", "world"), ("o", "a"), "Hellawarld" }
         };
 
     [Theory]
@@ -268,29 +274,29 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         initialList.GetTotalLength().Should().Be(0);
     }
 
-    public static TheoryData<StringSegmentLinkedList, Func<StringSegment, bool>, Expression<Func<StringSegmentLinkedList, bool>>> RemoveSegmentByPredicateCases
+    public static TheoryData<StringSegmentLinkedList, Func<ReadOnlyMemory<char>, bool>, Expression<Func<StringSegmentLinkedList, bool>>> RemoveByPredicateCases
         => new()
         {
             {
                 new StringSegmentLinkedList("Hel", "lo"),
-                segment => segment.StartsWith("lo", StringComparison.OrdinalIgnoreCase),
+                segment => segment.StartsWith("lo".ToCharArray()),
                 list => list.ToStringValue() == "Hel"
             },
             {
                 new StringSegmentLinkedList("Hel", "lo"),
-                segment => segment.StartsWith("He", StringComparison.OrdinalIgnoreCase),
+                segment => segment.StartsWith("He".ToCharArray()),
                 list => list.ToStringValue() == "lo"
             },
             {
                 new StringSegmentLinkedList("Hel"),
-                segment => segment.StartsWith("Hel", StringComparison.OrdinalIgnoreCase),
+                segment => segment.StartsWith("Hel".ToCharArray()),
                 list => list.ToStringValue() == string.Empty
             }
         };
-    
+
     [Theory]
-    [MemberData(nameof(RemoveSegmentByPredicateCases))]
-    public void Given_a_initial_list_When_removing_node_with_specified_predicate_Then_the_resulting_list_should_match_expectation(StringSegmentLinkedList initialList, Func<StringSegment, bool> nodeToRemovePredicate, Expression<Func<StringSegmentLinkedList, bool>> resultExpectation)
+    [MemberData(nameof(RemoveByPredicateCases))]
+    public void Given_a_initial_list_When_removing_node_with_specified_predicate_Then_the_resulting_list_should_match_expectation(StringSegmentLinkedList initialList, Func<ReadOnlyMemory<char>, bool> nodeToRemovePredicate, Expression<Func<StringSegmentLinkedList, bool>> resultExpectation)
     {
         // Act
         StringSegmentLinkedList actual = initialList.RemoveBy(nodeToRemovePredicate);
@@ -316,10 +322,10 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
             },
             {
                 new StringSegmentLinkedList("one","two"),
-                new StringSegmentLinkedList("three", ["four", "five", "six", "seven", "eight", "nine"])
+                new StringSegmentLinkedList("three", "four", "five", "six", "seven", "eight", "nine")
             }
         };
-    
+
     [Theory]
     [MemberData(nameof(AppendListToAnotherListCases))]
     public void Given_an_initial_list_When_appending_another_list_Then_the_resulting_list_should_match_expectation(StringSegmentLinkedList first, StringSegmentLinkedList second)
@@ -335,12 +341,172 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     public void Given_initial_list_not_null_When_appending_null_Then_Append_should_throw_ArgumentNullException()
     {
         // Arrange
-        StringSegmentLinkedList initialList = new StringSegmentLinkedList();
+        StringSegmentLinkedList initialList = [];
 
         // Act
         Action appendingNullList = () => initialList.Append((StringSegmentLinkedList)null);
-        
+
         // Assert
         appendingNullList.Should().Throw<ArgumentNullException>();
+    }
+
+    [Property]
+    public void Given_two_lists_which_contains_characters_When_both_are_in_the_same_order_and_result_in_the_same_string_Then_both_lists_should_be_considered_equal(NonEmptyString valueGenerator)
+    {
+        // Arrange
+        string value = valueGenerator.Get;
+        int leftChunkSize = Random.Shared.Next(1, value.Length);
+        int rightChunkSize = Random.Shared.Next(1, value.Length);
+
+        IReadOnlyList<char[]> leftChunks = value.Chunk(leftChunkSize).ToArray();
+        IReadOnlyList<char[]> rightChunks = value.Chunk(rightChunkSize).ToArray();
+
+        outputHelper.WriteLine($"'left chunks : '{leftChunks.Jsonify()}'");
+        outputHelper.WriteLine($"'right chunks : '{rightChunks.Jsonify()}'");
+
+        StringSegmentLinkedList left = new ();
+        foreach (char[] leftChunk in leftChunks)
+        {
+            left.Append(leftChunk);
+        }
+
+        StringSegmentLinkedList right = new ();
+        foreach (char[] rightChunk in rightChunks)
+        {
+            right.Append(rightChunk);
+        }
+
+        // Act
+        bool actual = right.Equals(left);
+
+        // Assert
+        actual.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Given_two_lists_When_both_are_empty_Then_they_should_be_considered_equal()
+    {
+        // Arrange
+        StringSegmentLinkedList left = [];
+        StringSegmentLinkedList right = [];
+
+        // Act
+        bool actual = left.Equals(right);
+
+        // Assert
+        actual.Should().BeTrue();
+    }
+
+    public static TheoryData<StringSegmentLinkedList, StringSegmentLinkedList, IEqualityComparer<char>, bool, string> EqualsCases
+        => new()
+        {
+            {
+                [],
+                [],
+                CharComparer.InvariantCultureIgnoreCase,
+                true,
+                "Both lists are empty"
+            },
+            {
+                new StringSegmentLinkedList("A", "lazy fox"),
+                new StringSegmentLinkedList("A", "lazy", " ", "fox"),
+                CharComparer.Ordinal,
+                true,
+                "Both lists contains 'A' and 'lazy fox'"
+            },
+            {
+                new StringSegmentLinkedList("A", "lazy fox"),
+                new StringSegmentLinkedList("A", "lazy", " ", "Fox"),
+                CharComparer.Ordinal,
+                false,
+                "Both lists contains 'A' and 'lazy fox' but the casing is not the same and StringComparison is Ordinal only."
+            },
+            {
+                new StringSegmentLinkedList("A", "lazy fox"),
+                new StringSegmentLinkedList("A", "lazy", " ", "Fox"),
+                CharComparer.InvariantCultureIgnoreCase,
+                true,
+                "Both lists contains 'A' and 'lazy fox' but the casing is not the same and StringComparison is OrdinalIgnoreCase only."
+            }
+        };
+
+    [Theory]
+    [MemberData(nameof(EqualsCases))]
+    public void Given_left_and_right_lists_Equals_should_behave_as_expected(StringSegmentLinkedList left, StringSegmentLinkedList right, IEqualityComparer<char> comparer, bool expectedResult, string reason)
+    {
+        // Act
+        bool actual = left.Equals(right, comparer);
+
+        //Assert
+        actual.Should().Be(expectedResult, reason);
+    }
+
+    public static TheoryData<StringSegmentLinkedList, Func<char, bool>, char, StringSegmentLinkedList> ReplaceCharByCharWithPredicateCases
+        => new()
+        {
+            {
+                new StringSegmentLinkedList("A", "lazy fox"),
+                chr => chr is 'A' or 'a',
+                'E',
+                new StringSegmentLinkedList("E", "lEzy fox")
+            },
+            {
+                new StringSegmentLinkedList("A", "lazy fox"),
+                chr => chr is 'W' or 'w',
+                'E',
+                new StringSegmentLinkedList("A", "lazy fox")
+            }
+        };
+
+    [Theory]
+    [MemberData(nameof(ReplaceCharByCharWithPredicateCases))]
+    public void Given_a_StringSegmentLinkedList_When_replacing_a_char_using_a_predicate_Then_the_result_should_match_expectation(StringSegmentLinkedList input, Func<char, bool> predicate, char replacement, StringSegmentLinkedList expected)
+    {
+        // Act
+        StringSegmentLinkedList actual = input.Replace(predicate, [replacement]);
+
+        // Assert
+        string actualStr = actual.ToStringValue();
+        outputHelper.WriteLine($"{nameof(actualStr)}: '{actualStr}'");
+        actualStr.Should().Be(expected.ToStringValue());
+    }
+
+    public static TheoryData<StringSegmentLinkedList, Func<char, bool>, IReadOnlyDictionary<char, ReadOnlyMemory<char>>, StringSegmentLinkedList> ReplaceCharByCharWithPredicateAndReplaceFunctionCases
+        => new()
+        {
+            {
+                new StringSegmentLinkedList("A", "lazy fox"),
+                chr => chr is 'A' or 'a',
+                new Dictionary<char, ReadOnlyMemory<char>>
+                {
+                    ['A'] = new(['a']),
+                    ['a'] = new(['A'])
+                },
+                new StringSegmentLinkedList("a", "lAzy fox")
+            },
+            {
+                new StringSegmentLinkedList("A", "lazy fox"),
+                chr => chr is 'W' or 'w',
+                new Dictionary<char, ReadOnlyMemory<char>>
+                {
+                    ['W'] = new(['a']),
+                    ['z'] = new(['A'])
+                },
+                new StringSegmentLinkedList("A", "lazy fox")
+            }
+        };
+
+    [Theory]
+    [MemberData(nameof(ReplaceCharByCharWithPredicateAndReplaceFunctionCases))]
+    public void Given_a_StringSegmentLinkedList_When_replacing_a_char_using_a_predicate_Then_the_result_should_match_expectation(StringSegmentLinkedList input, Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> replacement, StringSegmentLinkedList expected)
+    {
+        // Act
+        StringSegmentLinkedList actual = input.Replace(predicate, replacement);
+
+        // Assert
+        string actualStr = actual.ToStringValue();
+        outputHelper.WriteLine($"{nameof(actualStr)}: '{actualStr}'");
+
+        actualStr.Should().Be(expected.ToStringValue());
     }
 }
