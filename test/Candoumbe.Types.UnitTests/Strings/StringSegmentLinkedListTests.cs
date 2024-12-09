@@ -568,7 +568,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     public void Given_left_and_right_lists_Equals_should_behave_as_expected(StringSegmentLinkedList left, StringSegmentLinkedList right, IEqualityComparer<char> comparer, bool expectedResult, string reason)
     {
         // Act
-        bool actual = left.Equals(right, comparer);
+        bool actual = left.IsEquivalentTo(right, comparer);
 
         //Assert
         actual.Should().Be(expectedResult, reason);

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace Candoumbe.Types.Strings;
 /// <remarks>
 /// This implementation is specifically designed to not allow appending <see cref="StringSegment.Empty"/> values.
 /// </remarks>
-public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
+public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquatable<StringSegmentLinkedList>
 {
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
@@ -536,8 +537,16 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
         return result;
     }
 
-    /// <inheritdoc />
-    public bool Equals(StringSegmentLinkedList other, IEqualityComparer<char> comparer = null)
+    /// <summary>
+    /// Indicates whether the current instance and <paramref name="other"/> are equivalent.
+    /// </summary>
+    /// <param name="other">the other list to test</param>
+    /// <param name="comparer">A comparer to use when checking for equality</param>
+    /// <returns><see langword="true"/> if the current instance and <paramref name="other"/> are equal, and <see langword="false"/> otherwise.</returns>
+    /// <remarks>
+    /// Equivalency means that both the current instance and <paramref name="other"/> would output the same string.
+    /// </remarks>
+    public bool IsEquivalentTo(StringSegmentLinkedList other, IEqualityComparer<char> comparer)
     {
         bool equals = false;
 
@@ -633,4 +642,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
         return equals;
     }
+
+    ///<inheritdoc/>
+    public bool Equals(StringSegmentLinkedList other) => IsEquivalentTo(other, null);
 }
