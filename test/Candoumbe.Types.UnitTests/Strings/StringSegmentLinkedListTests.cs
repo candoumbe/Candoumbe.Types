@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -21,6 +22,138 @@ namespace Candoumbe.Types.UnitTests.Strings;
 public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 {
     private static readonly Faker Faker = new();
+    
+            /// <summary>
+        /// The <c>_</c> character
+        /// </summary>
+        private const char Underscore = '_';
+
+        /// <summary>
+        /// The <c>*</c> character
+        /// </summary>
+        private const char Asterisk = '*';
+
+        /// <summary>
+        /// The <c>=</c> character
+        /// </summary>
+        private const char EqualSign = '=';
+
+        /// <summary>
+        /// The <c>(</c> character
+        /// </summary>
+        private const char LeftParenthesis = '(';
+
+        /// <summary>
+        /// The <c>)</c> character
+        /// </summary>
+        private const char RightParenthesis = ')';
+
+        /// <summary>
+        /// The <c>[</c> character
+        /// </summary>
+        private const char LeftSquareBracket = '[';
+
+        /// <summary>
+        /// The <c>{</c> character
+        /// </summary>
+        private const char LeftCurlyBracket = '{';
+
+        /// <summary>
+        /// The <c>}</c> character
+        /// </summary>
+        private const char RightCurlyBracket = '}';
+
+        /// <summary>
+        /// The <c>]</c> character
+        /// </summary>
+        private const char RightSquareBracket = ']';
+
+        /// <summary>
+        /// The <c>-</c> character
+        /// </summary>
+        private const char Hyphen = '-';
+
+        /// <summary>
+        /// The <c>\</c> character
+        /// </summary>
+        public const char BackSlash = '\\';
+
+        /// <summary>
+        /// The <c>|</c> character
+        /// </summary>
+        private const char Pipe = '|';
+
+        /// <summary>
+        /// The <c>,</c> character
+        /// </summary>
+        private const char Comma = ',';
+
+        /// <summary>
+        /// The <c>!</c> character
+        /// </summary>
+        private const char Bang = '!';
+
+        /// <summary>
+        /// The <c>"</c> character
+        /// </summary>
+        public const char DoubleQuote = '"';
+
+        /// <summary>
+        /// The <c>"</c> character as a string value
+        /// </summary>
+        internal const string DoubleQuoteString = @"\""";
+
+        /// <summary>
+        /// The <c>&#38;</c> character
+        /// </summary>
+        private const char Ampersand = '&';
+
+        /// <summary>
+        /// The <c>.</c> character.
+        /// </summary>
+        private const char Dot = '.';
+
+        /// <summary>
+        /// The space character
+        /// </summary>
+        private const char Space = ' ';
+
+        /// <summary>
+        /// The character to use to escape a special character.
+        /// </summary>
+        public const char EscapedCharacter = BackSlash;
+
+        /// <summary>
+        /// List of characters that have a special meaning and should be escaped
+        /// </summary>
+        public static readonly char[] SpecialCharacters =
+        [
+            Asterisk,
+            EqualSign,
+            LeftParenthesis,
+            RightParenthesis,
+            LeftSquareBracket,
+            RightSquareBracket,
+            BackSlash,
+            Pipe,
+            Comma,
+            Bang,
+            DoubleQuote,
+            Ampersand,
+            RightCurlyBracket,
+            LeftCurlyBracket,
+            ':',
+            Hyphen,
+            Dot,
+            Space
+        ];
+
+        internal static readonly IReadOnlyDictionary<char, ReadOnlyMemory<char>> EscapedSpecialCharacters = SpecialCharacters
+            .ToDictionary(chr => chr, chr => new ReadOnlyMemory<char>([BackSlash, chr]))
+#if NET8_0_OR_GREATER
+            .ToFrozenDictionary()
+#endif
+            ;
     
     [Property]
     public void Given_non_empty_string_segment_Then_constructor_should_initialize_properties(NonEmptyString stringGenerator)
@@ -474,25 +607,64 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     public static TheoryData<StringSegmentLinkedList, Func<char, bool>, IReadOnlyDictionary<char, ReadOnlyMemory<char>>, StringSegmentLinkedList> ReplaceCharByCharWithPredicateAndReplaceFunctionCases
         => new()
         {
+            // one match only in each node
             {
                 new StringSegmentLinkedList("A", "lazy fox"),
                 chr => chr is 'A' or 'a',
                 new Dictionary<char, ReadOnlyMemory<char>>
                 {
-                    ['A'] = new(['a']),
-                    ['a'] = new(['A'])
+                    ['A'] = "a".AsMemory(),
+                    ['a'] = "A".AsMemory()
                 },
                 new StringSegmentLinkedList("a", "lAzy fox")
             },
+            // No match
             {
                 new StringSegmentLinkedList("A", "lazy fox"),
                 chr => chr is 'W' or 'w',
                 new Dictionary<char, ReadOnlyMemory<char>>
                 {
-                    ['W'] = new(['a']),
-                    ['z'] = new(['A'])
+                    ['W'] = "a".AsMemory(),
+                    ['z'] = "A".AsMemory()
                 },
                 new StringSegmentLinkedList("A", "lazy fox")
+            },
+            // More than one matching and all replacements matches
+            {
+                new StringSegmentLinkedList("A bad", "very lazy fox"),
+                chr => chr is 'a' or 'e' or 'A',
+                new Dictionary<char, ReadOnlyMemory<char>>
+                {
+                    ['A'] = new(['a']),
+                    ['a'] = new(['A']),
+                    ['e'] = new(['E'])
+                },
+                new StringSegmentLinkedList("a bAd", "vEry lAzy fox")
+            },
+            // Several matches and one miss
+            {
+                new StringSegmentLinkedList("A bad", "very lazy fox"),
+                chr => chr is 'a' or 'e' or 'A',
+                new Dictionary<char, ReadOnlyMemory<char>>
+                {
+                    ['A'] = new(['a']),
+                    ['W'] = new(['A']),
+                    ['e'] = new(['E']),
+                    ['a'] = new(['A']),
+                },
+                new StringSegmentLinkedList("a bAd", "vEry lAzy fox")
+            },
+            // Several matches and one miss
+            {
+                new StringSegmentLinkedList("Aaaaaa bad", "very lazy fox"),
+                chr => chr is 'a' or 'e' or 'A',
+                new Dictionary<char, ReadOnlyMemory<char>>
+                {
+                    ['A'] = new(['a']),
+                    ['e'] = new(['E']),
+                    ['a'] = new(['A']),
+                },
+                new StringSegmentLinkedList("aAAAAA bAd", "vEry lAzy fox")
             }
         };
 
