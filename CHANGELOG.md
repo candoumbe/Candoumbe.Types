@@ -9,12 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚨 Breaking changes
 - Renamed `StringSegmentLinkedList.Equals(StringSegmentLinkedList, IEqualityComparer<char>)` to `StringSegmentLinkedList.IsEquivalentTo(StringSegmentLinkedList, IEqualityComparer<char>)`
 
-### ⚒️ Fixes
+### 🐛 Fixes
 - Fixed `ArgumentOutOfRangeException` thrown by `StringSegmentLinkedList.Replace(Func<char, bool>, IReadOnlyDictionary<char, ReadOnlyMemory<char>>)` 
 when there are more than 1 match in a node.
 
 ### 🧹 Housekeeping
 - Added documentation.
+- Updated GitVersion configuration to better handle hotfix versioning
 
 
 ## [0.2.0] / 2024-12-03
