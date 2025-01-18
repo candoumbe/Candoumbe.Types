@@ -350,6 +350,15 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
         return replacementList;
     }
 
+    /// <summary>
+    /// Replaces characters that matches <paramref name="predicate"/>.
+    /// </summary>
+    /// <param name="predicate">The predicate to select characters to replace.</param>
+    /// <param name="replacement">A dictionary mapping characters with their replacement value.</param>
+    /// <returns>A new instance where all characters which match <paramref name="predicate"/> were replaced.</returns>
+    /// <remarks>
+    /// This method will simply remove any character that matches <paramref name="predicate"/> but for which no suitable mapping was found in <paramref name="replacement"/>.
+    /// </remarks>
     public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> replacement)
     {
         StringSegmentLinkedList replacementList = [];

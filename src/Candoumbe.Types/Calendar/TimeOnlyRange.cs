@@ -38,6 +38,9 @@ public record TimeOnlyRange : Range<TimeOnly>
     , IUnaryNegationOperators<TimeOnlyRange, TimeOnlyRange>
 #endif
 {
+    /// <summary>
+    /// Duration of the current range as a <see cref="TimeSpan"/>.
+    /// </summary>
     public TimeSpan Span => Start <= End ? End - Start : Start - End;
 
     /// <summary>
