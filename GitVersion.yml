@@ -17,7 +17,7 @@ branches:
     is-main-branch: false
     pre-release-weight: 30000
   coldfix:
-    regex: "^coldfix(es)?[/-]"
+    regex: "^coldfix(es)?[/-](?<BranchName>.+)"
     mode: ContinuousDelivery
     label: '{BranchName}'
     increment: Inherit
