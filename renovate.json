@@ -1,8 +1,12 @@
 {
   "extends": [
-    "config:base"
+    "config:base",
+    ":approveMajorUpdates",
+    ":assignee(candoumbe)",
+    ":reviewer(candoumbe)",
+    ":automergePatch",
+    ":automergeStableNonMajor"
   ],
-  "assignees": [ "candoumbe" ],
-  "addLabels": [ "package-update" ],
-  "automerge": true
+  "addLabels": [ "renovate", "package-update" ],
+  "automergeStrategy": "rebase"
 }
