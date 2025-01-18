@@ -44,7 +44,7 @@ public record TimeOnlyRange : Range<TimeOnly>
     public TimeSpan Span => Start <= End ? End - Start : Start - End;
 
     /// <summary>
-    /// The largest time interval that <see cref="TimeOnlyRange"/> can represent.
+    /// Represents the largest time interval that <see cref="TimeOnlyRange"/> can represent
     /// </summary>
     private static TimeSpan AllDayTimeSpan => Infinite.Span;
 

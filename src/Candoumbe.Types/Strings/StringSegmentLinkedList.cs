@@ -561,112 +561,82 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
             }
             else
             {
-                bool mismatchFound = false;
-                Func<char, char, bool> predicateComparer = comparer switch
+                ReadOnlyMemory<char> current = currentEnumerator.Current;
+                ReadOnlyMemory<char> otherCurrent = otherEnumerator.Current;
+
+                if (current.Length == otherCurrent.Length)
                 {
-                    null => (x, y) => Equals(x, y),
-                    _    => comparer.Equals,
-                };
-
-                bool hasReachedCurrentEnd = false;
-                bool hasReachedOtherEnd = false;
-
-                do
+                    equals = current.Equals(otherCurrent);
+                }
+                else if (current.Length < otherCurrent.Length && otherCurrent.StartsWith(current))
                 {
-                    ReadOnlyMemory<char> current = currentEnumerator.Current;
-                    ReadOnlyMemory<char> otherCurrent = otherEnumerator.Current;
-                    if (current.Length == otherCurrent.Length)
+                    bool mismatchFound = false;
+                    int index = current.Length;
+                    Func<char, char, bool> predicate = comparer switch
                     {
-                        mismatchFound = !( current.StartsWith(otherCurrent, comparer) || otherCurrent.StartsWith(current, comparer) );
-                    }
-                    else if (current.Length < otherCurrent.Length && otherCurrent.StartsWith(current, comparer))
+                        null => (x, y) => Equals(x, y),
+                        _ => comparer.Equals,
+                    };
+                    while (currentEnumerator.MoveNext() && !mismatchFound)
                     {
-                        if (!currentEnumerator.MoveNext())
+                        current = currentEnumerator.Current;
+                        int j = 0;
+                        while (j < current.Length && index < otherCurrent.Length && !mismatchFound)
                         {
-                            mismatchFound = true;
-                        }
-                        else
-                        {
-                            int index = current.Length;
-                            current = currentEnumerator.Current;
-                            int j = 0;
-                            do
+                            mismatchFound = !current.Slice(j, 1).StartsWith(otherCurrent.Slice(index, 1), comparer);
+                            j++;
+                            index++;
+
+                            // No mismatch found, but we read current to the end => grab the next node (if any) and starts again.
+                            if (!mismatchFound && j == current.Length && currentEnumerator.MoveNext())
                             {
-                                while (j < current.Length && index < otherCurrent.Length && !mismatchFound)
-                                {
-                                    char currentChar = current.Span[j];
-                                    char otherChar = otherCurrent.Span[index];
-                                    mismatchFound = !predicateComparer(currentChar, otherChar);
-                                    j++;
-                                    index++;
+                                current = currentEnumerator.Current;
+                                j = 0;
+                            }
 
-                                    // No mismatch found, but we read current to the end => grab the next node (if any) and starts again.
-                                    if (!mismatchFound && j == current.Length && currentEnumerator.MoveNext())
-                                    {
-                                        current = currentEnumerator.Current;
-                                        j = 0;
-                                    }
-                                    // No mismatch found, but we read otherCurrent to the end => grab the next node (if any) and starts again.
-                                    if (!mismatchFound && index == otherCurrent.Length && otherEnumerator.MoveNext())
-                                    {
-                                        otherCurrent = otherEnumerator.Current;
-                                        index = 0;
-                                    }
-                                }
-                            } while (j < current.Length  && index < otherCurrent.Length && !mismatchFound);
-                        }
-                    }
-                    else if (otherCurrent.Length < current.Length && current.StartsWith(otherCurrent, comparer))
-                    {
-                        if (!otherEnumerator.MoveNext())
-                        {
-                            mismatchFound = true;
-                        }
-                        else
-                        {
-                            int index = otherCurrent.Length;
-                            otherCurrent = otherEnumerator.Current;
-                            int j = 0;
-                            do
+                            // No mismatch found, but we read otherCurrent to the end => grab the next node (if any) and starts again.
+                            if (!mismatchFound && index == otherCurrent.Length && otherEnumerator.MoveNext())
                             {
-                                while (j < otherCurrent.Length && index < current.Length && !mismatchFound)
-                                {
-                                    char currentChar = current.Span[index];
-                                    char otherChar = otherCurrent.Span[j];
-                                    mismatchFound = !predicateComparer(currentChar, otherChar);
-                                    j++;
-                                    index++;
-
-                                    // No mismatch found, but we read current to the end => grab the next node (if any) and starts again.
-                                    if (!mismatchFound && j == otherCurrent.Length && otherEnumerator.MoveNext())
-                                    {
-                                        otherCurrent = otherEnumerator.Current;
-                                        j = 0;
-                                    }
-                                    // No mismatch found, but we read otherCurrent to the end => grab the next node (if any) and starts again.
-                                    if (!mismatchFound && index == current.Length && currentEnumerator.MoveNext())
-                                    {
-                                        current = currentEnumerator.Current;
-                                        index = 0;
-                                    }
-                                }
-                            } while (j < otherCurrent.Length && index < current.Length && !mismatchFound);
+                                otherCurrent = otherEnumerator.Current;
+                                index = 0;
+                            }
                         }
                     }
-                    else
+
+                    equals = !mismatchFound;
+                }
+                else
+                {
+                    bool mismatchFound = false;
+                    int index = otherCurrent.Length;
+                    while (otherEnumerator.MoveNext() && !mismatchFound)
                     {
-                        mismatchFound = true;
+                        otherCurrent = otherEnumerator.Current;
+                        int j = 0;
+                        while (j < otherCurrent.Length && index < current.Length && !mismatchFound)
+                        {
+                            mismatchFound = !current.Slice(index, 1).StartsWith(otherCurrent.Slice(j, 1), comparer);
+                            j++;
+                            index++;
+
+                            // No mismatch found, and we read current to the end => grab the next node (if any) and starts again.
+                            if (!mismatchFound && index == current.Length && currentEnumerator.MoveNext())
+                            {
+                                current = currentEnumerator.Current;
+                                index = 0;
+                            }
+
+                            // No mismatch found, and we read otherCurrent to the end => grab the next node (if any) and starts again.
+                            if (!mismatchFound && j == otherCurrent.Length && otherEnumerator.MoveNext())
+                            {
+                                otherCurrent = otherEnumerator.Current;
+                                j = 0;
+                            }
+                        }
                     }
 
-                    if (!mismatchFound)
-                    {
-                        hasReachedCurrentEnd = !currentEnumerator.MoveNext();
-                        hasReachedOtherEnd = !otherEnumerator.MoveNext();
-                        equals = hasReachedCurrentEnd && hasReachedOtherEnd;
-                    }
-
-                    //equals = !mismatchFound && hasReachedCurrentEnd && hasReachedOtherEnd;
-                } while (!mismatchFound && ( !hasReachedCurrentEnd || !hasReachedOtherEnd ));
+                    equals = !mismatchFound;
+                }
             }
         }
 

@@ -12,6 +12,11 @@ public interface ICanRepresentEmpty<in TInterval, TBound> where TInterval : IRan
     /// <summary>
     /// Checks if the current instance is empty (by <typeparamref name="TInterval"/>'s definition).
     /// </summary>
+    static TInterval Empty { get; }
+
+    /// <summary>
+    /// Checks if the current instance is empty (by <typeparamref name="TInterval"/>'s definition)
+    /// </summary>
     /// <returns><see langword="true"/> if range is empty or <see langword="false"/> otherwise.</returns>
     bool IsEmpty();
 }
