@@ -1,21 +1,7 @@
 mode: ContinuousDeployment
-branches:
-  feature:
+branches: 
+  feature: 
     regex: "^feature(s)?[/-]"
-  hotfix:
-    mode: ContinuousDelivery
-    label: "fix"
-    increment: Inherit
-    prevent-increment:
-      when-current-commit-tagged: false
-    regex: ^hotfix(es)?[/-](?<BranchName>.+)
-    source-branches:
-      - main
-      - support
-    is-source-branch-for: [ ]
-    is-release-branch: true
-    is-main-branch: false
-    pre-release-weight: 30000
   coldfix:
     regex: "^coldfix(es)?[/-](?<BranchName>.+)"
     mode: ContinuousDelivery
