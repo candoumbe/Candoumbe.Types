@@ -6,14 +6,12 @@ using Candoumbe.Pipelines.Components.GitHub;
 using Candoumbe.Pipelines.Components.NuGet;
 using Candoumbe.Pipelines.Components.Workflows;
 using Nuke.Common;
-using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.Codecov;
 using Nuke.Common.Tools.GitHub;
-using Nuke.Common.Utilities.Collections;
 
 [GitHubActions("integration", GitHubActionsImage.UbuntuLatest,
     AutoGenerate = false,
@@ -131,10 +129,6 @@ public class Pipelines : EnhancedNukeBuild,
     ICreateGithubRelease,
     IGitFlowWithPullRequest
 {
-
-    [CI]
-    public GitHubActions GitHubActions;
-
     [Required]
     [Solution]
     public Solution Solution;

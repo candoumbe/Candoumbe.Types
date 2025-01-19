@@ -8,18 +8,16 @@
     <NukeRootDirectory>..</NukeRootDirectory>
     <NukeScriptDirectory>..</NukeScriptDirectory>
     <NukeTelemetryVersion>1</NukeTelemetryVersion>
-      <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
-</PropertyGroup>
+  </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Candoumbe.Pipelines" Version="0.12.1" />
+    <PackageReference Include="Candoumbe.Pipelines" Version="0.12.1"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageDownload Include="GitVersion.Tool" Version="[6.0.5]" />
-    <PackageDownload Include="CodeCov.Tool" Version="[1.13.0]" />
-    <PackageDownload Include="CodecovUploader" Version="[0.8.0]" />
-    <PackageDownload Include="ReportGenerator" Version="[5.1.13]" />
+    <PackageDownload Include="GitVersion.Tool" Version="[6.0.5]"/>
+    <PackageDownload Include="CodeCov.Tool" Version="[1.13.0]"/>
+    <PackageDownload Include="CodecovUploader" Version="[0.8.0]"/>
+    <PackageDownload Include="ReportGenerator" Version="[5.1.13]"/>
   </ItemGroup>
-
 </Project>
