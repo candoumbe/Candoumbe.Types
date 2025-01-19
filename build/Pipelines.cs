@@ -7,7 +7,6 @@ using Candoumbe.Pipelines.Components.NuGet;
 using Candoumbe.Pipelines.Components.Workflows;
 using Candoumbe.Pipelines.Tools;
 using Nuke.Common;
-using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -131,10 +130,6 @@ public class Pipelines : EnhancedNukeBuild,
     ICreateGithubRelease,
     IGitFlowWithPullRequest
 {
-
-    [CI]
-    public GitHubActions GitHubActions;
-
     [Required]
     [Solution]
     public Solution Solution;

@@ -8,8 +8,7 @@
     <NukeRootDirectory>..</NukeRootDirectory>
     <NukeScriptDirectory>..</NukeScriptDirectory>
     <NukeTelemetryVersion>1</NukeTelemetryVersion>
-      <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
-</PropertyGroup>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Candoumbe.Pipelines" Version="0.13.3-beta.2" />
@@ -23,5 +22,4 @@
     <PackageDownload Include="ReportGenerator" Version="[5.1.13]" />
     <PackageDownload Include="dotnet-stryker" Version="[4.6.0]" />
   </ItemGroup>
-
 </Project>
