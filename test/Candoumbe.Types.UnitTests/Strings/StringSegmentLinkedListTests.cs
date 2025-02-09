@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using Bogus;
 using Candoumbe.MiscUtilities.Comparers;
 using Candoumbe.Types.Strings;
@@ -115,18 +114,17 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     {
         get
         {
-            TheoryData<StringSegmentLinkedList, IReadOnlyList<StringSegment>, (int length, string value)> data = new TheoryData<StringSegmentLinkedList, IReadOnlyList<StringSegment>, (int length, string value)>();
-            data.Add(new("Hello"),
-                    [" ", "world"],
-                    ( "Hello world".Length, "Hello world" )
-            );
-            data.Add(new("Hello"),
-                    ["wonderful", string.Empty, " ", "world"],
+            TheoryData<StringSegmentLinkedList, IReadOnlyList<StringSegment>, (int length, string value)> data = new()
+            {
+                { new StringSegmentLinkedList("Hello"), [" ", "world"], ( "Hello world".Length, "Hello world" ) },
+                {
+                    new StringSegmentLinkedList("Hello"), ["wonderful", string.Empty, " ", "world"],
                     ( "Hellowonderful world".Length, "Hellowonderful world" )
-            );
+                }
+            };
             {
                 StringSegment source = "abcdef";
-                data.Add(new (source.Subsegment(0, 1)), [ source ] , (7, "aabcdef"));
+                data.Add(new StringSegmentLinkedList(source.Subsegment(0, 1)), [ source ] , (7, "aabcdef"));
             }
 
             return data;
@@ -404,6 +402,13 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
                 [],
                 [],
                 CharComparer.InvariantCultureIgnoreCase,
+                true,
+                "Both lists are empty"
+            },
+            {
+                [],
+                [],
+                null,
                 true,
                 "Both lists are empty"
             },

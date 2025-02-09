@@ -506,7 +506,15 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
         return result;
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Tests if the current instance is equal to <paramref name="other"/>.
+    /// </summary>
+    /// <param name="other">the other instance to compare</param>
+    /// <param name="comparer">An equality comparer to use.</param>
+    /// <returns><see langword="true"/> if the current instance is equal to <paramref name="other"/> or <see langword="falase"/> otherwise.</returns>
+    /// <remarks>
+    /// A default <see cref="EqualityComparer{T}"/> will be used when <paramref name="comparer"/> is <see langword="null"/>.
+    /// </remarks>
     public bool Equals(StringSegmentLinkedList other, IEqualityComparer<char> comparer = null)
     {
         bool equals = false;

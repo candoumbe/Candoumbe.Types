@@ -1,20 +1,16 @@
-﻿namespace Candoumbe.Types.UnitTests.Numerics;
-
-using Bogus;
-
+﻿using Bogus;
 using Candoumbe.Types.Numerics;
 using Candoumbe.Types.UnitTests.Generators;
-
 using FluentAssertions;
-
 using FsCheck;
 using FsCheck.Xunit;
-
 using System;
+
+namespace Candoumbe.Types.UnitTests.Numerics;
 
 public class PositiveIntegerTests
 {
-    private readonly static Faker Faker = new();
+    private static readonly Faker Faker = new();
 
     [Property]
     public void Given_PositiveIntegers_When_Addition_Then_ShouldReturnCorrectResult(int left, int right)
@@ -45,9 +41,10 @@ public class PositiveIntegerTests
         PositiveInteger result = positiveA - positiveB;
 
         // Assert
-        object _ = (left - right) switch
+        object _ = ( left - right ) switch
         {
-            < 1 => result.Value.Should().Be(PositiveInteger.MinValue.Value, $"a positive integer can never hold a value less than {PositiveInteger.MinValue.Value}"),
+            < 1 => result.Value.Should().Be(PositiveInteger.MinValue.Value,
+                $"a positive integer can never hold a value less than {PositiveInteger.MinValue.Value}"),
             int value => result.Value.Should().Be(value)
         };
     }
@@ -69,7 +66,8 @@ public class PositiveIntegerTests
     }
 
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public void Given_PositiveInteger_When_multiplying_by_NonNegativeZero_Then_result_should_be_NonNegativeZero(PositiveInteger left)
+    public void Given_PositiveInteger_When_multiplying_by_NonNegativeZero_Then_result_should_be_NonNegativeZero(
+        PositiveInteger left)
     {
         // Arrange
         NonNegativeInteger zero = NonNegativeInteger.Zero;
@@ -82,7 +80,9 @@ public class PositiveIntegerTests
     }
 
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public void Given_PositiveInteger_When_multiplying_by_NonNegativeInteger_Then_result_should_be_a_NonNegativeInteger_which_value_is_left_times_right(PositiveInteger left, NonNegativeInteger right)
+    public void
+        Given_PositiveInteger_When_multiplying_by_NonNegativeInteger_Then_result_should_be_a_NonNegativeInteger_which_value_is_left_times_right(
+            PositiveInteger left, NonNegativeInteger right)
     {
         // Arrange
         NonNegativeInteger expected = NonNegativeInteger.From(left * right);
@@ -95,7 +95,8 @@ public class PositiveIntegerTests
     }
 
     [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public void Given_PositiveInteger_When_multiplying_by_NonNegative_identity_Then_result_should_be_the_left_value(PositiveInteger left)
+    public void Given_PositiveInteger_When_multiplying_by_NonNegative_identity_Then_result_should_be_the_left_value(
+        PositiveInteger left)
     {
         // Arrange
         NonNegativeInteger identity = NonNegativeInteger.MultiplicativeIdentity;
@@ -124,7 +125,8 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_PositiveIntegers_When_LessThanOrEqual_Then_ShouldReturnCorrectResult(PositiveInt leftValue, PositiveInt rightValue)
+    public void Given_PositiveIntegers_When_LessThanOrEqual_Then_ShouldReturnCorrectResult(PositiveInt leftValue,
+        PositiveInt rightValue)
     {
         // Arrange
         PositiveInteger left = PositiveInteger.From(leftValue.Item);
@@ -138,7 +140,8 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_PositiveIntegers_When_GreaterThan_Then_ShouldReturnCorrectResult(PositiveInt leftValue, PositiveInt rightValue)
+    public void Given_PositiveIntegers_When_GreaterThan_Then_ShouldReturnCorrectResult(PositiveInt leftValue,
+        PositiveInt rightValue)
     {
         // Arrange
         PositiveInteger left = PositiveInteger.From(leftValue.Item);
@@ -152,7 +155,8 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_PositiveIntegers_When_GreaterThanOrEqual_Then_ShouldReturnCorrectResult(PositiveInt leftValue, PositiveInt rightValue)
+    public void Given_PositiveIntegers_When_GreaterThanOrEqual_Then_ShouldReturnCorrectResult(PositiveInt leftValue,
+        PositiveInt rightValue)
     {
         // Arrange
         PositiveInteger left = PositiveInteger.From(leftValue.Item);
@@ -166,7 +170,8 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_a_PositiveInteger_When_implicitely_casting_to_int32_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_PositiveInteger_When_implicitely_casting_to_int32_Then_result_should_equal_the_original_value(
+        PositiveInt initialValueGenerator)
     {
         // Arrange
         PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
@@ -179,7 +184,8 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_a_PositiveInteger_When_implicitely_casting_to_long_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_PositiveInteger_When_implicitely_casting_to_long_Then_result_should_equal_the_original_value(
+        PositiveInt initialValueGenerator)
     {
         // Arrange
         PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
@@ -192,7 +198,8 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_a_PositiveInteger_When_implicitely_casting_to_decimal_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_PositiveInteger_When_implicitely_casting_to_decimal_Then_result_should_equal_the_original_value(
+        PositiveInt initialValueGenerator)
     {
         // Arrange
         PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
@@ -205,7 +212,8 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_a_PositiveInteger_When_implicitely_casting_to_uint_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_PositiveInteger_When_implicitely_casting_to_uint_Then_result_should_equal_the_original_value(
+        PositiveInt initialValueGenerator)
     {
         // Arrange
         PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
@@ -218,7 +226,8 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_a_PositiveInteger_When_implicitely_casting_to_ulong_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_PositiveInteger_When_implicitely_casting_to_ulong_Then_result_should_equal_the_original_value(
+        PositiveInt initialValueGenerator)
     {
         // Arrange
         PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
@@ -231,7 +240,8 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_a_PositiveInteger_When_adding_a_non_negative_value_Then_result_should_be_gte_the_original_value(PositiveInt positiveIntGenerator, NonNegativeInt nonNegativeIntGenerator)
+    public void Given_a_PositiveInteger_When_adding_a_non_negative_value_Then_result_should_be_gte_the_original_value(
+        PositiveInt positiveIntGenerator, NonNegativeInt nonNegativeIntGenerator)
     {
         // Arrange
         PositiveInteger positiveInteger = PositiveInteger.From(positiveIntGenerator.Item);
@@ -245,7 +255,8 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_a_PositiveInteger_When_dividing_by_a_PositiveInteger_Then_result_should_be_NonNegativeInteger(PositiveInt leftGenerator, PositiveInt rightGenerator)
+    public void Given_a_PositiveInteger_When_dividing_by_a_PositiveInteger_Then_result_should_be_NonNegativeInteger(
+        PositiveInt leftGenerator, PositiveInt rightGenerator)
     {
         // Arrange
         PositiveInteger left = PositiveInteger.From(leftGenerator.Item);
