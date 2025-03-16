@@ -166,9 +166,9 @@ public class Pipelines : EnhancedNukeBuild,
     ///<inheritdoc/>
     IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects =>
     [
-        new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, "Candoumbe.Types", StringComparison.InvariantCultureIgnoreCase)),
-                                         this.Get<IHaveSolution>().Solution.GetAllProjects("*UnitTests"),
-                                         this.Get<IHaveTestDirectory>().TestDirectory / "stryker-config.json")
+        .. Projects.Select(projectName => new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
+                                         this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests"),
+                                         this.Get<IHaveTestDirectory>().TestDirectory / "stryker-config.json"))
     ];
 
     ///<inheritdoc/>
@@ -218,4 +218,9 @@ public class Pipelines : EnhancedNukeBuild,
 
     ///<inheritdoc/>
     IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
+
+    private static readonly string[] Projects = [
+        "Candoumbe.Types",
+        "Candoumbe.Types.Numerics"
+    ];
 }

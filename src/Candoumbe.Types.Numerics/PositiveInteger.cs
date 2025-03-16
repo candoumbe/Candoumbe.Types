@@ -238,7 +238,7 @@ namespace Candoumbe.Types.Numerics
         public static implicit operator uint(PositiveInteger x) => (uint)x.Value;
 
         /// <summary>
-        /// Implicitely cast to <see cref="NonNegativeInteger"/> type
+        /// Implicitly cast to <see cref="NonNegativeInteger"/> type
         /// </summary>
         /// <param name="x"></param>
         public static implicit operator NonNegativeInteger(PositiveInteger x) => NonNegativeInteger.From(x.Value);
