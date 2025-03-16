@@ -1,22 +1,16 @@
-﻿using Bogus;
-
-using Candoumbe.Types.Numerics;
-using Candoumbe.Types.UnitTests.Generators;
-
+﻿using System;
+using System.Globalization;
+using Bogus;
+using Candoumbe.Types.Numerics.UnitTests.Generators;
 using FluentAssertions;
-
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
-
-using System;
-using System.Globalization;
-
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
 
-namespace Candoumbe.Types.UnitTests.Numerics;
+namespace Candoumbe.Types.Numerics.UnitTests;
 
 [UnitTest]
 [Feature(nameof(Numerics))]
@@ -24,7 +18,7 @@ public class NonNegativeIntegerTests
 {
     private static readonly Faker Faker = new();
     private readonly ITestOutputHelper _outputHelper;
-    private static readonly string[] StandardNumericFormats = { "c", "d", "e", "f", "g", "n", "p", "r", "x" };
+    private static readonly string[] StandardNumericFormats = ["c", "d", "e", "f", "g", "n", "p", "r", "x"];
 
     public NonNegativeIntegerTests(ITestOutputHelper outputHelper)
     {
@@ -717,7 +711,7 @@ public class NonNegativeIntegerTests
         actual.Should().Be(nonNegativeInteger);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_a_NonNegativeInteger_When_PreDecrementing_Then_result_should_be_a_NonNegativeInteger(NonNegativeInteger initial)
     {
         // Arrange
@@ -733,7 +727,7 @@ public class NonNegativeIntegerTests
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_a_NonNegativeInteger_When_PreIncrementing_Then_result_should_be_a_NonNegativeInteger(NonNegativeInteger initial)
     {
         // Arrange
@@ -749,7 +743,7 @@ public class NonNegativeIntegerTests
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_a_NonNegativeInteger_When_Dividing_by_divisor_then_result_should_be_expected(NonNegativeInteger dividend, PositiveInteger divisor)
     {
         // Arrange
@@ -762,7 +756,7 @@ public class NonNegativeIntegerTests
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_a_NonNegativeInteger_When_Dividing_by_Zero_Then_DivideByZeroException_should_be_thrown(NonNegativeInteger initial)
     {
         // Arrange
@@ -775,7 +769,7 @@ public class NonNegativeIntegerTests
         dividingByZero.Should().ThrowExactly<DivideByZeroException>();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_a_NonNegativeInteger_When_calling_unary_plus_Then_result_should_be_initial_value(NonNegativeInteger initial)
     {
         // Arrange

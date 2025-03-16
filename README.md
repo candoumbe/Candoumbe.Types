@@ -27,8 +27,20 @@ The goal of that project was to enable the effective matching of one or more tem
 With the team back then, it took several weeks to get this "planning matcher" to work properly and,
 at the time, I was not very happy with the result (specifically with the planning matching part of the algorithm).
 
-That's how I started working on [Candoumbe.Types.Calendar](./src/Candoumbe.Types/Calendar) types namespace.
+That's how I started working on types from [Candoumbe.Types.Calendar](./src/Candoumbe.Types/Calendar) namespace.
 
+## Features
+### Calendar
+
+The `Calendar` namespace contains various types related to calendar operations, such as:
+- `DateTimeRange`: a datetime range represents a interval between two `DateTime`s
+- `DateOnlyRange`: an interval between two `DateOnly`s
+- `TimeOnlyRange`: an interval between two `TimeOnly`s
+
+### Numerics
+The numerics namespace contains various types useful when you want to work with very specific numeric values such as:
+- `NonNegativeInteger`: a type that can only hold non-negative integers
+- `PositiveInteger`: a type that can only hold integers values greater than zero.
 
 
 ## Contributing
