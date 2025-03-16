@@ -9,8 +9,6 @@ using Nuke.Common;
 using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.Codecov;
 using Nuke.Common.Tools.GitHub;
 
 [GitHubActions("integration", GitHubActionsImage.UbuntuLatest,
@@ -165,9 +163,9 @@ public class Pipelines : EnhancedNukeBuild,
     ///<inheritdoc/>
     IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects =>
     [
-        new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, "Candoumbe.Types", StringComparison.InvariantCultureIgnoreCase)),
-                                         this.Get<IHaveSolution>().Solution.GetAllProjects("*UnitTests"),
-                                         this.Get<IHaveTestDirectory>().TestDirectory / "stryker-config.json")
+        .. Projects.Select(projectName => new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
+                                         this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests"),
+                                         this.Get<IHaveTestDirectory>().TestDirectory / "stryker-config.json"))
     ];
 
     ///<inheritdoc/>
@@ -201,16 +199,10 @@ public class Pipelines : EnhancedNukeBuild,
     bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;
 
     ///<inheritdoc/>
-    Configure<CodecovSettings> IReportCoverage.CodecovSettings => _ => _.SetFramework("netcoreapp3.1");
-
-    protected override void OnBuildCreated()
-    {
-        if (IsServerBuild)
-        {
-            Environment.SetEnvironmentVariable("DOTNET_ROLL_FORWARD", "LatestMajor");
-        }
-    }
-    
-    ///<inheritdoc/>
     IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
+
+    private static readonly string[] Projects = [
+        "Candoumbe.Types",
+        "Candoumbe.Types.Numerics"
+    ];
 }

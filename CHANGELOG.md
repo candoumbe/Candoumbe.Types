@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### 💥 Breaking changes
+
+- Moved all types from `Candoumbe.Types.Numerics` namespace in `Candoumbe.Types` NuGet package into `Candoumbe.Types.Numerics` NuGet package
+
 
 ## [0.2.0] / 2024-12-03
 ### 🚀 New features
@@ -18,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added [ICanRepresentEmpty](./src/Candoumbe.Types/ICanRepresentEmpty.cs) interface
 - Added [ICanRepresentInfinite](./src/Candoumbe.Types/ICanRepresentInfinite.cs) interface
 
-### 🚨 Breaking changes
+### 💥 Breaking changes
 - Dropped `net6.0` support as it's no longer maintained by Microsoft ([#216](https://github.com/candoumbe/Candoumbe.Types/issues/216)).
 - Dropped `net7.0` support as it's no longer maintained by Microsoft.
 - Removed `Ranges` property from [`MultiDateTimeRange`](./src/Candoumbe.Types/Calendar/MultiDateTimeRange.cs), [`MultiTimeOnlyRange`](./src/Candoumbe.Types/Calendar/MultiTimeOnlyRange.cs) and [`MultiDateOnlyRange`](./src/Candoumbe.Types/Calendar/MultiDateOnlyRange.cs)
