@@ -477,8 +477,10 @@ $RECYCLE.BIN/
 *.lnk
 # Nuke temporary directory
 /.nuke/temp
-
 .qodo
 
-# Stryker mutation test results
-stryker-report.json
+# Stryker file reports
+/*/**/stryker-report.json
+
+# Jetbrains Rider settings
+.idea
