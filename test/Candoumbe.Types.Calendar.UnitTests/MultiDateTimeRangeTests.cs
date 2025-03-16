@@ -5,9 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using Candoumbe.Types.Calendar;
-using Candoumbe.Types.UnitTests.Generators;
+using Candoumbe.Types.Calendar.UnitTests.Generators;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using FsCheck;
@@ -16,7 +14,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
 
-namespace Candoumbe.Types.UnitTests.Calendar;
+namespace Candoumbe.Types.Calendar.UnitTests;
 
 [UnitTest]
 public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
