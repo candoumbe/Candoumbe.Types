@@ -1,14 +1,11 @@
 ﻿// "Copyright (c) Cyrille NDOUMBE.
 // Licenced under GNU General Public Licence, version 3.0"
 
-using Candoumbe.Types.Calendar;
-
+using System;
 using FsCheck;
 using FsCheck.Fluent;
 
-using System;
-
-namespace Candoumbe.Types.UnitTests.Generators;
+namespace Candoumbe.Types.Calendar.UnitTests.Generators;
 
 /// <summary>
 /// Utility class for generating custom <see cref="Arbitrary{T}"/>

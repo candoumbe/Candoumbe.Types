@@ -479,3 +479,6 @@ $RECYCLE.BIN/
 /.nuke/temp
 
 .qodo
+
+# Stryker mutation test results
+stryker-report.json
