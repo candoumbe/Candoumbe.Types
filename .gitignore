@@ -479,5 +479,7 @@ $RECYCLE.BIN/
 /.nuke/temp
 /.idea/.idea.Candoumbe.Types/.idea/developer-tools.xml
 
-# Qodo
 .qodo
+
+# Stryker mutation test results
+stryker-report.json

@@ -1,26 +1,20 @@
 ﻿// "Copyright (c) Cyrille NDOUMBE.
 // Licenced under GNU General Public Licence, version 3.0"
 
+using System;
+using System.Collections.Generic;
 using Bogus;
-
-using Candoumbe.Types.Calendar;
-using Candoumbe.Types.UnitTests.Generators;
-
+using Candoumbe.Types.Calendar.UnitTests.Generators;
 using FluentAssertions;
 using FluentAssertions.Extensions;
-
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
-
-using System;
-using System.Collections.Generic;
-
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
 
-namespace Candoumbe.Types.UnitTests.Calendar;
+namespace Candoumbe.Types.Calendar.UnitTests;
 [UnitTest]
 public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
 {
