@@ -480,7 +480,7 @@ $RECYCLE.BIN/
 .qodo
 
 # Stryker file reports
-/*/**/stryker-report.json
+*/**/stryker-report.json
 
 # Jetbrains Rider settings
 .idea

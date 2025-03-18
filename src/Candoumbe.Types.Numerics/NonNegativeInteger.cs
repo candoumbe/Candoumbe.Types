@@ -3,12 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics;
 
-namespace Candoumbe.Types.Numerics
-{
-    /// <summary>
-    /// A numeric type that can only hold an <see langword="int" /> value &gt;= <c>0</c>.
-    /// </summary>
-    public record NonNegativeInteger :
+namespace Candoumbe.Types.Numerics;
+
+/// <summary>
+/// A numeric type that can only hold an <see langword="int" /> value &gt;= <c>0</c>.
+/// </summary>
+public record NonNegativeInteger : 
         NonNegativeNumberBase<int, NonNegativeInteger>,
         IEquatable<NonNegativeInteger>
 #if NET7_0_OR_GREATER
@@ -25,21 +25,21 @@ namespace Candoumbe.Types.Numerics
         , IComparisonOperators<NonNegativeInteger, NonNegativeInteger, bool>
 
 #endif
-    {
+{
         /// <summary>
         /// The underlying <see langword="int"/> value
         /// </summary>
         public int Value
         {
-            get;
+                get;
 #if NET6_0_OR_GREATER
-            init;
+                init;
 #endif
         }
 
         private NonNegativeInteger(int value)
         {
-            Value = value;
+                Value = value;
         }
 
         /// <summary>
@@ -50,9 +50,9 @@ namespace Candoumbe.Types.Numerics
         /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is &lt; 0</exception>
         public static NonNegativeInteger From(int value)
         {
-            return value < 0
-                ? throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(value)} cannot be negative")
-                : new NonNegativeInteger(value);
+                return value < 0
+                        ? throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(value)} cannot be negative")
+                        : new NonNegativeInteger(value);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Candoumbe.Types.Numerics
         /// <returns>the sum of left and right.</returns>
 #endif
         public static NonNegativeInteger operator +(NonNegativeInteger left, NonNegativeInteger right)
-            => From(left.Value + right.Value);
+                => From(left.Value + right.Value);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -114,11 +114,11 @@ namespace Candoumbe.Types.Numerics
         /// <returns>the sum of left and right.</returns>
 #endif
         public static NonNegativeInteger operator +(NonNegativeInteger left, int right)
-            => From((left.Value + right) switch
-            {
-                < 0 => 0,
-                int value => value
-            });
+                => From((left.Value + right) switch
+                {
+                        < 0 => 0,
+                        int value => value
+                });
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -131,7 +131,7 @@ namespace Candoumbe.Types.Numerics
         /// <returns>the result of the subtraction.</returns>
 #endif
         public static NonNegativeInteger operator -(NonNegativeInteger left, NonNegativeInteger right)
-            => left - right.Value;
+                => left - right.Value;
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -145,11 +145,11 @@ namespace Candoumbe.Types.Numerics
         /// <exception cref="ArgumentNullException"><paramref name="left"/> is <see langword="null"/></exception>
 #endif
         public static NonNegativeInteger operator -(NonNegativeInteger left, int right)
-            => From((left.Value - right) switch
-            {
-                < 0 => 0,
-                int value => value
-            });
+                => From((left.Value - right) switch
+                {
+                        < 0 => 0,
+                        int value => value
+                });
 
         /// <summary>
         /// Implicit cast to <see langword="int"/>
@@ -229,28 +229,28 @@ namespace Candoumbe.Types.Numerics
 
         /// <inheritdoc/>
         public static NonNegativeInteger operator --(NonNegativeInteger value)
-            => value.Value switch
-            {
-                0 => MaxValue,
-                _ => value - One
-            };
+                => value.Value switch
+                {
+                        0 => MaxValue,
+                        _ => value - One
+                };
 
         /// <inheritdoc/>
         public static NonNegativeInteger operator /(NonNegativeInteger left, NonNegativeInteger right)
-            => right.Value switch
-            {
-                0 => throw new DivideByZeroException(),
-                1 => left,
-                _ => From(left.Value / right.Value)
-            };
+                => right.Value switch
+                {
+                        0 => throw new DivideByZeroException(),
+                        1 => left,
+                        _ => From(left.Value / right.Value)
+                };
 
         /// <inheritdoc/>
         public static NonNegativeInteger operator ++(NonNegativeInteger value)
-            => value.Value switch
-            {
-                int.MaxValue => Zero,
-                _ => value + One
-            };
+                => value.Value switch
+                {
+                        int.MaxValue => Zero,
+                        _ => value + One
+                };
 
         /// <inheritdoc/>
         public static NonNegativeInteger operator +(NonNegativeInteger value) => value;
@@ -267,7 +267,7 @@ namespace Candoumbe.Types.Numerics
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
         public static bool IsOddInteger(NonNegativeInteger value)
-                    => int.IsOddInteger(value.Value);
+                => int.IsOddInteger(value.Value);
 #else
         /// <summary>
         /// Determines if <paramref name="value"/> is an odd integral number
@@ -385,11 +385,11 @@ namespace Candoumbe.Types.Numerics
         /// <returns><paramref name="x"/> if <paramref name="x"/> is greater than <paramref name="y"/>; otherwise <paramref name="y"/>.</returns>
 #endif
         public static NonNegativeInteger MaxMagnitude(NonNegativeInteger x, NonNegativeInteger y)
-            => (x > y) switch
-            {
-                true => x,
-                _ => y
-            };
+                => (x > y) switch
+                {
+                        true => x,
+                        _ => y
+                };
 
 #if NET7_0_OR_GREATER
         /// <inheritdoc/>
@@ -420,12 +420,12 @@ namespace Candoumbe.Types.Numerics
 
         /// <inheritdoc/>
         public static bool TryParse([NotNullWhen(true)] string s, NumberStyles style, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeInteger result)
-            => throw new NotImplementedException();
+                => throw new NotImplementedException();
 
 #if NET7_0_OR_GREATER
         /// <inheritdoc/>
         public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider provider)
-            => Value.TryFormat(destination, out charsWritten, format, provider);
+                => Value.TryFormat(destination, out charsWritten, format, provider);
 #endif
 
         /// <inheritdoc/>
@@ -441,46 +441,45 @@ namespace Candoumbe.Types.Numerics
         /// <inheritdoc/>
         public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeInteger result)
         {
-            bool successfullyParsed = false;
-            try
-            {
-                result = From(int.Parse(s, provider));
-                successfullyParsed = true;
-            }
-            catch
-            {
-                result = default;
-            }
+                bool successfullyParsed = false;
+                try
+                {
+                        result = From(int.Parse(s, provider));
+                        successfullyParsed = true;
+                }
+                catch
+                {
+                        result = default;
+                }
 
-            return successfullyParsed;
+                return successfullyParsed;
         }
 #endif
 
         /// <inheritdoc/>
         public static NonNegativeInteger Parse(string s, IFormatProvider provider)
         {
-            long value = long.Parse(s, provider);
-            return value < MinValue || value > MaxValue
-                ? throw new OverflowException($@"""{s}"" represents a value that is outside range of {nameof(NonNegativeInteger)} values")
-                : From((int)value);
+                long value = long.Parse(s, provider);
+                return value < MinValue || value > MaxValue
+                        ? throw new OverflowException($@"""{s}"" represents a value that is outside range of {nameof(NonNegativeInteger)} values")
+                        : From((int)value);
         }
 
         /// <inheritdoc/>
         public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out NonNegativeInteger result)
         {
-            bool parsingDone = false;
+                bool parsingDone = false;
 
-            try
-            {
-                result = Parse(s, provider);
-                parsingDone = true;
-            }
-            catch
-            {
-                result = default;
-            }
+                try
+                {
+                        result = Parse(s, provider);
+                        parsingDone = true;
+                }
+                catch
+                {
+                        result = default;
+                }
 
-            return parsingDone;
+                return parsingDone;
         }
-    }
 }

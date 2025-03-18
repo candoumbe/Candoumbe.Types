@@ -19,7 +19,7 @@ internal static class ValueGenerators
     public static Arbitrary<DateOnly> DateOnlys()
         => ArbMap.Default.ArbFor<DateTime>()
                          .Generator
-                         .Select(dateTime => DateOnly.FromDateTime(dateTime))
+                         .Select(DateOnly.FromDateTime)
                          .ToArbitrary();
 
     /// <summary>
