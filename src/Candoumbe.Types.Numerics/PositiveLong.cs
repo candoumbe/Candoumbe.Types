@@ -3,19 +3,18 @@
 using System.Numerics;
 #endif
 
-namespace Candoumbe.Types.Numerics
-{
+namespace Candoumbe.Types.Numerics;
 #if NET7_0_OR_GREATER
 #endif
 
-    /// <summary>
-    /// A numeric type which value is garantied to always be greater than <c>0</c>.
-    /// <para>
-    /// This type can be usefull when a value must be strictly greater than <c>0</c> but using <see langword="uint"/> would make an API harder
-    /// to integrate with existing ecosystem.
-    /// </para>
-    /// </summary>
-    public record PositiveLong :
+/// <summary>
+/// A numeric type which value is garantied to always be greater than <c>0</c>.
+/// <para>
+/// This type can be usefull when a value must be strictly greater than <c>0</c> but using <see langword="uint"/> would make an API harder
+/// to integrate with existing ecosystem.
+/// </para>
+/// </summary>
+public record PositiveLong :
 
 #if NET7_0_OR_GREATER
         PositiveNumberBase<long, PositiveLong>,
@@ -34,7 +33,7 @@ namespace Candoumbe.Types.Numerics
         , IMultiplicativeIdentity<PositiveLong, PositiveLong>
 
 #endif
-    {
+{
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
 #else
@@ -57,11 +56,11 @@ namespace Candoumbe.Types.Numerics
 
         private PositiveLong(long value)
         {
-            if (value < 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(value)} must be greater than 1.");
-            }
-            Value = value;
+                if (value < 1)
+                {
+                        throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(value)} must be greater than 1.");
+                }
+                Value = value;
         }
 
 #if NET7_0_OR_GREATER
@@ -102,25 +101,25 @@ namespace Candoumbe.Types.Numerics
 #endif
         public static PositiveLong operator +(PositiveLong left, PositiveLong right)
         {
-            return (left.Value, right.Value) switch
-            {
-                (long.MaxValue, _) => right.Value switch
+                return (left.Value, right.Value) switch
                 {
-                    1 => One,
-                    _ => right - One
-                },
-                (_, long.MaxValue) => left.Value switch
-                {
-                    1 => One,
-                    _ => left - One
-                },
+                        (long.MaxValue, _) => right.Value switch
+                        {
+                                1 => One,
+                                _ => right - One
+                        },
+                        (_, long.MaxValue) => left.Value switch
+                        {
+                                1 => One,
+                                _ => left - One
+                        },
 
-                _ => (left.Value + right.Value) switch
-                {
-                    long result when result < 1 => From(1 + Math.Abs(result)),
-                    long result => From(result)
-                }
-            };
+                        _ => (left.Value + right.Value) switch
+                        {
+                                long result when result < 1 => From(1 + Math.Abs(result)),
+                                long result => From(result)
+                        }
+                };
         }
 
 #if NET7_0_OR_GREATER
@@ -136,14 +135,14 @@ namespace Candoumbe.Types.Numerics
 #endif
         public static PositiveLong operator checked +(PositiveLong left, PositiveLong right)
         {
-            try
-            {
-                return From(left.Value + right.Value);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                throw new OverflowException($@"adding ""{left}"" and ""{right}"" result is outside of {nameof(PositiveLong)} values");
-            }
+                try
+                {
+                        return From(left.Value + right.Value);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                        throw new OverflowException($@"adding ""{left}"" and ""{right}"" result is outside of {nameof(PositiveLong)} values");
+                }
         }
 
 #if NET7_0_OR_GREATER
@@ -169,12 +168,12 @@ namespace Candoumbe.Types.Numerics
         /// <returns>the result of the difference of <paramref name="right"/> from <paramref name="left"/>.</returns>
 #endif
         public static PositiveLong operator -(PositiveLong left, PositiveLong right)
-                 => (left.Value - right.Value) switch
-                 {
-                     long value when value == 0 => MaxValue,
-                     long value when value < 0 => From(MaxValue.Value - Math.Abs(value)),
-                     long result => From(result)
-                 };
+                => (left.Value - right.Value) switch
+                {
+                        long value when value == 0 => MaxValue,
+                        long value when value < 0 => From(MaxValue.Value - Math.Abs(value)),
+                        long result => From(result)
+                };
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -187,11 +186,11 @@ namespace Candoumbe.Types.Numerics
         /// <returns>the result of the difference of <paramref name="right"/> from <paramref name="left"/>.</returns>
 #endif
         public static PositiveLong operator checked -(PositiveLong left, PositiveLong right)
-                    => (left.Value - right.Value) switch
-                    {
+                => (left.Value - right.Value) switch
+                {
                         < 1 => throw new OverflowException(),
                         long result => From(result)
-                    };
+                };
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -204,7 +203,7 @@ namespace Candoumbe.Types.Numerics
         /// <returns>The result of <paramref name="left"/> multiplied by <paramref name="right"/>.</returns>
 #endif
         public static PositiveLong operator *(PositiveLong left, PositiveLong right)
-            => From(left.Value * right.Value);
+                => From(left.Value * right.Value);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -217,7 +216,7 @@ namespace Candoumbe.Types.Numerics
         /// <returns>The result of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
 #endif
         public static NonNegativeLong operator /(PositiveLong left, PositiveLong right)
-            => NonNegativeLong.From(left.Value / right.Value);
+                => NonNegativeLong.From(left.Value / right.Value);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -230,7 +229,7 @@ namespace Candoumbe.Types.Numerics
         /// <returns>The result of <paramref name="left"/> multiplied by <paramref name="right"/>.</returns>
 #endif
         public static NonNegativeLong operator *(PositiveLong left, NonNegativeLong right)
-            => From(left.Value * right.Value);
+                => From(left.Value * right.Value);
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -306,5 +305,4 @@ namespace Candoumbe.Types.Numerics
         /// </summary>
         /// <param name="x"></param>
         public static implicit operator NonNegativeLong(PositiveLong x) => NonNegativeLong.From(x.Value);
-    }
 }

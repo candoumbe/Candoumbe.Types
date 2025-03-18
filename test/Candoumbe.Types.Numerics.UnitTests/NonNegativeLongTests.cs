@@ -1,22 +1,17 @@
-﻿using Bogus;
-
-using Candoumbe.Types.Numerics;
-using Candoumbe.Types.UnitTests.Generators;
-
+﻿using System;
+using System.Globalization;
+using Bogus;
+using Candoumbe.Types.Numerics.UnitTests.Generators;
 using FluentAssertions;
-
+using FluentAssertions.Execution;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
-
-using System;
-using System.Globalization;
-
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
 
-namespace Candoumbe.Types.UnitTests.Numerics;
+namespace Candoumbe.Types.Numerics.UnitTests;
 
 [UnitTest]
 [Feature(nameof(Numerics))]
@@ -24,14 +19,14 @@ public class NonNegativeLongTests
 {
     private static readonly Faker Faker = new();
     private readonly ITestOutputHelper _outputHelper;
-    private static readonly string[] StandardNumericFormats = { "c", "d", "e", "f", "g", "n", "p", "r", "x" };
+    private static readonly string[] StandardNumericFormats = ["c", "d", "e", "f", "g", "n", "p", "r", "x"];
 
     public NonNegativeLongTests(ITestOutputHelper outputHelper)
     {
         _outputHelper = outputHelper;
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_default_instance_Then_underlying_should_be_zero(NonNegativeLong initial)
     {
         // Arrange
@@ -41,6 +36,7 @@ public class NonNegativeLongTests
         NonNegativeLong numeric = NonNegativeLong.From(initial.Value);
 
         // Assert
+        using AssertionScope _ = new ();
         numeric.Should().Be(initial);
         numeric.Value.Should().Be(expected);
     }
@@ -75,7 +71,7 @@ public class NonNegativeLongTests
         createNonNegativeLong.Should().Throw<ArgumentOutOfRangeException>();
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public Property Given_any_NonNegativeLong_When_adding_AdditiveIdentity_Then_result_should_be_initial_value(NonNegativeLong initial)
         => ((initial + NonNegativeLong.AdditiveIdentity) == initial).ToProperty();
 
@@ -150,7 +146,7 @@ public class NonNegativeLongTests
     }
 
     [Property]
-    public void Given_NonNegativeLong_When_casting_to_int_Then_result_should_equal_the_inner_value(NonNegativeInt nonNegativeInt)
+    public void Given_NonNegativeLong_When_casting_to_long_Then_result_should_equal_the_inner_value(NonNegativeInt nonNegativeInt)
     {
         // Arrange
         long expected = nonNegativeInt.Item;
@@ -165,7 +161,7 @@ public class NonNegativeLongTests
                        .Be(expected);
     }
 
-    [Property]
+    [Property(Replay = "(10341023407452684865,8566247456245825077)")]
     public void Two_NonNegativeLong_are_equal_when_their_value_are_equal(NonNegativeInt leftValueGenerator, NonNegativeInt rightValueGenerator)
     {
         // Arrange
@@ -180,7 +176,7 @@ public class NonNegativeLongTests
     }
 
     [Property]
-    public void Given_left_is_NonNegativeLong_and_right_is_an_int_When_left_value_equal_right_Then_left_and_right_should_be_equal(NonNegativeInt leftValueGenerator, long right)
+    public void Given_left_is_NonNegativeLong_and_right_is_an_long_When_left_value_equal_right_Then_left_and_right_should_be_equal(NonNegativeInt leftValueGenerator, long right)
     {
         // Arrange
         NonNegativeLong left = NonNegativeLong.From(leftValueGenerator.Item);
@@ -622,17 +618,16 @@ public class NonNegativeLongTests
     }
 #endif
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public Property Given_an_existing_NonNegativeInteger_When_multiplying_by_multiplicative_identity_Then_the_result_should_be_equal_to_the_initial_value(NonNegativeLong initial)
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Given_an_existing_NonNegativeLong_When_multiplying_by_multiplicative_identity_Then_the_result_should_be_equal_to_the_initial_value(NonNegativeLong initial)
     => ((initial * NonNegativeLong.MultiplicativeIdentity) == initial).ToProperty();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
-    public void Given_an_existing_NonNegativeInteger_When_adding_additive_identity_Then_the_result_should_be_equal_to_the_initial_value(NonNegativeLong initial)
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Given_an_existing_NonNegativeLong_When_adding_additive_identity_Then_the_result_should_be_equal_to_the_initial_value(NonNegativeLong initial)
         => ((initial + NonNegativeLong.AdditiveIdentity) == initial).ToProperty();
 
-
     [Property]
-    public void Given_a_NonNegativeLong_When_implicitely_casting_to_int32_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_NonNegativeLong_When_implicitly_casting_to_int32_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
     {
         // Arrange
         NonNegativeLong initial = NonNegativeLong.From(initialValueGenerator.Item);

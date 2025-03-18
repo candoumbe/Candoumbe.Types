@@ -1,9 +1,10 @@
 ﻿root = true
 [*]
 end_of_line = crlf
-
+indent_style = space
 [{*.csproj,*.json,*.xml,*.props}]
 indent_size = 2
+
 [*.cs]
 # Style options
 csharp_style_expression_bodied_accessors = when_on_single_line:suggestion

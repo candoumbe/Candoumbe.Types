@@ -1,25 +1,19 @@
-﻿namespace Candoumbe.Types.UnitTests.Numerics;
-
+﻿using System;
+using System.Collections.Generic;
 using Bogus;
-
-using Candoumbe.Types.Numerics;
-
 using FluentAssertions;
-
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
-
-using System;
-using System.Collections.Generic;
-
 using Xunit;
 using Xunit.Abstractions;
+
+namespace Candoumbe.Types.Numerics.UnitTests;
 
 public class PositiveLongTests
 {
     private readonly ITestOutputHelper _outputHelper;
-    private readonly static Faker Faker = new();
+    private static readonly Faker Faker = new();
 
     public PositiveLongTests(ITestOutputHelper outputHelper)
     {
@@ -245,10 +239,10 @@ public class PositiveLongTests
         PositiveLong right = PositiveLong.From(rightGenerator.Item);
 
         // Act
-        Action addingPositiveValueUsingCheckedKeyword = () => _ = checked(left + right);
+        Action addingPositiveValueInCheckedContext = () => _ = checked(left + right);
 
         // Assert
-        addingPositiveValueUsingCheckedKeyword.Should().Throw<OverflowException>($"the result is outside of [{PositiveLong.MinValue} - {PositiveLong.MaxValue}] range");
+        addingPositiveValueInCheckedContext.Should().Throw<OverflowException>($"the result is outside of [{PositiveLong.MinValue} - {PositiveLong.MaxValue}] range");
     }
 
     [Property]
@@ -272,32 +266,32 @@ public class PositiveLongTests
     {
         get
         {
-            yield return new object[]
-            {
+            yield return
+            [
                 PositiveLong.MinValue,
                 PositiveLong.MinValue,
                 PositiveLong.MaxValue
-            };
+            ];
 
-            yield return new object[]
-            {
+            yield return
+            [
                 PositiveLong.One,
                 PositiveLong.One,
                 PositiveLong.MaxValue
-            };
+            ];
 
-            yield return new object[]
-            {
+            yield return
+            [
                 PositiveLong.One,
                 PositiveLong.From(2),
                 PositiveLong.From(PositiveLong.MaxValue.Value - 1)
-            };
+            ];
         }
     }
 
     [Theory]
     [MemberData(nameof(SubtractionInCheckedContextCases))]
-    public void Given_two_PositiveLong_When_substracting_Then_result_should_be_expected(PositiveLong left, PositiveLong right, PositiveLong expected)
+    public void Given_unchecked_When_subtracting_left_from_right_Then_result_should_be_expected(PositiveLong left, PositiveLong right, PositiveLong expected)
     {
         // Act
         PositiveLong actual = unchecked(left - right);
