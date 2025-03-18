@@ -606,11 +606,11 @@ public class NonNegativeIntegerTests
     }
 #endif
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public Property Given_an_existing_NonNegativeInteger_When_multiplying_by_multiplicative_identity_Then_the_result_should_be_equal_to_the_initial_value(NonNegativeInteger initial)
         => ((initial * NonNegativeInteger.MultiplicativeIdentity) == initial).ToProperty();
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_an_existing_NonNegativeInteger_When_adding_additive_identity_Then_the_result_should_be_equal_to_the_initial_value(NonNegativeInteger initial)
         => ((initial + NonNegativeInteger.AdditiveIdentity) == initial).ToProperty();
 

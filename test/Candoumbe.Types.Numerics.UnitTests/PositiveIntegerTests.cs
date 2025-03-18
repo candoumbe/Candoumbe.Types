@@ -1,9 +1,8 @@
 using System;
 using Bogus;
-using Candoumbe.Types.Numerics.UnitTests.Generators;
 using FluentAssertions;
-using System;
 using System.Collections.Generic;
+using Candoumbe.Types.Numerics.UnitTests.Generators;
 using Xunit;
 using Xunit.Abstractions;
 using FsCheck;
@@ -35,10 +34,10 @@ public class PositiveIntegerTests
         callingFrom.Should()
                    .ThrowExactly<ArgumentOutOfRangeException>($"{input} is out of [{PositiveLong.MinValue} - {PositiveLong.MaxValue}] range of values")
                    .Where(ex => !string.IsNullOrWhiteSpace(ex.Message), "the message of the exception helps understanding the issue")
-                   .Where(ex => Equals(ex.ActualValue, input), "having the actual value that caused the exception can help when debbuging");
+                   .Where(ex => Equals(ex.ActualValue, input), "having the actual value that caused the exception can help when debugging");
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_positive_integers_When_comparing_them_Then_the_result_should_be_the_same_as_comparing_their_underlying_values(PositiveInteger left, PositiveInteger right)
     {
         // Assert
@@ -50,14 +49,14 @@ public class PositiveIntegerTests
         (left != right).Should().Be(left.Value != right.Value);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_positive_integers_and_in_a_checked_When_adding_those_values_together_Then_the_result_should_be_withing_range_of_positive_values(PositiveInteger left, PositiveInteger right)
     {
         // Act
         PositiveInteger result = checked(left + right);
 
         // Assert
-        result.Should()
+        result.Value.Should()
               .BeInRange(PositiveInteger.MinValue, PositiveInteger.MaxValue);
         result.Should().Be(checked(right + left));
     }
@@ -84,14 +83,14 @@ public class PositiveIntegerTests
         };
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_two_PositiveIntegers_and_checked_context_When_multiplying_them_together_Then_the_result_should_be_correct(PositiveInteger left, PositiveInteger right)
     {
         // Act
         PositiveInteger result = checked(left * right);
 
         // Assert
-        result.Should()
+        result.Value.Should()
               .BeInRange(PositiveInteger.MinValue, PositiveInteger.MaxValue)
               .And.Be(right * left, "The multîplication is commutative");
     }
@@ -194,7 +193,7 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_a_PositiveInteger_When_implicitely_casting_to_int32_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_PositiveInteger_When_implicitly_casting_to_int32_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
     {
         // Arrange
         PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
@@ -207,7 +206,7 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_a_PositiveInteger_When_implicitely_casting_to_long_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_PositiveInteger_When_implicitly_casting_to_long_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
     {
         // Arrange
         PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
@@ -233,7 +232,7 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_a_PositiveInteger_When_implicitely_casting_to_uint_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_PositiveInteger_When_implicitly_casting_to_uint_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
     {
         // Arrange
         PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
@@ -246,7 +245,7 @@ public class PositiveIntegerTests
     }
 
     [Property]
-    public void Given_a_PositiveInteger_When_implicitely_casting_to_ulong_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_PositiveInteger_When_implicitly_casting_to_ulong_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
     {
         // Arrange
         PositiveInteger initial = PositiveInteger.From(initialValueGenerator.Item);
@@ -321,32 +320,32 @@ public class PositiveIntegerTests
     {
         get
         {
-            yield return new object[]
-            {
+            yield return
+            [
                 PositiveInteger.MinValue,
                 PositiveInteger.MinValue,
                 PositiveInteger.MaxValue
-            };
+            ];
 
-            yield return new object[]
-            {
+            yield return
+            [
                 PositiveInteger.One,
                 PositiveInteger.One,
                 PositiveInteger.MaxValue
-            };
+            ];
 
-            yield return new object[]
-            {
+            yield return
+            [
                 PositiveInteger.One,
                 PositiveInteger.From(2),
                 PositiveInteger.From(PositiveInteger.MaxValue.Value - 1)
-            };
+            ];
         }
     }
 
     [Theory]
     [MemberData(nameof(SubtractionInCheckedContextCases))]
-    public void Given_two_PositiveInteger_When_substracting_Then_result_should_be_expected(PositiveInteger left, PositiveInteger right, PositiveInteger expected)
+    public void Given_two_PositiveInteger_When_subtracting_Then_result_should_be_expected(PositiveInteger left, PositiveInteger right, PositiveInteger expected)
     {
         // Act
         PositiveInteger actual = unchecked(left - right);
@@ -355,7 +354,7 @@ public class PositiveIntegerTests
         actual.Should().Be(expected);
     }
 
-    [Property(Arbitrary = new[] { typeof(ValueGenerators) })]
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
     public Property Given_an_existing_PositiveInteger_When_multiplying_by_multiplicative_identity_Then_the_result_should_be_equal_to_the_initial_value(PositiveInteger initial)
         => ((initial * PositiveInteger.MultiplicativeIdentity) == initial).ToProperty();
 }
