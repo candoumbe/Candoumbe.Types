@@ -11,7 +11,7 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.GitHub;
 
-[GitHubActions("integration", GitHubActionsImage.UbuntuLatest,
+[GitHubActions("integration", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
     InvokedTargets = [nameof(IUnitTest.Compile), nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Pack), nameof(IPushNugetPackages.Publish)],
@@ -38,12 +38,11 @@ using Nuke.Common.Tools.GitHub;
         "LICENSE"
     ]
 )]
-[GitHubActions("nightly", GitHubActionsImage.UbuntuLatest,
+[GitHubActions("nightly", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
     OnCronSchedule = "0 0 * * *",
     InvokedTargets = [nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
-    OnPushBranches = [IHaveDevelopBranch.DevelopBranchName],
     CacheKeyFiles =
     [
         "src/**/*.csproj",
@@ -67,7 +66,7 @@ using Nuke.Common.Tools.GitHub;
         "LICENSE"
     ]
 )]
-[GitHubActions("delivery", GitHubActionsImage.UbuntuLatest,
+[GitHubActions("delivery", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
     InvokedTargets = [nameof(IPushNugetPackages.Pack), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease)],
@@ -94,7 +93,7 @@ using Nuke.Common.Tools.GitHub;
         "LICENSE"
     ]
 )]
-[GitHubActions("perf-manual", GitHubActionsImage.UbuntuLatest,
+[GitHubActions("perf-manual", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = true,
     FetchDepth = 0,
     InvokedTargets = [nameof(IBenchmark.Benchmarks)],
