@@ -10,17 +10,17 @@ namespace Candoumbe.Types.Numerics;
 /// </summary>
 /// <typeparam name="TNumber">The numeric type that the current type will restrict values for.</typeparam>
 public abstract record Number<TNumber> : IComparable<Number<TNumber>>
-    where TNumber : IComparable<TNumber>
+    where TNumber : notnull, IComparable<TNumber>
 {
     /// <summary>
-    /// Gets the underlying value
+    /// Gets the underlying <typeparamref name="TNumber"/> value
     /// </summary>
-    /// <remarks>The value is guaranteed to be within the range of values defined by the current type.</remarks>
+    /// <remarks>The value is guaranteed to be within the range of valid values defined by the current type.</remarks>
     public TNumber Value
     {
         get;
 #if NET7_0_OR_GREATER
-        init;
+        protected init;
 #else
             protected set;
 #endif
