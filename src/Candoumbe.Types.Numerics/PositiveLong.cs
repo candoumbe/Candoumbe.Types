@@ -14,13 +14,7 @@ namespace Candoumbe.Types.Numerics;
 /// to integrate with existing ecosystem.
 /// </para>
 /// </summary>
-public record PositiveLong :
-
-#if NET7_0_OR_GREATER
-        PositiveNumberBase<long, PositiveLong>,
-#endif
-
-        IEquatable<PositiveLong>
+public record PositiveLong : PositiveNumberBase<long, PositiveLong>
 #if NET7_0_OR_GREATER
         , IAdditionOperators<PositiveLong, PositiveLong, PositiveLong>
         , IAdditionOperators<PositiveLong, NonNegativeLong, PositiveLong>
@@ -47,12 +41,6 @@ public record PositiveLong :
         /// The one value
         /// </summary>
         public static PositiveLong One => From(1);
-
-        /// <summary>
-        /// Gets the underlying <see langword="long"/> value.
-        /// </summary>
-        /// <remarks>The value is garantied to be &gt; <c>0</c></remarks>
-        public long Value { get; }
 
         private PositiveLong(long value)
         {
