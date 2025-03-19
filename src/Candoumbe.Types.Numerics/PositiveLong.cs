@@ -8,9 +8,9 @@ namespace Candoumbe.Types.Numerics;
 #endif
 
 /// <summary>
-/// A numeric type which value is garantied to always be greater than <c>0</c>.
+/// A numeric type which value is guaranteed to always be greater than <c>0</c>.
 /// <para>
-/// This type can be usefull when a value must be strictly greater than <c>0</c> but using <see langword="uint"/> would make an API harder
+/// This type can be useful when a value must be strictly greater than <c>0</c> but using <see langword="uint"/> would make an API harder
 /// to integrate with existing ecosystem.
 /// </para>
 /// </summary>
