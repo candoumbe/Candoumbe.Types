@@ -17,7 +17,9 @@
 name: nightly
 
 on:
-  pull_request:
+  push:
+    branches:
+      - develop
     paths:
       - '!docs/*'
       - '!README.md'
