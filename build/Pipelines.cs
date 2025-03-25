@@ -14,7 +14,13 @@ using Nuke.Common.Tools.GitHub;
 [GitHubActions("integration", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
-    InvokedTargets = [nameof(IUnitTest.Compile), nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Pack), nameof(IPushNugetPackages.Publish)],
+    InvokedTargets =
+    [
+        nameof(IUnitTest.Compile),
+        nameof(IUnitTest.UnitTests),
+        nameof(IPushNugetPackages.Pack),
+        nameof(IPushNugetPackages.Publish)
+    ],
     CacheKeyFiles =
     [
         "src/**/*.csproj",
@@ -42,7 +48,18 @@ using Nuke.Common.Tools.GitHub;
     AutoGenerate = false,
     FetchDepth = 0,
     OnCronSchedule = "0 0 * * *",
-    InvokedTargets = [nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
+    OnPushBranches = [IGitFlow.DevelopBranchName],
+    OnPushExcludePaths =
+    [
+        "docs/*",
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE"
+    ],
+    InvokedTargets = [
+        nameof(IMutationTest.MutationTests),
+        nameof(IPushNugetPackages.Pack)
+    ],
     CacheKeyFiles =
     [
         "src/**/*.csproj",
@@ -57,14 +74,7 @@ using Nuke.Common.Tools.GitHub;
         nameof(IReportCoverage.CodecovToken),
         nameof(IMutationTest.StrykerDashboardApiKey)
     ],
-    PublishArtifacts = true,
-    OnPullRequestExcludePaths =
-    [
-        "docs/*",
-        "README.md",
-        "CHANGELOG.md",
-        "LICENSE"
-    ]
+    PublishArtifacts = true
 )]
 [GitHubActions("delivery", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
