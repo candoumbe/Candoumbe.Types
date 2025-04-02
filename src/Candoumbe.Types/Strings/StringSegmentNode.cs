@@ -22,9 +22,9 @@ internal record StringSegmentNode
     /// Initializes a new instance of the StringSegmentNode class with the specified value.
     /// </summary>
     /// <param name="value">The StringSegment value to be stored in the node.</param>
-    public StringSegmentNode(ReadOnlyMemory<char> value)
+    public StringSegmentNode(ReadOnlySpan<char> value)
     {
-        Value = value;
+        Value = value.ToArray();
         Next = null;
     }
 }

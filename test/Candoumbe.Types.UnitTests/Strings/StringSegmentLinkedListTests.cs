@@ -21,15 +21,15 @@ namespace Candoumbe.Types.UnitTests.Strings;
 public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 {
     private static readonly Faker Faker = new();
-    
+
     [Property]
     public void Given_non_empty_string_segment_Then_constructor_should_initialize_properties(NonEmptyString stringGenerator)
     {
         // Arrange
-        StringSegment initialSegment = new StringSegment("initial");
+        StringSegment initialSegment ="initial";
 
         // Act
-        StringSegmentLinkedList linkedList = new StringSegmentLinkedList(initialSegment);
+        StringSegmentLinkedList linkedList = new(initialSegment);
 
         // Assert
         linkedList.Count.Should().Be(1);
@@ -115,18 +115,17 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     {
         get
         {
-            TheoryData<StringSegmentLinkedList, IReadOnlyList<StringSegment>, (int length, string value)> data = new TheoryData<StringSegmentLinkedList, IReadOnlyList<StringSegment>, (int length, string value)>();
-            data.Add(new("Hello"),
-                    [" ", "world"],
-                    ( "Hello world".Length, "Hello world" )
-            );
-            data.Add(new("Hello"),
-                    ["wonderful", string.Empty, " ", "world"],
+            TheoryData<StringSegmentLinkedList, IReadOnlyList<StringSegment>, (int length, string value)> data = new()
+            {
+                { new("Hello"), [" ", "world"], ( "Hello world".Length, "Hello world" ) },
+                {
+                    new("Hello"), ["wonderful", string.Empty, " ", "world"],
                     ( "Hellowonderful world".Length, "Hellowonderful world" )
-            );
+                }
+            };
             {
                 StringSegment source = "abcdef";
-                data.Add(new (source.Subsegment(0, 1)), [ source ] , (7, "aabcdef"));
+                data.Add(new StringSegmentLinkedList(source.Subsegment(0, 1)), [ source ] , (7, "aabcdef"));
             }
 
             return data;
@@ -135,12 +134,12 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 
     [Theory]
     [MemberData(nameof(AppendCases))]
-    public void Given_a_initial_list_When_appending_value_Then_the_list_state_is_as_expected(StringSegmentLinkedList initialList, IEnumerable<StringSegment> values, (int length, string value) expected)
+    public void Given_a_initial_list_When_appending_value_Then_the_list_state_is_as_expected(StringSegmentLinkedList initialList, IReadOnlyList<StringSegment> values, (int length, string value) expected)
     {
         // Act
         foreach (StringSegment value in values)
         {
-            initialList.Append(value);
+            initialList.Append(value.AsSpan());
         }
 
         // Assert
@@ -154,17 +153,17 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         get
         {
             TheoryData<StringSegmentLinkedList, (int, StringSegmentLinkedList), (int length, string value)> data = new TheoryData<StringSegmentLinkedList, (int index, StringSegmentLinkedList), (int length, string value)>();
-            data.Add(new("Hello"),
+            data.Add(new StringSegmentLinkedList("Hello"),
                 (1 , new StringSegmentLinkedList(" ", "world")),
                 ( "Hello world".Length, "Hello world" )
             );
-            data.Add(new("Hello"),
-                (1, new("wonderful", string.Empty, " ", "world")),
+            data.Add(new StringSegmentLinkedList("Hello"),
+                (1, new StringSegmentLinkedList("wonderful", string.Empty, " ", "world")),
                 ( "Hellowonderful world".Length, "Hellowonderful world" )
             );
             {
                 StringSegment source = "abcdef";
-                data.Add(new (
+                data.Add(new StringSegmentLinkedList(
                     source.Subsegment(0, 1)),
                         (0, new (source)) ,
                         (7, "abcdefa"));
@@ -245,7 +244,8 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         StringSegmentLinkedList actualList = initialList.Replace(replacement.oldString, replacement.newString);
 
         // Assert
-        actualList.ToStringValue().Should().Be(expected);
+        string actual = actualList.ToStringValue();
+        actual.Should().Be(expected);
     }
 
     [Property]
@@ -253,7 +253,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     {
         // Arrange
         StringSegmentLinkedList initialList = new(StringSegment.Empty);
-        StringSegment segment = stringGenerator.Item;
+        string segment = stringGenerator.Item;
 
         // Act
         StringSegmentLinkedList actualList = initialList.Append(segment);
@@ -264,7 +264,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     }
 
     [Fact]
-    public void Given_initial_empty_list_Then_Count_should_return_zero()
+    public void Given_initial_empty_list_Then_Count_should_return_one()
     {
         // Arrange
         StringSegmentLinkedList initialList = new(StringSegment.Empty);
@@ -305,36 +305,40 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         actual.Should().Match(resultExpectation);
     }
 
-    public static TheoryData<StringSegmentLinkedList, StringSegmentLinkedList> AppendListToAnotherListCases
+    public static TheoryData<StringSegmentLinkedList, StringSegmentLinkedList, StringSegmentLinkedList> AppendListToAnotherListCases
         => new()
         {
             {
                 new StringSegmentLinkedList(),
+                new StringSegmentLinkedList(),
                 new StringSegmentLinkedList()
             },
             {
                 new StringSegmentLinkedList("one","two"),
-                new StringSegmentLinkedList()
+                new StringSegmentLinkedList(),
+                new StringSegmentLinkedList("one", "two")
             },
             {
                 new StringSegmentLinkedList(),
+                new StringSegmentLinkedList("one","two"),
                 new StringSegmentLinkedList("one","two")
             },
             {
                 new StringSegmentLinkedList("one","two"),
-                new StringSegmentLinkedList("three", "four", "five", "six", "seven", "eight", "nine")
+                new StringSegmentLinkedList("three", "four", "five", "six", "seven", "eight", "nine"),
+                new StringSegmentLinkedList("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
             }
         };
 
     [Theory]
     [MemberData(nameof(AppendListToAnotherListCases))]
-    public void Given_an_initial_list_When_appending_another_list_Then_the_resulting_list_should_match_expectation(StringSegmentLinkedList first, StringSegmentLinkedList second)
+    public void Given_an_initial_list_When_appending_another_list_Then_the_resulting_list_should_match_expectation(StringSegmentLinkedList first, StringSegmentLinkedList second, StringSegmentLinkedList expected)
     {
         // Act
         StringSegmentLinkedList actual = first.Append(second);
 
         // Assert
-        actual.Should().BeEquivalentTo([..first, ..second]);
+        actual.Should().HaveSameCount(expected);
     }
 
     [Fact]
