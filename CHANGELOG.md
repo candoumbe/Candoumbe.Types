@@ -26,6 +26,8 @@ when there are more than 1 match in a node.
 - Added documentation.
 - Updated GitVersion configuration to better handle hotfix versioning
 
+### 🛠️ Technical
+- Updated GitHub workflows to download required SDKs when running CI. 
 
 ## [0.2.0] / 2024-12-03
 ### 🚀 New features
