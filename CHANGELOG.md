@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `NonNegativeLong` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
 - Added `PositiveLong` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
 
+### 🛠️ Technical
+- Updated GitHub workflows to download required SDKs when running CI. 
 
 ## [0.2.0] / 2024-12-03
 ### 🚀 New features
