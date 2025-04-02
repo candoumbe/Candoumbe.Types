@@ -107,7 +107,7 @@ using Nuke.Common.Tools.GitHub;
     ]
 )]
 [GitHubActions("perf-manual", GitHubActionsImage.Ubuntu2204,
-    AutoGenerate = true,
+    AutoGenerate = false,
     FetchDepth = 0,
     InvokedTargets = [nameof(IBenchmark.Benchmarks)],
     CacheKeyFiles =
