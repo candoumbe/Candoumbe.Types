@@ -293,7 +293,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
             int indexOfOldChar = -1;
             IEnumerable<int> occurrences = [];
             Parallel.Invoke(() => indexOfOldChar = current.Value.FirstOccurrence(predicate),
-                            () => occurrences = current.Value.Occurrences(predicate));
+                () => occurrences = current.Value.Occurrences(predicate));
 
             if (indexOfOldChar >= 0)
             {
@@ -355,33 +355,35 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
             if (indexOfOldChar >= 0)
             {
-                ReadOnlyMemory<char> valueToKeep = current.Value[..indexOfOldChar];
+                replacementList = replacementList.Append(current.Value.Span[..indexOfOldChar]);
 
-                if (!substitutions.TryGetValue(current.Value.Span[indexOfOldChar], out ReadOnlyMemory<char> replacement))
+                char candidate = current.Value.Span[indexOfOldChar];
+                if (!substitutions.TryGetValue(candidate, out ReadOnlyMemory<char> replacement))
                 {
                     replacement = ReadOnlyMemory<char>.Empty;
                 }
 
-                replacementList.Append(valueToKeep).Append(replacement);
+                replacementList = replacementList.Append(replacement.Span);
 
-                int index = indexOfOldChar + 1;
+                int index = indexOfOldChar;
                 foreach (int occurrence in occurrences.Skip(1))
                 {
                     replacementList = replacementList.Append(replacement.Span);
                     if (index < occurrence)
                     {
-                        valueToKeep = current.Value.Slice(index, occurrence);
-                        replacementList.Append(valueToKeep);
+                        ReadOnlyMemory<char> valueToKeep = current.Value.Slice(index, occurrence);
+                        replacementList = replacementList.Append(valueToKeep.Span);
                     }
 
                     // move the cursor right after the current occurrence
-                    index = occurrence + 1;
+                    indexOfOldChar = occurrence;
                 }
 
                 // we did all substitutions, but we did not reach the end of the original input
                 // => copy all remaining original chars starting at index position  
-                if (index <= current.Value.Length)
+                if (indexOfOldChar < current.Value.Length)
                 {
+                    index = indexOfOldChar + 1;
                     replacementList = replacementList.Append(current.Value[index..].Span);
                 }
             }
@@ -397,72 +399,64 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     }
 
     /// <summary>
-    /// Replaces all <paramref name="oldString"/> by <paramref name="newString"/>.
+    /// Replaces all <paramref name="oldValue"/> by <paramref name="newValue"/>.
     /// </summary>
-    /// <param name="oldString"><see langword="string"/> to replace.</param>
-    /// <param name="newString"><see langword="string"/> that will replace <paramref name="oldString"/>.</param>
+    /// <param name="oldValue"><see langword="string"/> to replace.</param>
+    /// <param name="newValue"><see langword="string"/> that will replace <paramref name="oldValue"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
     /// This method does its best to never allocated.
     /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
     /// the current instance had.
     /// </remarks>
-    public StringSegmentLinkedList Replace(in ReadOnlySpan<char> oldString, in ReadOnlySpan<char> newString)
+    public StringSegmentLinkedList Replace(in ReadOnlySpan<char> oldValue, in ReadOnlySpan<char> newValue)
     {
         StringSegmentLinkedList replacementList = [];
         StringSegmentNode current = _head;
-
-        int oldStringLength = oldString.Length;
-
-        Queue<char> queue = new(oldString.Length);
+        int oldStringLength = oldValue.Length;
 
         while (current is not null)
         {
-            if (current.Value.Length == oldStringLength && newString.Length is not 0 && current.Value.Span.SequenceEqual(oldString) )
-            {
-                replacementList = replacementList.Append(newString);
-            }
-            else if (oldStringLength > 0 && current.Value.Length > oldStringLength)
-            {
-                int index = current.Value.Span.IndexOf(oldString[0]);
-                int offset = 0;
-                if (index is -1)
-                {
-                    replacementList = replacementList.Append(current.Value.Span);
-                }
-                else
-                {
-                    if (index > 0)
-                    {
-                        replacementList = replacementList.Append(current.Value.Span[..index]);
-                    }
-                    bool mismatchFound;
-                    do
-                    {
-                        mismatchFound = current.Value.Span[index] != oldString[offset];
-                        if (!mismatchFound)
-                        {
-                            queue.Enqueue(current.Value.Span[index]);
-                        }
-                        index++;
-                        offset++;
-                    } while (offset < oldStringLength && index < current.Value.Length && !mismatchFound );
+            ReadOnlySpan<char> subject = current.Value.Span;
+            int index = subject.IndexOf(oldValue[0]);
 
-                    if (!mismatchFound && queue.Count == oldStringLength)
-                    {
-                        queue.Clear();
-                        replacementList = replacementList.Append(newString);
-                        replacementList = replacementList.Append(current.Value.Span[..index]);
-                    }
-                }
-                if (index < current.Value.Length - 1)
-                {
-                    replacementList = replacementList.Append(current.Value.Span[index..]);
-                }
+            // no match in the current node
+            if (index is -1)
+            {
+                replacementList = replacementList.Append(subject);
             }
             else
             {
-                replacementList = replacementList.Append(current.Value.Span);
+                int previousIndex = 0;
+                do
+                {
+                    replacementList = replacementList.Append(subject[..index]);
+                    int offset = 0;
+                    bool mismatchFound;
+                    do
+                    {
+                        mismatchFound = subject[index] != oldValue[offset];
+                        index++;
+                        offset++;
+                    } while (offset < oldStringLength && index < subject.Length && !mismatchFound);
+
+                    replacementList = mismatchFound switch
+                    {
+                        // a mismatch was found : we need to rewind and copy from the previous index up to the current one
+                        true => replacementList.Append(subject[( previousIndex + 1 )..index]),
+                        // we looped through the whole span and up to here everything match => we just append newValue
+                        _ => replacementList.Append(newValue)
+                    };
+
+                    subject = subject[index..];
+                    previousIndex = index;
+                    index = subject.IndexOf(oldValue[0]);
+                } while (index != -1 && subject.Length > 0);
+
+                if (!subject.IsEmpty)
+                {
+                    replacementList = replacementList.Append(subject);
+                }
             }
             current = current.Next;
         }

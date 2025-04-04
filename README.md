@@ -1,12 +1,14 @@
 #  Types <!-- omit in toc -->
 
 [![GitHub Workflow Status (develop)](https://github.com/candoumbe/Candoumbe.Types/actions/workflows/integration.yml/badge.svg?branch=develop)](https://github.com/candoumbe/Candoumbe.Types/actions/workflows/integration.yml)
+[![GitHub Workflow Status (nightly)](https://github.com/candoumbe/Candoumbe.Types/actions/workflows/nightly.yml/badge.svg?branch=develop)](https://github.com/candoumbe/Candoumbe.Types/actions/workflows/nightly.yml)
+[![GitHub Workflow Status (main)](https://github.com/candoumbe/Candoumbe.Types/actions/workflows/delivery.yml/badge.svg?branch=main)](https://github.com/candoumbe/Candoumbe.Types/actions/workflows/delivery.yml)
 [![codecov](https://codecov.io/gh/candoumbe/candoumbe.types/branch/develop/graph/badge.svg?token=FHSC41A4X3)](https://codecov.io/gh/candoumbe/candoumbe.types)
 [![GitHub raw issues](https://img.shields.io/github/issues-raw/candoumbe/candoumbe.types)](https://github.com/candoumbe/candoumbe.types/issues)
 [![Nuget](https://img.shields.io/nuget/vpre/candoumbe.types)](https://nuget.org/packages/candoumbe.types)
-[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2FCandoumbe.Types)](https://dashboard.stryker-mutator.io/reports/Candoumbe.Types)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fcandoumbe%2FCandoumbe.Types%2Fdevelop)](https://dashboard.stryker-mutator.io/reports/github.com/candoumbe/Candoumbe.Types/develop)
 
-Various custom types that can be usefull when doing development.
+Various custom types that can be useful when doing development.
 
 ## **Disclaimer**
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
