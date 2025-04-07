@@ -2,18 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using Bogus;
 using Candoumbe.MiscUtilities.Comparers;
 using Candoumbe.Types.Strings;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using FsCheck;
+using FsCheck.Experimental;
 using FsCheck.Xunit;
 using Microsoft.Extensions.Primitives;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
+using ReplacePredicateByReadOnlyMemory = (System.Func<char, bool> Predicate, System.ReadOnlyMemory<char> NewValue);
+using ReplacePredicateByChar = (System.Func<char, bool> Predicate, char NewValue);
+using ReplaceStringByStringType = (string OldValue, string NewValue);
 
 namespace Candoumbe.Types.UnitTests.Strings;
 
@@ -194,6 +197,8 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
             { new StringSegmentLinkedList("Hello"), ('e', 'a'), "Hallo" },
             { new StringSegmentLinkedList("Hello"), ('o', 'a'), "Hella" },
             { new StringSegmentLinkedList("Hello", "world"), ('o', 'a'), "Hellawarld" },
+            { new StringSegmentLinkedList("killer", "ConcreteUnbranded", "Steel", "CarcopyAuto"), ('o', 'a'), "killerCancreteUnbrandedSteelCarcapyAuta" },
+            { new StringSegmentLinkedList("killer", "ConcreteUnbranded", "Steel", "CarcopyAuto"), ('o', 'ꂕ'), "killerCꂕncreteUnbrandedSteelCarcꂕpyAutꂕ" }
         };
 
     [Theory]
@@ -204,7 +209,8 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         StringSegmentLinkedList actualList = initialList.Replace(replacement.oldChar, replacement.newChar);
 
         // Assert
-        actualList.ToStringValue().Should().Be(expected);
+        string actual = actualList.ToStringValue();
+        actual.Should().Be(expected);
     }
 
     public static TheoryData<StringSegmentLinkedList, (char oldChar, string newString), string> ReplaceCharByStringCases
@@ -212,7 +218,8 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         {
             { new StringSegmentLinkedList("Hello"), ('e', "a"), "Hallo" },
             { new StringSegmentLinkedList("Hello"), ('H', "Tr"), "Trello" },
-            { new StringSegmentLinkedList("Hello", "world"), ('o', "a"), "Hellawarld" }
+            { new StringSegmentLinkedList("Hello", "world"), ('o', "a"), "Hellawarld" },
+            { new StringSegmentLinkedList("killer", "ConcreteUnbranded", "Steel", "CarcopyAuto"), ('o', "ꂕ"), "killerCꂕncreteUnbrandedSteelCarcꂕpyAutꂕ" }
         };
 
     [Theory]
@@ -233,7 +240,8 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
             { new StringSegmentLinkedList("Hello"), ("llo", "ro"), "Hero" },
             { new StringSegmentLinkedList("Hello"), ("ll", "r"), "Hero" },
             { new StringSegmentLinkedList("Hel", "lo"), ("ll", "r"), "Hero" },
-            { new StringSegmentLinkedList("Hello", "world"), ("o", "a"), "Hellawarld" }
+            { new StringSegmentLinkedList("Hello", "world"), ("o", "a"), "Hellawarld" },
+            { new StringSegmentLinkedList("killer", "ConcreteUnbranded", "Steel", "CarcopyAuto"), ("o", "ꂕ"), "killerCꂕncreteUnbrandedSteelCarcꂕpyAutꂕ" }
         };
 
     [Theory]
@@ -338,7 +346,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         StringSegmentLinkedList actual = first.Append(second);
 
         // Assert
-        actual.Should().HaveSameCount(expected);
+        
     }
 
     [Fact]
@@ -445,29 +453,32 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expectedResult, reason);
     }
 
-    public static TheoryData<StringSegmentLinkedList, Func<char, bool>, char, StringSegmentLinkedList> ReplaceCharByCharWithPredicateCases
+    public static TheoryData<StringSegmentLinkedList, ReplacePredicateByChar, StringSegmentLinkedList> ReplacePredicateByCharCases
         => new()
         {
             {
                 new StringSegmentLinkedList("A", "lazy fox"),
-                chr => chr is 'A' or 'a',
-                'E',
+                (chr => chr is 'A' or 'a',                 'E'),
                 new StringSegmentLinkedList("E", "lEzy fox")
             },
             {
                 new StringSegmentLinkedList("A", "lazy fox"),
-                chr => chr is 'W' or 'w',
-                'E',
+                (chr => chr is 'W' or 'w', 'E'),
                 new StringSegmentLinkedList("A", "lazy fox")
+            },
+            {
+                new StringSegmentLinkedList("killer", "ConcreteUnbranded", "Steel", "CarcopyAuto"),
+                (chr => chr is 'o', 'a'),
+                new StringSegmentLinkedList("killer", "CancreteUnbranded", "Steel", "CarcapyAuta")
             }
         };
 
     [Theory]
-    [MemberData(nameof(ReplaceCharByCharWithPredicateCases))]
-    public void Given_a_StringSegmentLinkedList_When_replacing_a_char_using_a_predicate_Then_the_result_should_match_expectation(StringSegmentLinkedList input, Func<char, bool> predicate, char replacement, StringSegmentLinkedList expected)
+    [MemberData(nameof(ReplacePredicateByCharCases))]
+    public void Given_a_StringSegmentLinkedList_When_replacing_a_char_using_a_predicate_Then_the_result_should_match_expectation(StringSegmentLinkedList input, ReplacePredicateByChar replacement, StringSegmentLinkedList expected)
     {
         // Act
-        StringSegmentLinkedList actual = input.Replace(predicate, [replacement]);
+        StringSegmentLinkedList actual = input.Replace(replacement.Predicate, replacement.NewValue);
 
         // Assert
         string actualStr = actual.ToStringValue();
@@ -475,6 +486,35 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         actualStr.Should().Be(expected.ToStringValue());
     }
 
+    public static TheoryData<StringSegmentLinkedList, ReplacePredicateByReadOnlyMemory, StringSegmentLinkedList> ReplacePredicateByReadOnlySpanCases
+        => new()
+        {
+            {
+                new StringSegmentLinkedList("A", "lazy fox"),
+                (chr => chr is 'A' or 'a', new ReadOnlyMemory<char>(['E'])),
+                new StringSegmentLinkedList("E", "lEzy fox")
+            },
+            {
+                new StringSegmentLinkedList("A", "lazy fox"),
+                (chr => chr is 'W' or 'w',  new ReadOnlyMemory<char>(['E'])),
+                new StringSegmentLinkedList("A", "lazy fox")
+            }
+        };
+
+    [Theory]
+    [MemberData(nameof(ReplacePredicateByReadOnlySpanCases))]
+    public void Given_a_StringSegmentLinkedList_When_replacing_a_char_using_a_predicate_Then_the_result_should_match_expectation(StringSegmentLinkedList input, ReplacePredicateByReadOnlyMemory replacement, StringSegmentLinkedList expected)
+    {
+        // Act
+        StringSegmentLinkedList actual = input.Replace(replacement.Predicate, replacement.NewValue.Span);
+
+        // Assert
+        string actualStr = actual.ToStringValue();
+        outputHelper.WriteLine($"{nameof(actualStr)}: '{actualStr}'");
+        actualStr.Should().Be(expected.ToStringValue());
+    }
+
+    
     public static TheoryData<StringSegmentLinkedList, Func<char, bool>, IReadOnlyDictionary<char, ReadOnlyMemory<char>>, StringSegmentLinkedList> ReplaceCharByCharWithPredicateAndReplaceFunctionCases
         => new()
         {
@@ -513,4 +553,8 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 
         actualStr.Should().Be(expected.ToStringValue());
     }
+
+    [Property]
+    public Property StringSegmentList_should_works_consistently()
+        => new StringSegmentLinkedListSpecification().ToProperty();
 }

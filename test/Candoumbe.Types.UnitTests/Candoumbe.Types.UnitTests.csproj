@@ -4,7 +4,7 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\..\src\Candoumbe.Types\Candoumbe.Types.csproj" />
   </ItemGroup>

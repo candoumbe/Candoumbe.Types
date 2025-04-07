@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Candoumbe.MiscUtilities.Comparers;
 using Microsoft.Extensions.Primitives;
 
 namespace Candoumbe.Types.Strings;
@@ -21,8 +22,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     private StringSegmentNode _tail;
 
     private static StringSegmentNode EmptyNode => new(ReadOnlySpan<char>.Empty);
-
-    private readonly Dictionary<ReadOnlyMemory<char>, ReadOnlyMemory<char>> _replacements;
 
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/> that is empty.
@@ -47,8 +46,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
         {
             Append(next);
         }
-
-        _replacements = new();
     }
 
     /// <summary>
@@ -65,8 +62,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
         {
             Append(next);
         }
-
-        _replacements = new Dictionary<ReadOnlyMemory<char>, ReadOnlyMemory<char>>();
     }
 
     /// <summary>
@@ -122,18 +117,16 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
             throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
         }
 
-        if (value is { Length: 0 })
+        if (value is not { Length: 0 })
         {
-            return;
+            StringSegmentNode newNode = new(value);
+            InsertAtInternal(index, newNode);
         }
-
-        StringSegmentNode newNode = new(value);
-        InsertAtInternal(index, newNode);
     }
 
     private void InsertAtInternal(int index, StringSegmentNode newNode)
     {
-        if (index == 0)
+        if (index is 0)
         {
             newNode.Next = _head;
             _head = newNode;
@@ -260,6 +253,19 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     public StringSegmentLinkedList Replace(char oldChar, char newChar) => Replace(oldChar, [newChar]);
 
     /// <summary>
+    /// Replaces one character <paramref name="oldChar"/> by <paramref name="newChar"/>.
+    /// </summary>
+    /// <param name="oldChar"><see langword="character"/> to replace.</param>
+    /// <param name="newChar"><see langword="character"/> that will replace <paramref name="oldChar"/>.</param>
+    /// <returns>The current list where all characters were replaced.</returns>
+    /// <remarks>
+    /// This method does its best to never allocated.
+    /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
+    /// the current instance.
+    /// </remarks>
+    public StringSegmentLinkedList Replace(Func<char, bool> oldChar, char newChar) => Replace(oldChar, [newChar]);
+
+    /// <summary>
     /// Replaces all <paramref name="oldChar"/> by <paramref name="replacement"/>.
     /// </summary>
     /// <param name="oldChar"><see langword="character"/> to replace.</param>
@@ -270,8 +276,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
     /// the current instance.
     /// </remarks>
-    public StringSegmentLinkedList Replace(char oldChar, ReadOnlySpan<char> replacement)
-        => Replace(chr => chr == oldChar, replacement);
+    public StringSegmentLinkedList Replace(char oldChar, ReadOnlySpan<char> replacement) => Replace(chr => chr == oldChar, replacement);
 
     /// <summary>
     /// Replaces all <see langword="char"/>s that matches <paramref name="predicate"/>
@@ -297,18 +302,23 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
             if (indexOfOldChar >= 0)
             {
-                ReadOnlySpan<char> valueToKeep = current.Value[..indexOfOldChar].Span;
-                replacementList.Append(valueToKeep).Append(replacement);
+                ReadOnlySpan<char> valueToKeep;
+                if (indexOfOldChar > 0)
+                {
+                    valueToKeep = current.Value[..indexOfOldChar].Span;
+                    replacementList = replacementList.Append(valueToKeep);
+                }
+                replacementList = replacementList.Append(replacement);
 
                 int index = indexOfOldChar + 1;
                 foreach (int occurrence in occurrences.Skip(1))
                 {
-                    replacementList = replacementList.Append(replacement);
                     if (index < occurrence)
                     {
-                        valueToKeep = current.Value.Span.Slice(index, occurrence);
-                        replacementList.Append(valueToKeep);
+                        valueToKeep = current.Value.Span.Slice(index, occurrence - index);
+                        replacementList = replacementList.Append(valueToKeep);
                     }
+                    replacementList = replacementList.Append(replacement);
 
                     // move the cursor right after the current occurrence
                     index = occurrence + 1;
@@ -345,7 +355,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     {
         StringSegmentLinkedList replacementList = [];
         StringSegmentNode current = _head;
-
+        
         while (current is not null)
         {
             int indexOfOldChar = -1;
@@ -407,7 +417,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <remarks>
     /// This method does its best to never allocated.
     /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
-    /// the current instance had.
+    /// the initial instance had.
     /// </remarks>
     public StringSegmentLinkedList Replace(in ReadOnlySpan<char> oldValue, in ReadOnlySpan<char> newValue)
     {
@@ -491,7 +501,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
             previous = current;
             current = current.Next;
         }
-
         return this;
     }
 
@@ -508,7 +517,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
             throw new ArgumentNullException(nameof(other));
         }
 
-        StringSegmentLinkedList result = new();
+        StringSegmentLinkedList result = [];
         StringSegmentNode current = _head;
         if (current != EmptyNode)
         {
@@ -539,7 +548,21 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     }
 
     /// <inheritdoc />
-    public bool Equals(StringSegmentLinkedList other, IEqualityComparer<char> comparer = null)
+    public override bool Equals(object obj) => obj is StringSegmentLinkedList other && Equals(other, CharComparer.InvariantCultureIgnoreCase);
+
+    /// <summary>
+    /// Determines whether the current <see cref="StringSegmentLinkedList"/> is equal to another <see cref="StringSegmentLinkedList"/>.
+    /// </summary>
+    /// <param name="other">The <see cref="StringSegmentLinkedList"/> to compare with the current instance.</param>
+    /// <param name="comparer">An optional <see cref="IEqualityComparer{T}"/> to compare elements. If null, the default equality comparer is used.</param>
+    /// <returns>
+    /// <c>true</c> if the current <see cref="StringSegmentLinkedList"/> is equal to the <paramref name="other"/> instance; otherwise, <c>false</c>.
+    /// </returns>
+    /// <remarks>
+    /// This method compares the elements of the two linked lists. If the lengths of the lists are different,
+    /// it checks if one list starts with the other. The comparison can be customized using the provided <paramref name="comparer"/>.
+    /// </remarks>
+    public bool Equals(StringSegmentLinkedList other, IEqualityComparer<char> comparer)
     {
         bool equals = false;
 
@@ -559,7 +582,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
                 if (current.Length == otherCurrent.Length)
                 {
-                    equals = current.Equals(otherCurrent);
+                    equals = current.StartsWith(otherCurrent) && otherCurrent.StartsWith(current);
                 }
                 else if (current.Length < otherCurrent.Length && otherCurrent.StartsWith(current))
                 {
