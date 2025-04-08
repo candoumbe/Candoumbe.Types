@@ -56,6 +56,14 @@ when there are more than 1 match in a node.
     - Avoid unnecessary allocations by using `ReadOnlyMemory<char>` and `ReadOnlySpan<char>`
     - Refactor code for better readability and performance
 
+### 🧹 Housekeeping
+- Add `DotNet.ReproducibleBuilds` package to `core.props`
+- Update `README.md` with new badges for nightly and main branches, and mutation testing
+- Improve `StringSegmentLinkedList.Replace` when replacing a `string` by a `string`  method to reduce memory allocations
+    - Optimize character replacement logic
+    - Avoid unnecessary allocations by using `ReadOnlyMemory<char>` and `ReadOnlySpan<char>`
+    - Refactor code for better readability and performance
+
 ### 🛠️ Technical
 - Updated GitHub workflows to download required SDKs when running CI. 
 
