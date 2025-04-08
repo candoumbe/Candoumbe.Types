@@ -552,10 +552,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         StringSegmentLinkedList actual = input.Replace(predicate, replacement);
 
         // Assert
-        string actualStr = actual.ToStringValue();
-        outputHelper.WriteLine($"{nameof(actualStr)}: '{actualStr}'");
-
-        actualStr.Should().Be(expected.ToStringValue());
+        actual.Should().ContainInOrder(expected);
     }
 
     [Property(Skip = "StringSegmentLinkedList does not handle state properly")]
