@@ -1,12 +1,13 @@
 using System;
-using Microsoft.Extensions.Primitives;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Candoumbe.Types.Strings;
 
 /// <summary>
 /// Represents a node in a <see cref="StringSegmentLinkedList"/>
 /// </summary>
-internal class StringSegmentNode : IEquatable<StringSegmentNode>
+[ExcludeFromCodeCoverage]
+internal sealed class StringSegmentNode : IEquatable<StringSegmentNode>
 {
     /// <summary>
     /// Value of the current node
@@ -35,5 +36,5 @@ internal class StringSegmentNode : IEquatable<StringSegmentNode>
     public override int GetHashCode() => Value.GetHashCode();
 
     /// <inheritdoc />
-    public virtual bool Equals(StringSegmentNode other) => other?.Value.Span.SequenceEqual(Value.Span) is true;
+    public bool Equals(StringSegmentNode other) => other?.Value.Span.SequenceEqual(Value.Span) is true;
 }
