@@ -35,6 +35,5 @@ internal class StringSegmentNode : IEquatable<StringSegmentNode>
     public override int GetHashCode() => HashCode.Combine(Value, Next);
 
     /// <inheritdoc />
-    public virtual bool Equals(StringSegmentNode other) => other?.Value.Span.SequenceEqual(Value.Span) is true
-                                                           && Equals(Next, other.Next);
+    public virtual bool Equals(StringSegmentNode other) => other?.Value.Span.SequenceEqual(Value.Span) is true;
 }

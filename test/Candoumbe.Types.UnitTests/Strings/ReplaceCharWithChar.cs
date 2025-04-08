@@ -31,9 +31,8 @@ internal class ReplaceCharWithChar : Operation<StringSegmentLinkedList, StringSe
         string actual = sut.ToStringValue();
 
         return ( actual == state.Value ).Label($"""
-                                                
-                                                Actual : {actual}
-                                                Expect : {state.Value}
+                                                Actual : "{actual}"
+                                                Expect : "{state.Value}"
                                                 """);
     }
 

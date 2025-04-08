@@ -19,7 +19,7 @@ public class StringSegmentLinkedListSpecification : Machine<StringSegmentLinkedL
         private readonly ReadOnlyMemory<char> _value;
         private readonly IReadOnlyList<string> _additionalValues;
 
-        internal StringSegmentLinkedListSetup(ReadOnlySpan<char> value, params IReadOnlyList<string> additionalValues)
+        internal StringSegmentLinkedListSetup(string value, params IReadOnlyList<string> additionalValues)
         {
             _value = value.ToArray();
             _additionalValues = additionalValues;
@@ -35,18 +35,16 @@ public class StringSegmentLinkedListSpecification : Machine<StringSegmentLinkedL
     /// <inheritdoc />
     public override Gen<Operation<StringSegmentLinkedList, StringSegmentLinkedListState>> Next(StringSegmentLinkedListState state)
     {
-        IList<Gen<Operation<StringSegmentLinkedList, StringSegmentLinkedListState>>> operations = [];
+        List<Gen<Operation<StringSegmentLinkedList, StringSegmentLinkedListState>>> operations =
+        [
+            Gen.Constant<Operation<StringSegmentLinkedList, StringSegmentLinkedListState>>(
+                new ReplaceCharWithChar(_faker.PickRandom(state.Value.ToCharArray()), _faker.Random.Char())),
 
-        if (state.Value is not { Length: 0 })
-        {
-            operations.Add(
-                Gen.Constant<Operation<StringSegmentLinkedList, StringSegmentLinkedListState>>(
-                    new ReplaceCharWithChar(_faker.PickRandom(state.Value.ToCharArray()), _faker.Random.Char())));
+            Gen.Constant<Operation<StringSegmentLinkedList, StringSegmentLinkedListState>>(
+                new ReplaceStringWithString($"{_faker.PickRandom(state.Value.ToCharArray())}",
+                    $"{_faker.Random.Word()}"))
 
-            operations.Add(
-                Gen.Constant<Operation<StringSegmentLinkedList, StringSegmentLinkedListState>>(
-                    new ReplaceStringWithString($"{_faker.PickRandom(state.Value.ToCharArray())}", $"{_faker.Random.Word()}")));
-        }
+        ];
 
         return Gen.OneOf(operations);
     }
@@ -56,9 +54,11 @@ public class StringSegmentLinkedListSpecification : Machine<StringSegmentLinkedL
     {
         get
         {
-            int count = _faker.Random.Int(min: 0, max: 2);
-
-            return Gen.Constant<Setup<StringSegmentLinkedList, StringSegmentLinkedListState>>(new StringSegmentLinkedListSetup(_faker.Random.Word(), _faker.Random.WordsArray(count)))
+            return ArbMap.Default
+                .ArbFor<NonEmptyString>().Generator
+                .Zip(ArbMap.Default.ArbFor<NonNull<List<string>>>().Generator)
+                .Select(tuple => (head: tuple.Item1.Item, additionalValues: tuple.Item2.Item ))
+                .Select(Setup<StringSegmentLinkedList, StringSegmentLinkedListState> (tuple) => new StringSegmentLinkedListSetup(tuple.head, tuple.additionalValues))
                 .ToArbitrary();
         }
     }

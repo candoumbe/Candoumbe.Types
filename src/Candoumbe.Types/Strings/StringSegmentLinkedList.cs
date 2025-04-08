@@ -85,7 +85,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
         if (_tail is null)
         {
             _tail = newNode;
-            if (_head == EmptyNode)
+            if (_head.Equals(EmptyNode))
             {
                 _head = newNode;
             }
@@ -221,7 +221,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <inheritdoc />
     public IEnumerator<ReadOnlyMemory<char>> GetEnumerator()
     {
-        if (_head == EmptyNode)
+        if (_head.Equals(EmptyNode))
         {
             yield break;
         }
@@ -295,13 +295,11 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
         while (current is not null)
         {
-            int indexOfOldChar = -1;
-            IEnumerable<int> occurrences = [];
-            Parallel.Invoke(() => indexOfOldChar = current.Value.FirstOccurrence(predicate),
-                () => occurrences = current.Value.Occurrences(predicate));
+            int indexOfOldChar = current.Value.FirstOccurrence(predicate);
 
             if (indexOfOldChar >= 0)
             {
+                IEnumerable<int> occurrences = current.Value.Occurrences(predicate);
                 ReadOnlySpan<char> valueToKeep;
                 if (indexOfOldChar > 0)
                 {
@@ -355,13 +353,11 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     {
         StringSegmentLinkedList replacementList = [];
         StringSegmentNode current = _head;
-        
+
         while (current is not null)
         {
-            int indexOfOldChar = -1;
-            IEnumerable<int> occurrences = [];
-            Parallel.Invoke(() => indexOfOldChar = current.Value.FirstOccurrence(predicate),
-                () => occurrences = current.Value.Occurrences(predicate));
+            int indexOfOldChar = current.Value.FirstOccurrence(predicate);
+            IEnumerable<int> occurrences = current.Value.Occurrences(predicate);
 
             if (indexOfOldChar >= 0)
             {
@@ -405,7 +401,9 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
             current = current.Next;
         }
 
-        return replacementList;
+        _head = replacementList._head;
+
+        return this;
     }
 
     /// <summary>
@@ -493,7 +491,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                 }
                 else
                 {
-                    Debug.Assert(_head == current);
+                    Debug.Assert(_head.Equals(current));
                     _head = _tail;
                 }
             }
@@ -519,7 +517,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
         StringSegmentLinkedList result = [];
         StringSegmentNode current = _head;
-        if (current != EmptyNode)
+        if (!current.Equals(EmptyNode))
         {
             while (current is not null)
             {
@@ -529,7 +527,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
         }
 
         current = other._head;
-        if (current != EmptyNode)
+        if (!current.Equals(EmptyNode))
         {
             if (result.Count == 0)
             {

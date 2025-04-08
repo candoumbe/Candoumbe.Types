@@ -33,8 +33,8 @@ internal class ReplaceStringWithString : Operation<StringSegmentLinkedList, Stri
         StringSegmentLinkedList result  = sut.Replace(_oldValue, _newValue);
         string actual = result.ToStringValue();
         return ( actual == state.Value ).Label($"""
-                                                Actual : {actual}
-                                                Expect : {state.Value}
+                                                Actual : "{actual}"
+                                                Expect : "{state.Value}"
                                                 """);
     }
 
