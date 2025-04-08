@@ -1,12 +1,13 @@
 using System;
-using Microsoft.Extensions.Primitives;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Candoumbe.Types.Strings;
 
 /// <summary>
 /// Represents a node in a <see cref="StringSegmentLinkedList"/>
 /// </summary>
-internal record StringSegmentNode
+[ExcludeFromCodeCoverage]
+internal sealed class StringSegmentNode : IEquatable<StringSegmentNode>
 {
     /// <summary>
     /// Value of the current node
@@ -22,9 +23,18 @@ internal record StringSegmentNode
     /// Initializes a new instance of the StringSegmentNode class with the specified value.
     /// </summary>
     /// <param name="value">The StringSegment value to be stored in the node.</param>
-    public StringSegmentNode(ReadOnlyMemory<char> value)
+    public StringSegmentNode(ReadOnlySpan<char> value)
     {
-        Value = value;
+        Value = value.ToArray();
         Next = null;
     }
+
+    /// <inheritdoc />
+    public override bool Equals(object obj) => obj is StringSegmentNode other && Equals(other);
+
+    /// <inheritdoc />
+    public override int GetHashCode() => Value.GetHashCode();
+
+    /// <inheritdoc />
+    public bool Equals(StringSegmentNode other) => other?.Value.Span.SequenceEqual(Value.Span) is true;
 }

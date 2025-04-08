@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `NonNegativeLong` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
 - Added `PositiveLong` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
 
+### 🧹 Housekeeping
+- Add `DotNet.ReproducibleBuilds` package to `core.props`
+- Update `README.md` with new badges for nightly and main branches, and mutation testing
+- Improve `StringSegmentLinkedList.Replace` when replacing a `string` by a `string`  method to reduce memory allocations
+    - Optimize character replacement logic
+    - Avoid unnecessary allocations by using `ReadOnlyMemory<char>` and `ReadOnlySpan<char>`
+    - Refactor code for better readability and performance
+
 ### 🛠️ Technical
 - Updated GitHub workflows to download required SDKs when running CI. 
 
