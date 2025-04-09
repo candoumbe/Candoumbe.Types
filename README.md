@@ -6,8 +6,7 @@
 [![codecov](https://codecov.io/gh/candoumbe/candoumbe.types/branch/develop/graph/badge.svg?token=FHSC41A4X3)](https://codecov.io/gh/candoumbe/candoumbe.types)
 [![GitHub raw issues](https://img.shields.io/github/issues-raw/candoumbe/candoumbe.types)](https://github.com/candoumbe/candoumbe.types/issues)
 [![Nuget](https://img.shields.io/nuget/vpre/candoumbe.types)](https://nuget.org/packages/candoumbe.types)
-[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fcandoumbe%2FCandoumbe.Types%2Fdevelop)](https://dashboard.stryker-mutator.io/reports/github.com/candoumbe/Candoumbe.Types/develop)
-
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fcandoumbe%2FCandoumbe.Types%2Fbaseline%2Fdevelop)](https://dashboard.stryker-mutator.io/reports/github.com/candoumbe/Candoumbe.Types/baseline/develop)
 Various custom types that can be useful when doing development.
 
 ## **Disclaimer**
