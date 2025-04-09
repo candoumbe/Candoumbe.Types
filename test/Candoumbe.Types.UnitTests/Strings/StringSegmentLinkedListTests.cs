@@ -347,7 +347,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 
         // Assert
         actual.Should().HaveSameCount(expected);
-        
+
         string actualString = actual.ToStringValue();
         string expectedString = expected.ToStringValue();
         actualString.Should().Be(expectedString);
@@ -552,7 +552,9 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         StringSegmentLinkedList actual = input.Replace(predicate, replacement);
 
         // Assert
-        actual.Should().ContainInOrder(expected);
+        string actualStr = actual.ToStringValue();
+        outputHelper.WriteLine($"{nameof(actualStr)}: '{actualStr}'");
+        actualStr.Should().Be(expected.ToStringValue());
     }
 
     [Property(Skip = "StringSegmentLinkedList does not handle state properly")]
