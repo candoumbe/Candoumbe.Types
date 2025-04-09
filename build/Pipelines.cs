@@ -174,7 +174,7 @@ public class Pipelines : EnhancedNukeBuild,
     [
         .. Projects.Select(projectName => new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
                                          this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests"),
-                                         this.Get<IHaveTestDirectory>().TestDirectory / "stryker-config.json"))
+                                         this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
     ];
 
     ///<inheritdoc/>
