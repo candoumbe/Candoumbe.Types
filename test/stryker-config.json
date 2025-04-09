@@ -1,5 +1,6 @@
 {
   "stryker-config": {
-    "concurrency": 10
+    "concurrency": 10,
+    "dashboard-url":"https://dashboard.stryker-mutator.io"
   }
 }
