@@ -25,7 +25,7 @@ namespace Candoumbe.Types.UnitTests.Strings;
 public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 {
     private static readonly Faker Faker = new();
-    
+
     [Property]
     public void Given_non_empty_string_segment_Then_constructor_should_initialize_properties(NonEmptyString stringGenerator)
     {
@@ -586,7 +586,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         outputHelper.WriteLine($"left is : {leftValue}");
         outputHelper.WriteLine($"right is: {rightValue}");
         // Act
-        bool actual = left.Equals(right);
+        bool actual = left.Equals(right, comparer);
 
         //Assert
         actual.Should().Be(expectedResult, reason);
@@ -725,7 +725,9 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         StringSegmentLinkedList actual = input.Replace(predicate, replacement);
 
         // Assert
-        actual.Should().ContainInOrder(expected);
+        string actualStr = actual.ToStringValue();
+        outputHelper.WriteLine($"{nameof(actualStr)}: '{actualStr}'");
+        actualStr.Should().Be(expected.ToStringValue());
     }
 
     [Property(Skip = "StringSegmentLinkedList does not handle state properly")]
