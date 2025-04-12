@@ -55,13 +55,3 @@ jobs:
         with:
           name: packages
           path: output/artifacts/packages
-      - name: 'Publish: coverage-report'
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: output/artifacts/reports/coverage-report
-      - name: 'Publish: coverage-history'
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-history
-          path: output/artifacts/reports/coverage-history
