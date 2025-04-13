@@ -36,6 +36,7 @@
         "Pack",
         "Publish",
         "Release",
+        "ReportUnitTestCoverage",
         "Restore",
         "Tests",
         "UnitTests"
