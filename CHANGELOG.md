@@ -28,7 +28,7 @@ when there are more than 1 match in a node.
 
 ### 🧹 Housekeeping
 - Add `DotNet.ReproducibleBuilds` package to `core.props`
-- Update [`Candoumbe.Pipelines`](https://nuget.org/packages/pipelines) to `0.13.1`
+- Update [`Candoumbe.Pipelines`](https://nuget.org/packages/pipelines) to `0.13.2`
 - Update `README.md` with new badges for nightly and main branches, and mutation testing
 - Improve `StringSegmentLinkedList.Replace` when replacing a `string` by a `string`  method to reduce memory allocations
     - Optimize character replacement logic

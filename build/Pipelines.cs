@@ -19,7 +19,7 @@ using Nuke.Common.Tools.GitHub;
     FetchDepth = 0,
     InvokedTargets =
     [
-        nameof(IUnitTest.Compile),
+        nameof(ICompile.Compile),
         nameof(IUnitTest.UnitTests),
         nameof(IPushNugetPackages.Pack),
         nameof(IPushNugetPackages.Publish)
@@ -105,7 +105,7 @@ using Nuke.Common.Tools.GitHub;
 )]
 
 [GitHubActions("delivery", GitHubActionsImage.Ubuntu2204,
-    AutoGenerate = false,
+    AutoGenerate = true,
     FetchDepth = 0,
     InvokedTargets = [nameof(IPushNugetPackages.Pack), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease)],
     CacheKeyFiles =
@@ -157,8 +157,8 @@ public class Pipelines : EnhancedNukeBuild,
     IUnitTest,
     IBenchmark,
     IHaveGitVersion,
-    IReportUnitTestCoverage,
     IMutationTest,
+    IReportUnitTestCoverage,
     IPack,
     IPushNugetPackages,
     ICreateGithubRelease,
@@ -219,8 +219,7 @@ public class Pipelines : EnhancedNukeBuild,
         new GitHubPushNugetConfiguration(
             githubToken: this.Get<ICreateGithubRelease>()?.GitHubToken,
             source: new Uri($"https://nuget.pkg.github.com/{this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner()}/index.json"),
-            canBeUsed: () => this is ICreateGithubRelease createRelease && createRelease.GitHubToken is not null
-        )
+            canBeUsed: () => this is ICreateGithubRelease { GitHubToken: not null } )
     ];
 
     public Target Tests => _ => _
