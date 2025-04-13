@@ -68,13 +68,13 @@ jobs:
         with:
           name: packages
           path: output/artifacts/packages
-      - name: 'Publish: unit-tests'
+      - name: 'Publish: unit-tests-coverage'
         uses: actions/upload-artifact@v4
         with:
-          name: unit-tests
-          path: output/artifacts/reports/coverage-report/unit-tests
-      - name: 'Publish: unit-tests-history'
+          name: unit-tests-coverage
+          path: output/artifacts/reports/coverage-report/unit-tests-coverage
+      - name: 'Publish: unit-tests-coverage-history'
         uses: actions/upload-artifact@v4
         with:
-          name: unit-tests-history
-          path: output/artifacts/reports/coverage-history/unit-tests-history
+          name: unit-tests-coverage-history
+          path: output/artifacts/reports/coverage-history/unit-tests-coverage-history
