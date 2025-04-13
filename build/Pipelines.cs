@@ -107,7 +107,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 )]
 
 [GitHubActions("delivery", GitHubActionsImage.Ubuntu2204,
-    AutoGenerate = true,
+    AutoGenerate = false,
     FetchDepth = 0,
     InvokedTargets = [nameof(IPushNugetPackages.Pack), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease)],
     CacheKeyFiles =
