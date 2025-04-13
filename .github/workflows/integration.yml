@@ -35,9 +35,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-dotnet@v4
-        with:
-          global-json-file: 'global.json'
       - name: 'Cache: .nuke/temp, ~/.nuget/packages'
         uses: actions/cache@v4
         with:
@@ -56,16 +53,16 @@ jobs:
         with:
           name: unit-tests
           path: output/artifacts/tests-results/unit-tests
-      - name: 'Publish: unit-tests'
+      - name: 'Publish: unit-tests-coverage'
         uses: actions/upload-artifact@v4
         with:
-          name: unit-tests
-          path: output/artifacts/reports/coverage-report/unit-tests
-      - name: 'Publish: unit-tests-history'
+          name: unit-tests-coverage
+          path: output/artifacts/reports/coverage-report/unit-tests-coverage
+      - name: 'Publish: unit-tests-coverage-history'
         uses: actions/upload-artifact@v4
         with:
-          name: unit-tests-history
-          path: output/artifacts/reports/coverage-history/unit-tests-history
+          name: unit-tests-coverage-history
+          path: output/artifacts/reports/coverage-history/unit-tests-coverage-history
       - name: 'Publish: packages'
         uses: actions/upload-artifact@v4
         with:
