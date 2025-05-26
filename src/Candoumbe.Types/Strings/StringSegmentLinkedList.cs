@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Candoumbe.MiscUtilities.Comparers;
 using Microsoft.Extensions.Primitives;
+using ZLinq;
+using ZLinq.Linq;
 
 namespace Candoumbe.Types.Strings;
 
@@ -246,7 +248,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <param name="newChar"><see langword="character"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
-    /// This method does its best to never allocated.
+    /// This method does its best to never allocate.
     /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
     /// the current instance.
     /// </remarks>
@@ -259,7 +261,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <param name="newChar"><see langword="character"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
-    /// This method does its best to never allocated.
+    /// This method does its best to never allocate.
     /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
     /// the current instance.
     /// </remarks>
@@ -272,7 +274,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <param name="replacement"><see langword="string"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
-    /// This method does its best to never allocated.
+    /// This method does its best to never allocate.
     /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
     /// the current instance.
     /// </remarks>
@@ -309,7 +311,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                 replacementList = replacementList.Append(replacement);
 
                 int index = indexOfOldChar + 1;
-                foreach (int occurrence in occurrences.Skip(1))
+                foreach (int occurrence in occurrences.AsValueEnumerable().Skip(1))
                 {
                     if (index < occurrence)
                     {
@@ -357,7 +359,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
         while (current is not null)
         {
             int indexOfOldChar = current.Value.FirstOccurrence(predicate);
-            IEnumerable<int> occurrences = current.Value.Occurrences(predicate);
+            ValueEnumerable<FromEnumerable<int>, int> occurrences = current.Value.Occurrences(predicate).AsValueEnumerable();
 
             if (indexOfOldChar >= 0)
             {
@@ -566,8 +568,8 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
         if (other is not null)
         {
-            using IEnumerator<ReadOnlyMemory<char>> currentEnumerator = GetEnumerator();
-            using IEnumerator<ReadOnlyMemory<char>> otherEnumerator = other.GetEnumerator();
+            using ValueEnumerator<FromEnumerable<ReadOnlyMemory<char>>, ReadOnlyMemory<char>> currentEnumerator = this.AsValueEnumerable().GetEnumerator();
+            using ValueEnumerator<FromEnumerable<ReadOnlyMemory<char>>, ReadOnlyMemory<char>> otherEnumerator = other.AsValueEnumerable().GetEnumerator();
 
             if (!currentEnumerator.MoveNext() && !otherEnumerator.MoveNext())
             {
