@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🐛 Fixes
 - Fixed `ArgumentOutOfRangeException` thrown by `StringSegmentLinkedList.Replace(Func<char, bool>, IReadOnlyDictionary<char, ReadOnlyMemory<char>>)` 
 when there are more than 1 match in a node.
+- Fixed incorrect behavior of `StringSegmentLinkedList.IsEquivalentTo`([#283](https://github.com/candoumbe/candoumbe.types/issues/283))
 
 ### 🧹 Housekeeping
 - Added documentation.

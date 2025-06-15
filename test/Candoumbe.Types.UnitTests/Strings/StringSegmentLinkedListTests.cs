@@ -126,7 +126,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         /// <summary>
         /// List of characters that have a special meaning and should be escaped
         /// </summary>
-        public static readonly char[] SpecialCharacters =
+        public static readonly IReadOnlyList<char> SpecialCharacters =
         [
             Asterisk,
             EqualSign,
@@ -154,7 +154,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
             .ToFrozenDictionary()
 #endif
             ;
-    
+
     [Property]
     public void Given_non_empty_string_segment_Then_constructor_should_initialize_properties(NonEmptyString stringGenerator)
     {
@@ -205,10 +205,11 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         StringSegmentLinkedList list = new StringSegmentLinkedList(stringGenerator.Item);
 
         // Act
-        list.Append(StringSegment.Empty);
+        list = list.Append(StringSegment.Empty);
 
         // Assert
-        list.Count.Should().Be(1);
+        list.Should()
+            .HaveCount(1);
     }
 
     public static TheoryData<StringSegmentLinkedList, (int index, StringSegment value), (int length, string value)> InsertAtCases
@@ -483,37 +484,39 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         appendingNullList.Should().Throw<ArgumentNullException>();
     }
 
-    [Property]
+    [Property(Replay = "(10142478484008374314,6556710070879737633)")]
     public void Given_two_lists_which_contains_characters_When_both_are_in_the_same_order_and_result_in_the_same_string_Then_both_lists_should_be_considered_equal(NonEmptyString valueGenerator)
     {
         // Arrange
         string value = valueGenerator.Get;
-        int leftChunkSize = Random.Shared.Next(1, value.Length);
-        int rightChunkSize = Random.Shared.Next(1, value.Length);
+        int leftChunkSize = Faker.Random.Int(min:1, max: value.Length);
+        int rightChunkSize = Faker.Random.Int(min:1, max: value.Length);
 
-        IReadOnlyList<char[]> leftChunks = value.Chunk(leftChunkSize).ToArray();
-        IReadOnlyList<char[]> rightChunks = value.Chunk(rightChunkSize).ToArray();
+        IReadOnlyList<char[]> leftChunks = [.. value.Chunk(leftChunkSize) ];
+        IReadOnlyList<char[]> rightChunks =[.. value.Chunk(rightChunkSize)];
 
-        outputHelper.WriteLine($"'left chunks : '{leftChunks.Jsonify()}'");
-        outputHelper.WriteLine($"'right chunks : '{rightChunks.Jsonify()}'");
-
-        StringSegmentLinkedList left = new ();
-        foreach (char[] leftChunk in leftChunks)
+        StringSegmentLinkedList left = [];
+        foreach (char[] chunk in leftChunks)
         {
-            left.Append(leftChunk);
+            left = left.Append(chunk);
         }
 
-        StringSegmentLinkedList right = new ();
-        foreach (char[] rightChunk in rightChunks)
+        StringSegmentLinkedList right = [];
+        foreach (char[] chunk in rightChunks)
         {
-            right.Append(rightChunk);
+            right = right.Append(chunk);
         }
+
+        string leftValue = $"[{string.Join(',', left.Select(node => $"[{node}]"))}]";
+        string rightValue = $"[{string.Join(',', right.Select(node => $"[{node}]"))}]";
+        outputHelper.WriteLine($"left is : {leftValue}");
+        outputHelper.WriteLine($"right is: {rightValue}");
 
         // Act
-        bool actual = right.Equals(left);
+        bool actual = left.Equals(right);
 
         // Assert
-        actual.Should().BeTrue();
+        actual.Should().BeTrue($"'{leftValue}' is equivalent to '{rightValue}'");
     }
 
     [Fact]
@@ -531,42 +534,56 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     }
 
     public static TheoryData<StringSegmentLinkedList, StringSegmentLinkedList, IEqualityComparer<char>, bool, string> EqualsCases
-        => new()
+    {
+        get
         {
+            TheoryData<StringSegmentLinkedList, StringSegmentLinkedList, IEqualityComparer<char>, bool, string> data = new();
+            data.Add([], [], CharComparer.Ordinal, true, $"Both lists are empty (comparer : {nameof(CharComparer.Ordinal)})");
+            data.Add([],
+                     [],
+                     CharComparer.InvariantCultureIgnoreCase,
+                     true,
+                     $"Both lists are empty (comparer : {nameof(CharComparer.InvariantCultureIgnoreCase)})");
+            data.Add(new StringSegmentLinkedList("A","lazy fox"),
+                     new StringSegmentLinkedList("A","lazy fox"),
+                     CharComparer.InvariantCultureIgnoreCase,
+                     true,
+                     "Both lists contains 'A' and 'lazy fox'");
+            data.Add(new StringSegmentLinkedList("A",
+                                                 "lazy fox"),
+                     new StringSegmentLinkedList("A",
+                                                 "lazy Fox"),
+                     CharComparer.Ordinal,
+                     false,
+                     $"Both lists contains 'A' and 'lazy fox' but the casing is not the same and comparer is {nameof(CharComparer.Ordinal)} only.");
+            data.Add(new StringSegmentLinkedList("A", "lazy fox"), new StringSegmentLinkedList("A", "lazy Fox"), CharComparer.InvariantCultureIgnoreCase, true, $"Both lists contains 'A' and 'lazy fox' but the casing is not the same and is comparer is {nameof(CharComparer.InvariantCultureIgnoreCase)} only.");
+            data.Add(new StringSegmentLinkedList("A lazy fox"), new StringSegmentLinkedList("A"), CharComparer.InvariantCultureIgnoreCase, false, "Both lists contains starts with 'A' but the right list contains only one character whereas the left is longer");
+            data.Add(new StringSegmentLinkedList("A"), new StringSegmentLinkedList("A lazy fox"), CharComparer.InvariantCultureIgnoreCase, false, "Both lists starts with the same value but the left list contains only one value whereas the right is longer");
+            data.Add(new StringSegmentLinkedList("A lazy ", "fox"), new StringSegmentLinkedList("A lazy fox"), CharComparer.Ordinal, true, "Both lists would result with the same string values but were not initialize in the same way");
+
             {
-                [],
-                [],
-                CharComparer.InvariantCultureIgnoreCase,
-                true,
-                "Both lists are empty"
-            },
-            {
-                new StringSegmentLinkedList("A", "lazy fox"),
-                new StringSegmentLinkedList("A", "lazy", " ", "fox"),
-                CharComparer.Ordinal,
-                true,
-                "Both lists contains 'A' and 'lazy fox'"
-            },
-            {
-                new StringSegmentLinkedList("A", "lazy fox"),
-                new StringSegmentLinkedList("A", "lazy", " ", "Fox"),
-                CharComparer.Ordinal,
-                false,
-                "Both lists contains 'A' and 'lazy fox' but the casing is not the same and StringComparison is Ordinal only."
-            },
-            {
-                new StringSegmentLinkedList("A", "lazy fox"),
-                new StringSegmentLinkedList("A", "lazy", " ", "Fox"),
-                CharComparer.InvariantCultureIgnoreCase,
-                true,
-                "Both lists contains 'A' and 'lazy fox' but the casing is not the same and StringComparison is OrdinalIgnoreCase only."
+                StringSegmentLinkedList left = new ("aH");
+                left = left.Append("&");
+
+                StringSegmentLinkedList right = new ("aH&");
+
+                data.Add(left, right, null, true, "Both list would produces the same string output");
+                data.Add(right, left, null, true, "Both list would produces the same string output");
             }
-        };
+
+            return data;
+        }
+    }
 
     [Theory]
     [MemberData(nameof(EqualsCases))]
-    public void Given_left_and_right_lists_Equals_should_behave_as_expected(StringSegmentLinkedList left, StringSegmentLinkedList right, IEqualityComparer<char> comparer, bool expectedResult, string reason)
+    public void Given_left_and_right_lists_IsEquivalentTo_should_behave_as_expected(StringSegmentLinkedList left, StringSegmentLinkedList right, IEqualityComparer<char> comparer, bool expectedResult, string reason)
     {
+        // Arrange
+        string leftValue = $"[{string.Join(',', left.Select(node => $"[{node}]"))}]";
+        string rightValue = $"[{string.Join(',', right.Select(node => $"[{node}]"))}]";
+        outputHelper.WriteLine($"left is : {leftValue}");
+        outputHelper.WriteLine($"right is: {rightValue}");
         // Act
         bool actual = left.IsEquivalentTo(right, comparer);
 
@@ -629,7 +646,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
                 },
                 new StringSegmentLinkedList("A", "lazy fox")
             },
-            // More than one matching and all replacements matches
+            // More than one matching and all replacements match
             {
                 new StringSegmentLinkedList("A bad", "very lazy fox"),
                 chr => chr is 'a' or 'e' or 'A',
