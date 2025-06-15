@@ -94,7 +94,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// </summary>
     /// <param name="value">The value to append</param>
     /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
-    public StringSegmentLinkedList Append(StringSegment value) => Append((ReadOnlyMemory<char>)value);
+    public StringSegmentLinkedList Append(StringSegment value) => Append(value.AsMemory());
 
     private void AppendInternal(StringSegmentNode newNode)
     {
@@ -197,12 +197,12 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     }
 
     /// <summary>
-    /// Gets the number of nodes in the current linked list
+    /// Gets the number of nodes in the current linked list.
     /// </summary>
     public int Count { get; private set; }
 
     /// <summary>
-    /// Computes the total length of the resulting string value
+    /// Computes the total length of the resulting string value.
     /// </summary>
     /// <returns></returns>
     public int GetTotalLength()
@@ -572,14 +572,13 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                     _    => comparer.Equals,
                 };
 
-                bool hasReachedCurrentEnd;
-                bool hasReachedOtherEnd;
+                bool hasReachedCurrentEnd = false;
+                bool hasReachedOtherEnd = false;
 
                 do
                 {
                     ReadOnlyMemory<char> current = currentEnumerator.Current;
                     ReadOnlyMemory<char> otherCurrent = otherEnumerator.Current;
-
                     if (current.Length == otherCurrent.Length)
                     {
                         mismatchFound = !( current.StartsWith(otherCurrent, comparer) || otherCurrent.StartsWith(current, comparer) );
@@ -612,14 +611,13 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                                         j = 0;
                                     }
                                     // No mismatch found, but we read otherCurrent to the end => grab the next node (if any) and starts again.
-                                    else if (!mismatchFound && index == otherCurrent.Length && otherEnumerator.MoveNext())
+                                    if (!mismatchFound && index == otherCurrent.Length && otherEnumerator.MoveNext())
                                     {
                                         otherCurrent = otherEnumerator.Current;
                                         index = 0;
                                     }
                                 }
-
-                            } while (currentEnumerator.MoveNext() && !mismatchFound);
+                            } while (j < current.Length  && index < otherCurrent.Length && !mismatchFound);
                         }
                     }
                     else if (otherCurrent.Length < current.Length && current.StartsWith(otherCurrent, comparer))
@@ -650,19 +648,28 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                                         j = 0;
                                     }
                                     // No mismatch found, but we read otherCurrent to the end => grab the next node (if any) and starts again.
-                                    else if (!mismatchFound && index == current.Length && currentEnumerator.MoveNext())
+                                    if (!mismatchFound && index == current.Length && currentEnumerator.MoveNext())
                                     {
                                         current = currentEnumerator.Current;
                                         index = 0;
                                     }
                                 }
-                            } while (otherEnumerator.MoveNext() && !mismatchFound);
+                            } while (j < otherCurrent.Length && index < current.Length && !mismatchFound);
                         }
                     }
+                    else
+                    {
+                        mismatchFound = true;
+                    }
 
-                    hasReachedCurrentEnd = !currentEnumerator.MoveNext();
-                    hasReachedOtherEnd = !otherEnumerator.MoveNext();
-                    equals = !mismatchFound && hasReachedCurrentEnd && hasReachedOtherEnd;
+                    if (!mismatchFound)
+                    {
+                        hasReachedCurrentEnd = !currentEnumerator.MoveNext();
+                        hasReachedOtherEnd = !otherEnumerator.MoveNext();
+                        equals = hasReachedCurrentEnd && hasReachedOtherEnd;
+                    }
+
+                    //equals = !mismatchFound && hasReachedCurrentEnd && hasReachedOtherEnd;
                 } while (!mismatchFound && ( !hasReachedCurrentEnd || !hasReachedOtherEnd ));
             }
         }

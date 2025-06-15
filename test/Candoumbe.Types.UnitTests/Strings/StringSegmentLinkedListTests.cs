@@ -484,13 +484,14 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         appendingNullList.Should().Throw<ArgumentNullException>();
     }
 
-    [Property(Replay = "(10142478484008374314,6556710070879737633)")]
+    [Property]
     public void Given_two_lists_which_contains_characters_When_both_are_in_the_same_order_and_result_in_the_same_string_Then_both_lists_should_be_considered_equal(NonEmptyString valueGenerator)
     {
         // Arrange
         string value = valueGenerator.Get;
         int leftChunkSize = Faker.Random.Int(min:1, max: value.Length);
-        int rightChunkSize = Faker.Random.Int(min:1, max: value.Length);
+        int rightChunkSize = Faker.PickRandom(Faker.Random.Int(1, leftChunkSize),
+                                              Faker.Random.Int(leftChunkSize, value.Length));
 
         IReadOnlyList<char[]> leftChunks = [.. value.Chunk(leftChunkSize) ];
         IReadOnlyList<char[]> rightChunks =[.. value.Chunk(rightChunkSize)];
@@ -569,6 +570,13 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 
                 data.Add(left, right, null, true, "Both list would produces the same string output");
                 data.Add(right, left, null, true, "Both list would produces the same string output");
+            }
+            {
+                StringSegmentLinkedList left = new ("0");
+                StringSegmentLinkedList right = new ("+0");
+
+                data.Add(left, right, null, false, "['0'] is not equivalent to ['+0']");
+                data.Add(left, right, null, false, "['+0'] is not equivalent to ['0']");
             }
 
             return data;
