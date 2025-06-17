@@ -38,10 +38,13 @@ public record TimeOnlyRange : Range<TimeOnly>
     , IUnaryNegationOperators<TimeOnlyRange, TimeOnlyRange>
 #endif
 {
+    /// <summary>
+    /// <see cref="TimeSpan"/> representation of the current instance.
+    /// </summary>
     public TimeSpan Span => Start <= End ? End - Start : Start - End;
 
     /// <summary>
-    /// Represents the largest time interval that <see cref="TimeOnlyRange"/> can represent
+    /// The largest time interval that <see cref="TimeOnlyRange"/> can represent.
     /// </summary>
     private static TimeSpan AllDayTimeSpan => Infinite.Span;
 

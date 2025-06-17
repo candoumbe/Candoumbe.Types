@@ -36,7 +36,7 @@ public class ConcatVsStringSegmentLinkedList
     [Benchmark]
     public string Concatenate_with_StringBuilder()
     {
-        StringBuilder result =  new StringBuilder();
+        StringBuilder result =  new ();
 
         result = _words.Aggregate(result, (current, word) => current.Append(word));
 

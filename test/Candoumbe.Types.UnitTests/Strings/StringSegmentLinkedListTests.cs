@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -21,7 +22,139 @@ namespace Candoumbe.Types.UnitTests.Strings;
 public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 {
     private static readonly Faker Faker = new();
-    
+
+    /// <summary>
+    /// The <c>_</c> character
+    /// </summary>
+    private const char Underscore = '_';
+
+    /// <summary>
+    /// The <c>*</c> character
+    /// </summary>
+    private const char Asterisk = '*';
+
+    /// <summary>
+    /// The <c>=</c> character
+    /// </summary>
+    private const char EqualSign = '=';
+
+    /// <summary>
+    /// The <c>(</c> character
+    /// </summary>
+    private const char LeftParenthesis = '(';
+
+    /// <summary>
+    /// The <c>)</c> character
+    /// </summary>
+    private const char RightParenthesis = ')';
+
+    /// <summary>
+    /// The <c>[</c> character
+    /// </summary>
+    private const char LeftSquareBracket = '[';
+
+    /// <summary>
+    /// The <c>{</c> character
+    /// </summary>
+    private const char LeftCurlyBracket = '{';
+
+    /// <summary>
+    /// The <c>}</c> character
+    /// </summary>
+    private const char RightCurlyBracket = '}';
+
+    /// <summary>
+    /// The <c>]</c> character
+    /// </summary>
+    private const char RightSquareBracket = ']';
+
+    /// <summary>
+    /// The <c>-</c> character
+    /// </summary>
+    private const char Hyphen = '-';
+
+    /// <summary>
+    /// The <c>\</c> character
+    /// </summary>
+    public const char BackSlash = '\\';
+
+    /// <summary>
+    /// The <c>|</c> character
+    /// </summary>
+    private const char Pipe = '|';
+
+    /// <summary>
+    /// The <c>,</c> character
+    /// </summary>
+    private const char Comma = ',';
+
+    /// <summary>
+    /// The <c>!</c> character
+    /// </summary>
+    private const char Bang = '!';
+
+    /// <summary>
+    /// The <c>"</c> character
+    /// </summary>
+    public const char DoubleQuote = '"';
+
+    /// <summary>
+    /// The <c>"</c> character as a string value
+    /// </summary>
+    internal const string DoubleQuoteString = @"\""";
+
+    /// <summary>
+    /// The <c>&#38;</c> character
+    /// </summary>
+    private const char Ampersand = '&';
+
+    /// <summary>
+    /// The <c>.</c> character.
+    /// </summary>
+    private const char Dot = '.';
+
+    /// <summary>
+    /// The space character
+    /// </summary>
+    private const char Space = ' ';
+
+    /// <summary>
+    /// The character to use to escape a special character.
+    /// </summary>
+    public const char EscapedCharacter = BackSlash;
+
+    /// <summary>
+    /// List of characters that have a special meaning and should be escaped
+    /// </summary>
+    public static readonly IReadOnlyList<char> SpecialCharacters =
+    [
+        Asterisk,
+        EqualSign,
+        LeftParenthesis,
+        RightParenthesis,
+        LeftSquareBracket,
+        RightSquareBracket,
+        BackSlash,
+        Pipe,
+        Comma,
+        Bang,
+        DoubleQuote,
+        Ampersand,
+        RightCurlyBracket,
+        LeftCurlyBracket,
+        ':',
+        Hyphen,
+        Dot,
+        Space
+    ];
+
+    internal static readonly IReadOnlyDictionary<char, ReadOnlyMemory<char>> EscapedSpecialCharacters = SpecialCharacters
+            .ToDictionary(chr => chr, chr => new ReadOnlyMemory<char>([BackSlash, chr]))
+#if NET8_0_OR_GREATER
+            .ToFrozenDictionary()
+#endif
+        ;
+
     [Property]
     public void Given_non_empty_string_segment_Then_constructor_should_initialize_properties(NonEmptyString stringGenerator)
     {
@@ -72,10 +205,11 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         StringSegmentLinkedList list = new StringSegmentLinkedList(stringGenerator.Item);
 
         // Act
-        list.Append(StringSegment.Empty);
+        list = list.Append(StringSegment.Empty);
 
         // Assert
-        list.Count.Should().Be(1);
+        list.Should()
+            .HaveCount(1);
     }
 
     public static TheoryData<StringSegmentLinkedList, (int index, StringSegment value), (int length, string value)> InsertAtCases
@@ -117,16 +251,16 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         {
             TheoryData<StringSegmentLinkedList, IReadOnlyList<StringSegment>, (int length, string value)> data = new TheoryData<StringSegmentLinkedList, IReadOnlyList<StringSegment>, (int length, string value)>();
             data.Add(new("Hello"),
-                    [" ", "world"],
-                    ( "Hello world".Length, "Hello world" )
-            );
+                     [" ", "world"],
+                     ( "Hello world".Length, "Hello world" )
+                    );
             data.Add(new("Hello"),
-                    ["wonderful", string.Empty, " ", "world"],
-                    ( "Hellowonderful world".Length, "Hellowonderful world" )
-            );
+                     ["wonderful", string.Empty, " ", "world"],
+                     ( "Hellowonderful world".Length, "Hellowonderful world" )
+                    );
             {
                 StringSegment source = "abcdef";
-                data.Add(new (source.Subsegment(0, 1)), [ source ] , (7, "aabcdef"));
+                data.Add(new(source.Subsegment(0, 1)), [source], ( 7, "aabcdef" ));
             }
 
             return data;
@@ -149,25 +283,25 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         initialList.GetTotalLength().Should().Be(expected.length);
     }
 
-    public static TheoryData<StringSegmentLinkedList,(int index, StringSegmentLinkedList list), (int length, string value)> InsertAtListCases
+    public static TheoryData<StringSegmentLinkedList, (int index, StringSegmentLinkedList list), (int length, string value)> InsertAtListCases
     {
         get
         {
             TheoryData<StringSegmentLinkedList, (int, StringSegmentLinkedList), (int length, string value)> data = new TheoryData<StringSegmentLinkedList, (int index, StringSegmentLinkedList), (int length, string value)>();
             data.Add(new("Hello"),
-                (1 , new StringSegmentLinkedList(" ", "world")),
-                ( "Hello world".Length, "Hello world" )
-            );
+                     ( 1, new StringSegmentLinkedList(" ", "world") ),
+                     ( "Hello world".Length, "Hello world" )
+                    );
             data.Add(new("Hello"),
-                (1, new("wonderful", string.Empty, " ", "world")),
-                ( "Hellowonderful world".Length, "Hellowonderful world" )
-            );
+                     ( 1, new("wonderful", string.Empty, " ", "world") ),
+                     ( "Hellowonderful world".Length, "Hellowonderful world" )
+                    );
             {
                 StringSegment source = "abcdef";
-                data.Add(new (
-                    source.Subsegment(0, 1)),
-                        (0, new (source)) ,
-                        (7, "abcdefa"));
+                data.Add(new(
+                             source.Subsegment(0, 1)),
+                         ( 0, new(source) ),
+                         ( 7, "abcdefa" ));
             }
 
             return data;
@@ -190,11 +324,11 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     public static TheoryData<StringSegmentLinkedList, (char oldChar, char newChar), string> ReplaceCharByCharCases
         => new()
         {
-            { new StringSegmentLinkedList("Hello"), ('H', 'h'), "hello" },
-            { new StringSegmentLinkedList("Hello"), ('l', 'r'), "Herro" },
-            { new StringSegmentLinkedList("Hello"), ('e', 'a'), "Hallo" },
-            { new StringSegmentLinkedList("Hello"), ('o', 'a'), "Hella" },
-            { new StringSegmentLinkedList("Hello", "world"), ('o', 'a'), "Hellawarld" },
+            { new StringSegmentLinkedList("Hello"), ( 'H', 'h' ), "hello" },
+            { new StringSegmentLinkedList("Hello"), ( 'l', 'r' ), "Herro" },
+            { new StringSegmentLinkedList("Hello"), ( 'e', 'a' ), "Hallo" },
+            { new StringSegmentLinkedList("Hello"), ( 'o', 'a' ), "Hella" },
+            { new StringSegmentLinkedList("Hello", "world"), ( 'o', 'a' ), "Hellawarld" },
         };
 
     [Theory]
@@ -230,11 +364,11 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     public static TheoryData<StringSegmentLinkedList, (string oldString, string newString), string> ReplaceStringByStringCases
         => new()
         {
-            { new StringSegmentLinkedList("Hello", "world"), ("e", "a"), "Halloworld" },
-            { new StringSegmentLinkedList("Hello"), ("llo", "ro"), "Hero" },
-            { new StringSegmentLinkedList("Hello"), ("ll", "r"), "Hero" },
-            { new StringSegmentLinkedList("Hel", "lo"), ("ll", "r"), "Hero" },
-            { new StringSegmentLinkedList("Hello", "world"), ("o", "a"), "Hellawarld" }
+            { new StringSegmentLinkedList("Hello", "world"), ( "e", "a" ), "Halloworld" },
+            { new StringSegmentLinkedList("Hello"), ( "llo", "ro" ), "Hero" },
+            { new StringSegmentLinkedList("Hello"), ( "ll", "r" ), "Hero" },
+            { new StringSegmentLinkedList("Hel", "lo"), ( "ll", "r" ), "Hero" },
+            { new StringSegmentLinkedList("Hello", "world"), ( "o", "a" ), "Hellawarld" }
         };
 
     [Theory]
@@ -355,32 +489,35 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     {
         // Arrange
         string value = valueGenerator.Get;
-        int leftChunkSize = Random.Shared.Next(1, value.Length);
-        int rightChunkSize = Random.Shared.Next(1, value.Length);
+        int leftChunkSize = Faker.Random.Int(min: 1, max: value.Length);
+        int rightChunkSize = Faker.PickRandom(Faker.Random.Int(1, leftChunkSize),
+                                              Faker.Random.Int(leftChunkSize, value.Length));
 
-        IReadOnlyList<char[]> leftChunks = value.Chunk(leftChunkSize).ToArray();
-        IReadOnlyList<char[]> rightChunks = value.Chunk(rightChunkSize).ToArray();
+        IReadOnlyList<char[]> leftChunks = [.. value.Chunk(leftChunkSize)];
+        IReadOnlyList<char[]> rightChunks = [.. value.Chunk(rightChunkSize)];
 
-        outputHelper.WriteLine($"'left chunks : '{leftChunks.Jsonify()}'");
-        outputHelper.WriteLine($"'right chunks : '{rightChunks.Jsonify()}'");
-
-        StringSegmentLinkedList left = new ();
-        foreach (char[] leftChunk in leftChunks)
+        StringSegmentLinkedList left = [];
+        foreach (char[] chunk in leftChunks)
         {
-            left.Append(leftChunk);
+            left = left.Append(chunk);
         }
 
-        StringSegmentLinkedList right = new ();
-        foreach (char[] rightChunk in rightChunks)
+        StringSegmentLinkedList right = [];
+        foreach (char[] chunk in rightChunks)
         {
-            right.Append(rightChunk);
+            right = right.Append(chunk);
         }
+
+        string leftValue = $"[{string.Join(',', left.Select(node => $"[{node}]"))}]";
+        string rightValue = $"[{string.Join(',', right.Select(node => $"[{node}]"))}]";
+        outputHelper.WriteLine($"left is : {leftValue}");
+        outputHelper.WriteLine($"right is: {rightValue}");
 
         // Act
-        bool actual = right.Equals(left);
+        bool actual = left.Equals(right);
 
         // Assert
-        actual.Should().BeTrue();
+        actual.Should().BeTrue($"'{leftValue}' is equivalent to '{rightValue}'");
     }
 
     [Fact]
@@ -397,70 +534,194 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         actual.Should().BeTrue();
     }
 
-    public static TheoryData<StringSegmentLinkedList, StringSegmentLinkedList, IEqualityComparer<char>, bool, string> EqualsCases
-        => new()
+    public static TheoryData<StringSegmentLinkedList, StringSegmentLinkedList, IEqualityComparer<char>, bool, string> IsEquivalentToCases
+    {
+        get
         {
+            TheoryData<StringSegmentLinkedList, StringSegmentLinkedList, IEqualityComparer<char>, bool, string> data = new()
             {
-                [],
-                [],
-                CharComparer.InvariantCultureIgnoreCase,
-                true,
-                "Both lists are empty"
-            },
+                { [], [], CharComparer.Ordinal, true, $"Both lists are empty (comparer : {nameof(CharComparer.Ordinal)})" },
+                { [], [], CharComparer.InvariantCultureIgnoreCase, true, $"Both lists are empty (comparer : {nameof(CharComparer.InvariantCultureIgnoreCase)})" },
+                {new StringSegmentLinkedList("A", "lazy fox"),
+                         new StringSegmentLinkedList("A", "lazy fox"),
+                         CharComparer.InvariantCultureIgnoreCase,
+                         true,
+                         "Both lists contains 'A' and 'lazy fox'"
+                         },
+                {
+                    new StringSegmentLinkedList("A", "lazy fox"),
+                    new StringSegmentLinkedList("A", "lazy Fox"),
+                    CharComparer.Ordinal,
+                    false,
+                    $"Both lists contains 'A' and 'lazy fox' but the casing is not the same and comparer is {nameof(CharComparer.Ordinal)} only."
+                },
+                {
+                    new StringSegmentLinkedList("A", "lazy fox"),
+                    new StringSegmentLinkedList("A", "lazy Fox"),
+                    CharComparer.InvariantCultureIgnoreCase,
+                    true,
+                    $"Both lists contains 'A' and 'lazy fox' but the casing is not the same and is comparer is {nameof(CharComparer.InvariantCultureIgnoreCase)} only."
+                },
+                {
+                    new StringSegmentLinkedList("A lazy fox"),
+                    new StringSegmentLinkedList("A"),
+                    CharComparer.InvariantCultureIgnoreCase,
+                    false,
+                    "Both lists contains starts with 'A' but the right list contains only one character whereas the left is longer"
+                },
+                {
+                    new StringSegmentLinkedList("A"),
+                    new StringSegmentLinkedList("A lazy fox"),
+                    CharComparer.InvariantCultureIgnoreCase,
+                    false,
+                    "Both lists starts with the same value but the left list contains only one value whereas the right is longer"
+                },
+                {
+                    new StringSegmentLinkedList("A lazy ", "fox"),
+                    new StringSegmentLinkedList("A lazy fox"),
+                    CharComparer.Ordinal,
+                    true,
+                    "Both lists would result with the same string values but were not initialize in the same way"
+                }
+            };
+
             {
-                new StringSegmentLinkedList("A", "lazy fox"),
-                new StringSegmentLinkedList("A", "lazy", " ", "fox"),
-                CharComparer.Ordinal,
-                true,
-                "Both lists contains 'A' and 'lazy fox'"
-            },
-            {
-                new StringSegmentLinkedList("A", "lazy fox"),
-                new StringSegmentLinkedList("A", "lazy", " ", "Fox"),
-                CharComparer.Ordinal,
-                false,
-                "Both lists contains 'A' and 'lazy fox' but the casing is not the same and StringComparison is Ordinal only."
-            },
-            {
-                new StringSegmentLinkedList("A", "lazy fox"),
-                new StringSegmentLinkedList("A", "lazy", " ", "Fox"),
-                CharComparer.InvariantCultureIgnoreCase,
-                true,
-                "Both lists contains 'A' and 'lazy fox' but the casing is not the same and StringComparison is OrdinalIgnoreCase only."
+                StringSegmentLinkedList left = new("aH");
+                left = left.Append("&");
+
+                StringSegmentLinkedList right = new("aH&");
+
+                data.Add(left, right, null, true, "Both list would produces the same string output");
+                data.Add(right, left, null, true, "Both list would produces the same string output");
             }
-        };
+            {
+                StringSegmentLinkedList left = new("0");
+                StringSegmentLinkedList right = new("+0");
+
+                data.Add(left, right, null, false, "['0'] is not equivalent to ['+0']");
+                data.Add(left, right, null, false, "['+0'] is not equivalent to ['0']");
+            }
+
+            return data;
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(IsEquivalentToCases))]
+    public void Given_left_and_right_lists_IsEquivalentTo_should_behave_as_expected(StringSegmentLinkedList left, StringSegmentLinkedList right, IEqualityComparer<char> comparer, bool expectedResult, string reason)
+    {
+        // Arrange
+        string leftValue = $"[{string.Join(',', left.Select(node => $"[{node}]"))}]";
+        string rightValue = $"[{string.Join(',', right.Select(node => $"[{node}]"))}]";
+        outputHelper.WriteLine($"left is : {leftValue}");
+        outputHelper.WriteLine($"right is: {rightValue}");
+        // Act
+        bool actual = left.IsEquivalentTo(right, comparer);
+
+        //Assert
+        actual.Should().Be(expectedResult, reason);
+    }
+
+    public static TheoryData<StringSegmentLinkedList, StringSegmentLinkedList, bool, string> EqualsCases
+    {
+        get
+        {
+            TheoryData<StringSegmentLinkedList, StringSegmentLinkedList, bool, string> data = new()
+            {
+                { [], null, false, "The other list is null" },
+                { [], [], true, $"Both lists are empty (comparer : {nameof(CharComparer.Ordinal)})" },
+                { [], [], true, $"Both lists are empty (comparer : {nameof(CharComparer.InvariantCultureIgnoreCase)})" },
+                {
+                    new StringSegmentLinkedList("A", "lazy fox"),
+                    new StringSegmentLinkedList("A", "lazy fox"),
+                    true,
+                    "Both lists contains 'A' and 'lazy fox'"
+                },
+                {
+                    new StringSegmentLinkedList("A", "lazy fox"),
+                    new StringSegmentLinkedList("A", "lazy Fox"),
+                    false,
+                    $"Both lists contains 'A' and 'lazy fox' but the casing is not the same and comparer is {nameof(CharComparer.Ordinal)} only."
+                },
+                {
+                    new StringSegmentLinkedList("A", "lazy fox"),
+                    new StringSegmentLinkedList("A", "lazy Fox"),
+                    false,
+                    $"comparison is done with {nameof(CharComparer.InvariantCultureIgnoreCase)} only."
+                },
+                {
+                    new StringSegmentLinkedList("A lazy fox"),
+                    new StringSegmentLinkedList("A"),
+                    false,
+                    "Both lists contains starts with 'A' but the right list contains only one character whereas the left is longer"
+                },
+                {
+                    new StringSegmentLinkedList("A"),
+                    new StringSegmentLinkedList("A lazy fox"),
+                    false,
+                    "Both lists starts with the same value but the left list contains only one value whereas the right is longer"
+                },
+                {
+                    new StringSegmentLinkedList("A lazy ", "fox"),
+                    new StringSegmentLinkedList("A lazy fox"),
+                    true,
+                    "Both lists would result with the same string values but were not initialize in the same way"
+                }
+            };
+
+            {
+                StringSegmentLinkedList left = new("aH");
+                left = left.Append("&");
+
+                StringSegmentLinkedList right = new("aH&");
+
+                data.Add(left, right, true, "Both list would produces the same string output");
+                data.Add(right, left, true, "Both list would produces the same string output");
+            }
+            {
+                StringSegmentLinkedList left = new("0");
+                StringSegmentLinkedList right = new("+0");
+
+                data.Add(left, right, false, "['0'] is not equivalent to ['+0']");
+                data.Add(left, right, false, "['+0'] is not equivalent to ['0']");
+            }
+
+            return data;
+        }
+    }
+
 
     [Theory]
     [MemberData(nameof(EqualsCases))]
-    public void Given_left_and_right_lists_Equals_should_behave_as_expected(StringSegmentLinkedList left, StringSegmentLinkedList right, IEqualityComparer<char> comparer, bool expectedResult, string reason)
+    public void Given_left_and_right_lists_Equals_should_behave_as_expected(StringSegmentLinkedList left, StringSegmentLinkedList right, bool expectedResult, string reason)
     {
+        // Arrange
+        string leftValue = $"[{string.Join(',', left.Select(node => $"[{node}]"))}]";
+        string rightValue = right switch
+        {
+            not null => $"[{string.Join(',', right.Select(node => $"[{node}]"))}]",
+            null     => string.Empty
+        };
+        outputHelper.WriteLine($"left is : {leftValue}");
+        outputHelper.WriteLine($"right is: {rightValue}");
         // Act
-        bool actual = left.Equals(right, comparer);
+        bool actual = left.Equals(right);
 
         //Assert
         actual.Should().Be(expectedResult, reason);
     }
 
     public static TheoryData<StringSegmentLinkedList, Func<char, bool>, char, StringSegmentLinkedList> ReplaceCharByCharWithPredicateCases
-        => new()
-        {
-            {
-                new StringSegmentLinkedList("A", "lazy fox"),
-                chr => chr is 'A' or 'a',
-                'E',
-                new StringSegmentLinkedList("E", "lEzy fox")
-            },
-            {
-                new StringSegmentLinkedList("A", "lazy fox"),
-                chr => chr is 'W' or 'w',
-                'E',
-                new StringSegmentLinkedList("A", "lazy fox")
-            }
-        };
+        => new() { { new StringSegmentLinkedList("A", "lazy fox"), chr => chr is 'A' or 'a', 'E', new StringSegmentLinkedList("E", "lEzy fox") }, { new StringSegmentLinkedList("A", "lazy fox"), chr => chr is 'W' or 'w', 'E', new StringSegmentLinkedList("A", "lazy fox") } };
 
     [Theory]
     [MemberData(nameof(ReplaceCharByCharWithPredicateCases))]
-    public void Given_a_StringSegmentLinkedList_When_replacing_a_char_using_a_predicate_Then_the_result_should_match_expectation(StringSegmentLinkedList input, Func<char, bool> predicate, char replacement, StringSegmentLinkedList expected)
+    public void
+        Given_a_StringSegmentLinkedList_When_replacing_a_char_using_a_predicate_Then_the_result_should_match_expectation(
+            StringSegmentLinkedList input,
+            Func<char, bool> predicate,
+            char replacement,
+            StringSegmentLinkedList expected)
     {
         // Act
         StringSegmentLinkedList actual = input.Replace(predicate, [replacement]);
@@ -474,25 +735,64 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     public static TheoryData<StringSegmentLinkedList, Func<char, bool>, IReadOnlyDictionary<char, ReadOnlyMemory<char>>, StringSegmentLinkedList> ReplaceCharByCharWithPredicateAndReplaceFunctionCases
         => new()
         {
+            // one match only in each node
             {
                 new StringSegmentLinkedList("A", "lazy fox"),
                 chr => chr is 'A' or 'a',
                 new Dictionary<char, ReadOnlyMemory<char>>
                 {
-                    ['A'] = new(['a']),
-                    ['a'] = new(['A'])
+                    ['A'] = "a".AsMemory(),
+                    ['a'] = "A".AsMemory()
                 },
                 new StringSegmentLinkedList("a", "lAzy fox")
             },
+            // No match
             {
                 new StringSegmentLinkedList("A", "lazy fox"),
                 chr => chr is 'W' or 'w',
                 new Dictionary<char, ReadOnlyMemory<char>>
                 {
-                    ['W'] = new(['a']),
-                    ['z'] = new(['A'])
+                    ['W'] = "a".AsMemory(),
+                    ['z'] = "A".AsMemory()
                 },
                 new StringSegmentLinkedList("A", "lazy fox")
+            },
+            // More than one matching and all replacements match
+            {
+                new StringSegmentLinkedList("A bad", "very lazy fox"),
+                chr => chr is 'a' or 'e' or 'A',
+                new Dictionary<char, ReadOnlyMemory<char>>
+                {
+                    ['A'] = new(['a']),
+                    ['a'] = new(['A']),
+                    ['e'] = new(['E'])
+                },
+                new StringSegmentLinkedList("a bAd", "vEry lAzy fox")
+            },
+            // Several matches and one miss
+            {
+                new StringSegmentLinkedList("A bad", "very lazy fox"),
+                chr => chr is 'a' or 'e' or 'A',
+                new Dictionary<char, ReadOnlyMemory<char>>
+                {
+                    ['A'] = new(['a']),
+                    ['W'] = new(['A']),
+                    ['e'] = new(['E']),
+                    ['a'] = new(['A']),
+                },
+                new StringSegmentLinkedList("a bAd", "vEry lAzy fox")
+            },
+            // Several matches and one miss
+            {
+                new StringSegmentLinkedList("Aaaaaa bad", "very lazy fox"),
+                chr => chr is 'a' or 'e' or 'A',
+                new Dictionary<char, ReadOnlyMemory<char>>
+                {
+                    ['A'] = new(['a']),
+                    ['e'] = new(['E']),
+                    ['a'] = new(['A']),
+                },
+                new StringSegmentLinkedList("aAAAAA bAd", "vEry lAzy fox")
             }
         };
 

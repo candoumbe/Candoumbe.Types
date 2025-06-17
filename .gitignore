@@ -477,3 +477,7 @@ $RECYCLE.BIN/
 *.lnk
 # Nuke temporary directory
 /.nuke/temp
+/.idea/.idea.Candoumbe.Types/.idea/developer-tools.xml
+
+# Qodo
+.qodo
