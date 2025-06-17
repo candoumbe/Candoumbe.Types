@@ -5,6 +5,7 @@ using Candoumbe.Pipelines.Components;
 using Candoumbe.Pipelines.Components.GitHub;
 using Candoumbe.Pipelines.Components.NuGet;
 using Candoumbe.Pipelines.Components.Workflows;
+using Candoumbe.Pipelines.Tools;
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
@@ -13,7 +14,6 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.Codecov;
 using Nuke.Common.Tools.GitHub;
-using Nuke.Common.Utilities.Collections;
 
 [GitHubActions("integration", GitHubActionsImage.UbuntuLatest,
     AutoGenerate = false,
@@ -124,7 +124,7 @@ public class Pipelines : EnhancedNukeBuild,
     IUnitTest,
     IBenchmark,
     IHaveGitVersion,
-    IReportCoverage,
+    IReportUnitTestCoverage,
     IMutationTest,
     IPack,
     IPushNugetPackages,
@@ -207,7 +207,11 @@ public class Pipelines : EnhancedNukeBuild,
     bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;
 
     ///<inheritdoc/>
-    Configure<CodecovSettings> IReportCoverage.CodecovSettings => _ => _.SetFramework("netcoreapp3.1");
+    Configure<CodecovSettings> IReportUnitTestCoverage.CodecovSettings => _ => _.SetFramework("netcoreapp3.1");
+
+    /// <inheritdoc />
+    Configure<StrykerSettings> IMutationTest.StrykerArgumentsSettings => options => options
+                                                                             .When(_ => IsLocalBuild, settings => settings.SetReporters(StrykerReporter.Html));
 
     protected override void OnBuildCreated()
     {
@@ -216,7 +220,7 @@ public class Pipelines : EnhancedNukeBuild,
             Environment.SetEnvironmentVariable("DOTNET_ROLL_FORWARD", "LatestMajor");
         }
     }
-    
+
     ///<inheritdoc/>
     IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
 }
