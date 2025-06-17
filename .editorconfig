@@ -78,8 +78,8 @@ dotnet_naming_symbols.static_readonly_fields.required_modifiers = static, readon
 dotnet_naming_symbols.private_readonly_fields.applicable_accessibilities = private
 dotnet_naming_symbols.private_readonly_fields.applicable_kinds = field
 dotnet_naming_symbols.private_readonly_fields.required_modifiers = readonly
-dotnet_naming_style.private_readonly_fields.required_prefix = _
-dotnet_naming_style.private_readonly_fields.capitalization = camel_case
+dotnet_naming_style.prefix_private_readonly_fields.required_prefix = _
+dotnet_naming_style.prefix_private_readonly_fields.capitalization = camel_case
 # public_internal_fields - Define public and internal fields
 dotnet_naming_symbols.public_internal_fields.applicable_accessibilities = public, internal
 dotnet_naming_symbols.public_internal_fields.applicable_kinds = field
