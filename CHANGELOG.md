@@ -6,8 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.2.1] / 2025-06-17
 ### 🚨 Breaking changes
 - Renamed `StringSegmentLinkedList.Equals(StringSegmentLinkedList, IEqualityComparer<char>)` to `StringSegmentLinkedList.IsEquivalentTo(StringSegmentLinkedList, IEqualityComparer<char>)`
+
 
 ### 🐛 Fixes
 - Fixed `ArgumentOutOfRangeException` thrown by `StringSegmentLinkedList.Replace(Func<char, bool>, IReadOnlyDictionary<char, ReadOnlyMemory<char>>)` 
@@ -45,6 +48,7 @@ which is now redundant
 ## [0.1.0] / 2023-01-29
 - Initial release
 
-[Unreleased]: https://github.com/candoumbe/Candoumbe.Types/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/candoumbe/Candoumbe.Types/compare/0.2.1...HEAD
+[0.2.1]: https://github.com/candoumbe/Candoumbe.Types/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/candoumbe/Candoumbe.Types/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/candoumbe/Candoumbe.Types/tree/0.1.0
