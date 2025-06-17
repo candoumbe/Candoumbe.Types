@@ -1,13 +1,9 @@
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Candoumbe.MiscUtilities.Comparers;
 using Microsoft.Extensions.Primitives;
 
 namespace Candoumbe.Types.Strings;
@@ -368,8 +364,8 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     ///     { 'a', "alpha".AsMemory() },
     ///     { 'b', "beta".AsMemory() }
     /// };
-    /// var result = linkedList.Replace(c => c == 'a' || c == 'b', replacements);
-    /// // `result` will have 'a' replaced with "alpha" and 'b' with "beta"
+    /// var list = linkedList.Replace(c => c == 'a' || c == 'b', replacements);
+    /// // `list` will have 'a' replaced with "alpha" and 'b' with "beta"
     /// </code>
     /// </example>
     public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> replacements)
