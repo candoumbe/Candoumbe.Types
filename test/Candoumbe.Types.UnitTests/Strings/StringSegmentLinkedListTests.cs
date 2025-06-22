@@ -606,7 +606,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
                 new StringSegmentLinkedList("Hello").Append("world"),
                 "low".AsMemory(),
                 CharComparer.Ordinal,
-                false
+                true
             }
         };
 
