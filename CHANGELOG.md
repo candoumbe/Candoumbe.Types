@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚀 New features
 - Added `NonNegativeLong` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
 - Added `PositiveLong` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
+- Added `StringSegmentLinkedList.Contains(ReadOnlySpan<char>)` ([#])
+- Added `StringSegmentLinkedList.Contains(ReadOnlySpan<char>, IEqualityComparer<char>)` 
 
 ### 🧹 Housekeeping
 - Add `DotNet.ReproducibleBuilds` package to `core.props`
