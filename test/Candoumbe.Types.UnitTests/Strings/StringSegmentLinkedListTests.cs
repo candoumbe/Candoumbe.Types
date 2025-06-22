@@ -733,4 +733,64 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     [Property(Skip = "StringSegmentLinkedList does not handle state properly")]
     public Property StringSegmentList_should_works_consistently()
         => new StringSegmentLinkedListSpecification().ToProperty();
+
+
+    [Property]
+    public void Given_an_empty_StringSegmentLinkedList_When_checking_if_it_contains_an_empty_string_Then_the_result_should_be_True()
+    {
+        // Arrange
+        StringSegmentLinkedList emptyList = [];
+
+        // Act
+        bool actual = emptyList.Contains(string.Empty);
+
+        // Assert
+        actual.Should().Be(string.Empty.Contains(string.Empty));
+    }
+
+    public static TheoryData<StringSegmentLinkedList, ReadOnlyMemory<char>, CharComparer, bool> ContainsCases
+        => new()
+        {
+            {
+                new StringSegmentLinkedList("Hello", "world"),
+                "world".AsMemory(),
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList("Hello", "world"),
+                "low".AsMemory(),
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList(@"Hello\*", "world"),
+                @"\*".AsMemory(),
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList(@"Hello\*", "world"),
+                @"\*m".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("world"),
+                "low".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            }
+        };
+
+    [Theory]
+    [MemberData(nameof(ContainsCases))]
+    public void Given_a_StringSegmentLinkedList_Then_Contains_should_behave_as_expected(StringSegmentLinkedList list, ReadOnlyMemory<char> search, IEqualityComparer<char> comparer, bool expected)
+    {
+        // Act
+        bool actual = list.Contains(search.Span, comparer);
+
+        // Assert
+        actual.Should().Be(expected);
+    }
 }

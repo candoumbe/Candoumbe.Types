@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Candoumbe.MiscUtilities.Comparers;
 using Microsoft.Extensions.Primitives;
 
 namespace Candoumbe.Types.Strings;
@@ -14,14 +15,12 @@ namespace Candoumbe.Types.Strings;
 /// <remarks>
 /// This implementation is specifically designed to not allow appending <see cref="StringSegment.Empty"/> values.
 /// </remarks>
-public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquatable<StringSegmentLinkedList>
+public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 {
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
 
-    private static readonly StringSegmentNode EmptyNode = new(ReadOnlyMemory<char>.Empty);
-
-    private readonly IDictionary<string, string> _replacements;
+    private static StringSegmentNode EmptyNode => new(ReadOnlySpan<char>.Empty);
 
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/> that is empty.
@@ -30,7 +29,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     {
         _head = EmptyNode;
         Count = 0;
-        _replacements = new Dictionary<string, string>();
     }
 
     /// <summary>
@@ -47,18 +45,16 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
         {
             Append(next);
         }
-
-        _replacements = new Dictionary<string, string>();
     }
 
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/>.
     /// </summary>
     /// <param name="head">the value of the head</param>
-    /// <param name="others">Additional <see cref="ReadOnlyMemory{T}"/>s to append to the list</param>
-    public StringSegmentLinkedList(ReadOnlyMemory<char> head, params ReadOnlyMemory<char>[] others)
+    /// <param name="others">Additional elements to append to the list.</param>
+    public StringSegmentLinkedList(ReadOnlySpan<char> head, params ReadOnlySpan<StringSegment> others)
     {
-        _head = new StringSegmentNode(head);
+        _head = new StringSegmentNode(head.ToArray());
         Count = 1;
 
         foreach (ReadOnlySpan<char> next in others)
@@ -327,6 +323,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                     valueToKeep = current.Value[..indexOfOldChar].Span;
                     replacementList = replacementList.Append(valueToKeep);
                 }
+
                 replacementList = replacementList.Append(replacement);
 
                 int index = indexOfOldChar + 1;
@@ -338,6 +335,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                         valueToKeep = current.Value.Span.Slice(index, occurrence - index);
                         replacementList = replacementList.Append(valueToKeep);
                     }
+
                     replacementList = replacementList.Append(replacement);
 
                     // move the cursor right after the current occurrence
@@ -485,9 +483,9 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
                     replacementList = mismatchFound switch
                     {
-                        // a mismatch was found : we need to rewind and copy from the previous index up to the current one
+                        // a mismatch was found: we need to rewind and copy from the previous index up to the current one
                         true => replacementList.Append(subject[( previousIndex + 1 )..index]),
-                        // we looped through the whole span and up to here everything match => we just append newValue
+                        // we looped through the whole span and, up to here, everything matches => we just append newValue
                         _ => replacementList.Append(newValue)
                     };
 
@@ -501,6 +499,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                     replacementList = replacementList.Append(subject);
                 }
             }
+
             current = current.Next;
         }
 
@@ -534,6 +533,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
             previous = current;
             current = current.Next;
         }
+
         return this;
     }
 
@@ -627,7 +627,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                     Func<char, char, bool> predicate = comparer switch
                     {
                         null => (x, y) => Equals(x, y),
-                        _ => comparer.Equals,
+                        _    => comparer.Equals,
                     };
                     while (currentEnumerator.MoveNext() && !mismatchFound)
                     {
@@ -693,6 +693,66 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
         }
 
         return equals;
+    }
+
+    /// <summary>
+    /// Checks if the current instance contains <paramref name="search"/>.
+    /// </summary>
+    /// <param name="search">The value to search in the current instance.</param>
+    /// <returns><see langword="true"/> if the current instance contains the specified <paramref name="search"/> and <see langword="false"/> otherwise.</returns>
+    /// <remarks>
+    /// This method uses <see cref="CharComparer.InvariantCultureIgnoreCase"/> comparer.
+    /// </remarks>
+    public bool Contains(ReadOnlySpan<char> search) => Contains(search, CharComparer.InvariantCultureIgnoreCase);
+
+    /// <summary>
+    /// Checks if the current instance contains <paramref name="search"/>.
+    /// </summary>
+    /// <param name="search">The value to search in the current instance.</param>
+    /// <param name="comparer">The comparer to use when comparing <see</param>
+    /// <returns><see langword="true"/> if the current instance contains the specified <paramref name="search"/> and <see langword="false"/> otherwise.</returns>
+    public bool Contains(ReadOnlySpan<char> search, IEqualityComparer<char> comparer)
+    {
+        bool found = false;
+
+        if (search.IsEmpty)
+        {
+            found = true;
+        }
+        else
+        {
+            StringSegmentNode currentNode = _head;
+            int searchIndex = 0;
+            while (currentNode is not null && !found)
+            {
+                var valueSpan = currentNode.Value.Span;
+
+                for (int i = 0; i < valueSpan.Length && !found; i++)
+                {
+                    if (searchIndex < search.Length && comparer.Equals(valueSpan[i],search[searchIndex]))
+                    {
+                        searchIndex++;
+                    }
+                    else
+                    {
+                        searchIndex = 0;
+                        if (valueSpan[i] == search[searchIndex])
+                        {
+                            searchIndex++;
+                        }
+                    }
+
+                    if (searchIndex == search.Length)
+                    {
+                        found = true;
+                    }
+                }
+
+                currentNode = currentNode.Next;
+            }
+        }
+
+        return found;
     }
 
     ///<inheritdoc/>

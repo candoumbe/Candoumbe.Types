@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved all types from `Candoumbe.Types.Numerics` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Numerics` NuGet package
 - Moved all types from `Candoumbe.Types.Calendar` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Calendar` NuGet package
 
+### 🚀 New features
+- Added `NonNegativeLong` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
+- Added `PositiveLong` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
+- Added `StringSegmentLinkedList.Contains(ReadOnlySpan<char>)` ([#])
+- Added `StringSegmentLinkedList.Contains(ReadOnlySpan<char>, IEqualityComparer<char>)` 
 
 ## [0.2.1] / 2025-06-17
 ### 🚨 Breaking changes
