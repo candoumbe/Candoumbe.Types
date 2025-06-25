@@ -72,13 +72,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
         return this;
     }
 
-    /// <summary>
-    /// Appends <paramref name="value"/> to the end of the list.
-    /// </summary>
-    /// <param name="value">The value to append</param>
-    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
-    public StringSegmentLinkedList Append(StringSegment value) => Append(value.AsMemory());
-
     private void AppendInternal(StringSegmentNode newNode)
     {
         if (_tail is null)
@@ -153,8 +146,8 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// Inserts <paramref name="other"/> at the given <paramref name="index"/>
     /// </summary>
     /// <param name="index">0-based index where the new node will be inserted</param>
-    /// <param name="other">The value of the node to insert</param>
-    /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0. or &gt; <see cref="Count"/>.</exception>
+    /// <param name="other">The value of the node to inserts</param>
+    /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0 or &gt; <see cref="Count"/>.</exception>
     /// <exception cref="ArgumentNullException">if <paramref name="other"/> is <see langword="null"/> .</exception>
     public StringSegmentLinkedList InsertAt(int index, StringSegmentLinkedList other)
     {
@@ -178,12 +171,12 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     }
 
     /// <summary>
-    /// Gets the number of nodes in the current linked list.
+    /// Gets the number of nodes in the current linked list
     /// </summary>
     public int Count { get; private set; }
 
     /// <summary>
-    /// Computes the total length of the resulting string value.
+    /// Computes the total length of the resulting string value
     /// </summary>
     /// <returns></returns>
     public int GetTotalLength()
@@ -212,14 +205,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
             ReadOnlyMemory<char> segment = current.Value;
             sb.Append(segment.Span);
             current = current.Next;
-        }
-
-        if (_replacements is not null)
-        {
-            foreach (( string key, string value ) in _replacements)
-            {
-                sb = sb.Replace(key, value);
-            }
         }
 
         return sb.ToString();
@@ -309,7 +294,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
             if (indexOfOldChar >= 0)
             {
-                IEnumerable<int> occurrences = current.Value.Occurrences(predicate);
                 ReadOnlySpan<char> valueToKeep;
                 if (indexOfOldChar > 0)
                 {
@@ -390,7 +374,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                 replacementList = replacementList.Append(current.Value.Span[..indexOfOldChar]);
 
                 char candidate = current.Value.Span[indexOfOldChar];
-                if (!substitutions.TryGetValue(candidate, out ReadOnlyMemory<char> replacement))
+                if (!replacements.TryGetValue(candidate, out ReadOnlyMemory<char> replacement))
                 {
                     replacement = ReadOnlyMemory<char>.Empty;
                 }
@@ -412,7 +396,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                 }
 
                 // we did all substitutions, but we did not reach the end of the original input
-                // => copy all remaining original chars starting at index position  
+                // => copy all remaining original chars starting at index position
                 if (indexOfOldChar < current.Value.Length)
                 {
                     index = indexOfOldChar + 1;
@@ -604,7 +588,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// This method compares the elements of the two linked lists. If the lengths of the lists are different,
     /// it checks if one list starts with the other. The comparison can be customized using the provided <paramref name="comparer"/>.
     /// </remarks>
-    public bool IsEQuivalentTo(StringSegmentLinkedList other, IEqualityComparer<char> comparer)
+    public bool Equals(StringSegmentLinkedList other, IEqualityComparer<char> comparer)
     {
         bool equals = false;
 
@@ -764,6 +748,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     public bool Equals(StringSegmentLinkedList other) => other switch
     {
         null => false,
-        _    => ReferenceEquals(this, other) || IsEquivalentTo(other, null)
+        _    => ReferenceEquals(this, other) || Equals(other, null)
     };
 }

@@ -488,7 +488,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 
     [Theory]
     [MemberData(nameof(IsEquivalentToCases))]
-    public void Given_left_and_right_lists_IsEquivalentTo_should_behave_as_expected(StringSegmentLinkedList left, StringSegmentLinkedList right, IEqualityComparer<char> comparer, bool expectedResult, string reason)
+    public void Given_left_and_right_lists_Equals_should_behave_as_expected(StringSegmentLinkedList left, StringSegmentLinkedList right, IEqualityComparer<char> comparer, bool expectedResult, string reason)
     {
         // Arrange
         string leftValue = $"[{string.Join(',', left.Select(node => $"[{node}]"))}]";
@@ -496,7 +496,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         outputHelper.WriteLine($"left is : {leftValue}");
         outputHelper.WriteLine($"right is: {rightValue}");
         // Act
-        bool actual = left.IsEquivalentTo(right, comparer);
+        bool actual = left.Equals(right, comparer);
 
         //Assert
         actual.Should().Be(expectedResult, reason);
@@ -585,7 +585,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         outputHelper.WriteLine($"left is : {leftValue}");
         outputHelper.WriteLine($"right is: {rightValue}");
         // Act
-        bool actual = left.Equals(right, comparer);
+        bool actual = left.Equals(right);
 
         //Assert
         actual.Should().Be(expectedResult, reason);
