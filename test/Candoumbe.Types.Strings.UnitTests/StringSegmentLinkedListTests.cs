@@ -18,7 +18,7 @@ using Xunit.Categories;
 using ReplacePredicateByReadOnlyMemory = (System.Func<char, bool> Predicate, System.ReadOnlyMemory<char> NewValue);
 using ReplacePredicateByChar = (System.Func<char, bool> Predicate, char NewValue);
 
-namespace Candoumbe.Types.UnitTests.Strings;
+namespace Candoumbe.Types.Strings.UnitTests.Strings;
 
 [UnitTest]
 public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)

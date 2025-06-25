@@ -633,11 +633,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                 {
                     bool mismatchFound = false;
                     int index = current.Length;
-                    Func<char, char, bool> predicate = comparer switch
-                    {
-                        null => (x, y) => Equals(x, y),
-                        _    => comparer.Equals,
-                    };
+
                     while (currentEnumerator.MoveNext() && !mismatchFound)
                     {
                         current = currentEnumerator.Current;
@@ -718,7 +714,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// Checks if the current instance contains <paramref name="search"/>.
     /// </summary>
     /// <param name="search">The value to search in the current instance.</param>
-    /// <param name="comparer">The comparer to use when comparing <see</param>
+    /// <param name="comparer">The comparer to use when comparing each <see cref="char"/> from <paramref name="search"/>.</param>
     /// <returns><see langword="true"/> if the current instance contains the specified <paramref name="search"/> and <see langword="false"/> otherwise.</returns>
     public bool Contains(ReadOnlySpan<char> search, IEqualityComparer<char> comparer)
     {

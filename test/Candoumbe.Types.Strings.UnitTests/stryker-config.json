@@ -3,7 +3,7 @@
     "concurrency": 10,
     "project-info": {
       "name": "github.com/candoumbe/Candoumbe.Types",
-      "module": "Candoumbe.Types"
+      "module": "Candoumbe.Types.Strings"
     }
   }
 }

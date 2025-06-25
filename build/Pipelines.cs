@@ -254,6 +254,7 @@ public class Pipelines : EnhancedNukeBuild,
 
     private static readonly string[] Projects = [
         "Candoumbe.Types",
+        "Candoumbe.Types.Strings",
         "Candoumbe.Types.Calendar",
         "Candoumbe.Types.Numerics"
     ];

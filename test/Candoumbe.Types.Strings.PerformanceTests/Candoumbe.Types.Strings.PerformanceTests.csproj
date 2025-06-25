@@ -12,7 +12,7 @@
     </ItemGroup>
     
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Candoumbe.Types\Candoumbe.Types.csproj"/>
+        <ProjectReference Include="..\..\src\Candoumbe.Types.Strings\Candoumbe.Types.Strings.csproj"/>
     </ItemGroup>
 
 </Project>
