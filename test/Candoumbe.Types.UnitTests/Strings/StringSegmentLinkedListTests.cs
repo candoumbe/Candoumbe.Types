@@ -17,7 +17,6 @@ using Xunit.Abstractions;
 using Xunit.Categories;
 using ReplacePredicateByReadOnlyMemory = (System.Func<char, bool> Predicate, System.ReadOnlyMemory<char> NewValue);
 using ReplacePredicateByChar = (System.Func<char, bool> Predicate, char NewValue);
-using ReplaceStringByStringType = (string OldValue, string NewValue);
 
 namespace Candoumbe.Types.UnitTests.Strings;
 

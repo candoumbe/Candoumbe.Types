@@ -25,26 +25,19 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/> that is empty.
     /// </summary>
-    public StringSegmentLinkedList()
+    public StringSegmentLinkedList(): this(ReadOnlySpan<char>.Empty)
     {
-        _head = EmptyNode;
-        Count = 0;
     }
 
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/>.
     /// </summary>
-    /// <param name="head">the value of the head</param>
-    /// <param name="others">Additional <see cref="StringSegment"/>s to append to the list</param>
-    public StringSegmentLinkedList(StringSegment head, params StringSegment[] others) : this()
+    /// <param name="head">The value of the head</param>
+    public StringSegmentLinkedList(ReadOnlySpan<char> head)
     {
-        _head = new StringSegmentNode(head);
-        Count = 1;
-
-        foreach (StringSegment next in others)
-        {
-            Append(next);
-        }
+        (_head, Count) = head.IsEmpty
+                    ? (EmptyNode, 1)
+                    : (new StringSegmentNode(head), 1);
     }
 
     /// <summary>
@@ -54,12 +47,12 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <param name="others">Additional elements to append to the list.</param>
     public StringSegmentLinkedList(ReadOnlySpan<char> head, params ReadOnlySpan<StringSegment> others)
     {
-        _head = new StringSegmentNode(head.ToArray());
+        _head = new StringSegmentNode(head);
         Count = 1;
 
-        foreach (ReadOnlySpan<char> next in others)
+        foreach (ReadOnlyMemory<char> next in others)
         {
-            Append(next);
+            Append(next.Span);
         }
     }
 
@@ -582,6 +575,22 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
     /// <inheritdoc />
     public override bool Equals(object obj) => obj is StringSegmentLinkedList other && Equals(other, CharComparer.InvariantCultureIgnoreCase);
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        HashCode hashCode = new();
+
+        StringSegmentNode current = _head;
+
+        while (current is not null)
+        {
+            hashCode.Add(current.Value.Span.GetHashCode());
+            current = current.Next;
+        }
+
+        return hashCode.ToHashCode();
+    }
 
     /// <summary>
     /// Determines whether the current <see cref="StringSegmentLinkedList"/> is equal to another <see cref="StringSegmentLinkedList"/>.
