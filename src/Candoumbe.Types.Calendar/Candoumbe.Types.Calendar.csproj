@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Candoumbe.Types\Candoumbe.Types.csproj"/>
+    <ProjectReference Include="..\..\src\Candoumbe.Types.Core\Candoumbe.Types.Core.csproj"/>
   </ItemGroup>
 
 </Project>

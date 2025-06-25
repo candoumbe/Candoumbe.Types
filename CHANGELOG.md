@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### 💥 Breaking changes
 
+- Moved all types from `Candoumbe.Types` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Core` NuGet package
 - Moved all types from `Candoumbe.Types.Numerics` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Numerics` NuGet package
 - Moved all types from `Candoumbe.Types.Calendar` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Calendar` NuGet package
 - Moved all types from `Candoumbe.Types.Strings` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Strings` NuGet package

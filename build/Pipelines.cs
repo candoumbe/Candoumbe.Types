@@ -253,7 +253,7 @@ public class Pipelines : EnhancedNukeBuild,
     IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
 
     private static readonly string[] Projects = [
-        "Candoumbe.Types",
+        "Candoumbe.Types.Core",
         "Candoumbe.Types.Strings",
         "Candoumbe.Types.Calendar",
         "Candoumbe.Types.Numerics"

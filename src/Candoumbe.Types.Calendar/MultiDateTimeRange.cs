@@ -13,7 +13,11 @@ using System.Text;
 namespace Candoumbe.Types.Calendar;
 
 /// <summary>
-/// A type that optimize the storage of several <see cref="DateTimeRange"/>.
+/// A type that optimizes the storage of several <see cref="DateTimeRange"/>s.
+/// <para>
+/// This type can be used to group several <see cref="DateTimeRange"/> together and check, using <see cref="Overlaps(Candoumbe.Types.Calendar.DateTimeRange)"/>,
+/// if one
+/// </para>
 /// </summary>
 public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<DateTimeRange>
 #if NET7_0_OR_GREATER
