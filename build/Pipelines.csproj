@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Candoumbe.Pipelines" Version="0.13.3-beta.2" />
+    <PackageReference Include="Candoumbe.Pipelines" />
   </ItemGroup>
 
   <ItemGroup>

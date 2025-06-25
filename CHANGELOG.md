@@ -34,6 +34,7 @@ when there are more than 1 match in a node.
 - Updated GitVersion configuration to better handle hotfix versioning
 
 ### 🧹 Housekeeping
+- Move to central package management
 - Add `DotNet.ReproducibleBuilds` package to `core.props`
 - Update [`Candoumbe.Pipelines`](https://nuget.org/packages/pipelines) to `0.13.2`
 - Update `README.md` with new badges for nightly and main branches, and mutation testing
