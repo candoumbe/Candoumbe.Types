@@ -15,7 +15,7 @@ namespace Candoumbe.Types.Strings;
 /// <remarks>
 /// This implementation is specifically designed to not allow appending <see cref="StringSegment.Empty"/> values.
 /// </remarks>
-public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
+public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquatable<StringSegmentLinkedList>
 {
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
@@ -306,7 +306,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                 int index = indexOfOldChar + 1;
                 foreach (int occurrence in occurrences.Skip(1))
                 {
-                    replacementList = replacementList.Append(replacementMemory);
+                    //replacementList = replacementList.Append(replacementMemory.Span);
                     if (index < occurrence)
                     {
                         valueToKeep = current.Value.Span.Slice(index, occurrence - index);
@@ -611,9 +611,9 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
                 if (current.Length == otherCurrent.Length)
                 {
-                    equals = current.StartsWith(otherCurrent) && otherCurrent.StartsWith(current);
+                    equals = current.StartsWith(otherCurrent, comparer) && otherCurrent.StartsWith(current, comparer);
                 }
-                else if (current.Length < otherCurrent.Length && otherCurrent.StartsWith(current))
+                else if (current.Length < otherCurrent.Length && otherCurrent.StartsWith(current, comparer))
                 {
                     bool mismatchFound = false;
                     int index = current.Length;
@@ -731,10 +731,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                         }
                     }
 
-                    if (searchIndex == search.Length)
-                    {
-                        found = true;
-                    }
+                    found = searchIndex == search.Length;
                 }
 
                 currentNode = currentNode.Next;

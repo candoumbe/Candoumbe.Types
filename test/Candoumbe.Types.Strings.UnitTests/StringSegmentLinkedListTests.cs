@@ -677,7 +677,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
                 },
                 new StringSegmentLinkedList("A", "lazy fox")
             },
-            // More than one matching and all replacements match
+            // More than one matching and all substitutions match
             {
                 new StringSegmentLinkedList("A bad", "very lazy fox"),
                 chr => chr is 'a' or 'e' or 'A',
