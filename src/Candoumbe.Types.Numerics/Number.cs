@@ -41,7 +41,7 @@ public abstract record Number<TNumber> : IComparable<Number<TNumber>>
     public int CompareTo(Number<TNumber> other) => Value.CompareTo(other.Value);
 
     ///<inheritdoc/>
-    public virtual bool Equals(Number<TNumber> other) => Equals(Value, other.Value);
+    public virtual bool Equals(Number<TNumber> other) => other is not null && Equals(Value, other.Value);
 
     ///<inheritdoc/>
     public override int GetHashCode() => Value.GetHashCode();

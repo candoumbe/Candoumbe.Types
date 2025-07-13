@@ -8,7 +8,7 @@ using FsCheck.Experimental;
 using FsCheck.Fluent;
 using Microsoft.Extensions.Primitives;
 
-namespace Candoumbe.Types.UnitTests.Strings;
+namespace Candoumbe.Types.Strings.UnitTests.Strings;
 
 public class StringSegmentLinkedListSpecification : Machine<StringSegmentLinkedList, StringSegmentLinkedListState>
 {

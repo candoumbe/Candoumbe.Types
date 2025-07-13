@@ -10,7 +10,7 @@ namespace Candoumbe.Types;
 public interface ICanRepresentEmpty<in TInterval, TBound> where TInterval : IRange<TInterval, TBound> where TBound : IComparable<TBound>
 {
     /// <summary>
-    /// The static default representation of an empty interval of <typeparamref name="TInterval"/>.
+    /// Checks if the current instance is empty (by <typeparamref name="TInterval"/>'s definition).
     /// </summary>
     static TInterval Empty { get; }
 

@@ -39,7 +39,7 @@ public record TimeOnlyRange : Range<TimeOnly>
 #endif
 {
     /// <summary>
-    /// Duration of the current range as a <see cref="TimeSpan"/>.
+    /// <see cref="TimeSpan"/> representation of the current instance.
     /// </summary>
     public TimeSpan Span => Start <= End ? End - Start : Start - End;
 

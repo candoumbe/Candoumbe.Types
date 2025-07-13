@@ -2,11 +2,11 @@
   
   <Import Project="..\..\tests.props" />
   <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Candoumbe.Types\Candoumbe.Types.csproj" />
+    <ProjectReference Include="..\..\src\Candoumbe.Types.Strings\Candoumbe.Types.Strings.csproj" />
   </ItemGroup>
 
   <ItemGroup>

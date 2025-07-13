@@ -29,6 +29,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🛠️ Technical
 - Updated GitHub workflows to download required SDKs when running CI. 
 
+## [0.3.0] / 2025-07-13
+### 💥 Breaking changes
+
+- Moved all types from `Candoumbe.Types` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Core` NuGet package
+- Moved all types from `Candoumbe.Types.Numerics` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Numerics` NuGet package
+- Moved all types from `Candoumbe.Types.Calendar` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Calendar` NuGet package
+- Moved all types from `Candoumbe.Types.Strings` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Strings` NuGet package
+- Replaced `StringSegmentLinkedList.IsEquivalentTo(StringSegmentLinkedList)` with `StringSegmentLinkedList.Equals(StringSegmentLinkedList)`
+
+### 🚀 New features
+- Added `NonNegativeLong` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
+- Added `PositiveLong` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
+- Added `StringSegmentLinkedList.Equals(StringSegmentLinkedList, IEqualituComparer<char>)`
+- Added `StringSegmentLinkedList.Contains(ReadOnlySpan<char>)` ([#284](https://github.com/candoumbe/Candoumbe.Types/issues/284))
+- Added `StringSegmentLinkedList.Contains(ReadOnlySpan<char>, IEqualityComparer<char>)` ([#284](https://github.com/candoumbe/Candoumbe.Types/issues/284))
+
+### 🧹 Housekeeping
+
+- Moved to central package management
+
+## [0.2.1] / 2025-06-17
+### 🚨 Breaking changes
+- Renamed `StringSegmentLinkedList.Equals(StringSegmentLinkedList, IEqualityComparer<char>)` to `StringSegmentLinkedList.IsEquivalentTo(StringSegmentLinkedList, IEqualityComparer<char>)`
+
+
+### 🐛 Fixes
+- Fixed `ArgumentOutOfRangeException` thrown by `StringSegmentLinkedList.Replace(Func<char, bool>, IReadOnlyDictionary<char, ReadOnlyMemory<char>>)` 
+when there are more than 1 match in a node.
+- Fixed incorrect behavior of `StringSegmentLinkedList.IsEquivalentTo`([#283](https://github.com/candoumbe/candoumbe.types/issues/283))
+
+### 🧹 Housekeeping
+- Added documentation.
+- Updated GitVersion configuration to better handle hotfix versioning
+
+### 🧹 Housekeeping
+- Move to central package management
+- Add `DotNet.ReproducibleBuilds` package to `core.props`
+- Update [`Candoumbe.Pipelines`](https://nuget.org/packages/pipelines) to `0.13.2`
+- Update `README.md` with new badges for nightly and main branches, and mutation testing
+- Improve `StringSegmentLinkedList.Replace` when replacing a `string` by a `string`  method to reduce memory allocations
+    - Optimize character replacement logic
+    - Avoid unnecessary allocations by using `ReadOnlyMemory<char>` and `ReadOnlySpan<char>`
+    - Refactor code for better readability and performance
+
+### 🛠️ Technical
+- Updated GitHub workflows to download required SDKs when running CI. 
+
 ## [0.2.0] / 2024-12-03
 ### 🚀 New features
 - Added `NonNegativeInteger` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
@@ -60,6 +107,8 @@ which is now redundant
 ## [0.1.0] / 2023-01-29
 - Initial release
 
-[Unreleased]: https://github.com/candoumbe/Candoumbe.Types/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/candoumbe/Candoumbe.Types/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/candoumbe/Candoumbe.Types/compare/0.2.1...0.3.0
+[0.2.1]: https://github.com/candoumbe/Candoumbe.Types/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/candoumbe/Candoumbe.Types/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/candoumbe/Candoumbe.Types/tree/0.1.0

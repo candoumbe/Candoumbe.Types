@@ -14,13 +14,13 @@ public interface ICanRepresentInfinite<TInterval, TBound>
 {
     /// <summary>
     /// The infinite <typeparamref name="TBound"/> interval per <typeparamref name="TInterval"/>'s definition.
-    /// Such interval overlaps any <typeparamref name="TBound"/> value and <typeparamref name="TInterval"/>.
+    /// Such an interval overlaps any <typeparamref name="TBound"/> value and <typeparamref name="TInterval"/>.
     /// </summary>
     static TInterval Infinite { get; }
 
     /// <summary>
     /// Checks if the current instance is infinite.
     /// </summary>
-    /// <returns></returns>
+    /// <returns><see langword="true"/> if the current <typeparamref name="TInterval"/> overlaps with any other <typeparamref name="TInterval"/> and <see langword="false"/> otherwise.</returns>
     bool IsInfinite();
 }

@@ -5,11 +5,16 @@ using Candoumbe.Pipelines.Components;
 using Candoumbe.Pipelines.Components.GitHub;
 using Candoumbe.Pipelines.Components.NuGet;
 using Candoumbe.Pipelines.Components.Workflows;
+using Candoumbe.Pipelines.Tools;
 using Nuke.Common;
 using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
+using Nuke.Common.Tooling;
+using Nuke.Common.Tools.Codecov;
+using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitHub;
+using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions("integration", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
@@ -194,10 +199,30 @@ public class Pipelines : EnhancedNukeBuild,
     ///<inheritdoc/>
     IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests");
 
+
+    /// <summary>
+    /// Architectural test projects
+    /// </summary>
+    public IEnumerable<Project> ArchitecturalTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.ArchitecturalTests");
+
+    public Target ArchitecturalTests => _ => _.TryTriggeredBy<IUnitTest>()
+                                            .TryBefore<IReportUnitTestCoverage>()
+                                            .TryBefore<IReportIntegrationTestCoverage>()
+                                            .Description("Runs architectural tests")
+                                            .Executes(() =>
+
+                                                          DotNetTest(s => s.SetConfiguration(Configuration.Debug)
+                                                                         .CombineWith(ArchitecturalTestsProjects,
+                                                                                      (setting, project) => setting.SetProjectFile(project)
+                                                                                          .CombineWith(project.GetTargetFrameworks(),
+                                                                                                       (x, framework) => x.SetFramework(framework)))
+                                                                    )
+                                                     );
+
     ///<inheritdoc/>
     IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects =>
     [
-        .. Projects.Select(projectName => new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
+        .. s_projects.Select(projectName => new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
                                          this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests"),
                                          this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
     ];
@@ -232,10 +257,26 @@ public class Pipelines : EnhancedNukeBuild,
     bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;
 
     ///<inheritdoc/>
+    Configure<CodecovSettings> IReportUnitTestCoverage.CodecovSettings => _ => _.SetFramework("netcoreapp3.1");
+
+    /// <inheritdoc />
+    Configure<StrykerSettings> IMutationTest.StrykerArgumentsSettings => options => options
+                                                                             .When(_ => IsLocalBuild, settings => settings.SetReporters(StrykerReporter.Html));
+
+    protected override void OnBuildCreated()
+    {
+        if (IsServerBuild)
+        {
+            Environment.SetEnvironmentVariable("DOTNET_ROLL_FORWARD", "LatestMajor");
+        }
+    }
+
+    ///<inheritdoc/>
     IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
 
-    private static readonly string[] Projects = [
-        "Candoumbe.Types",
+    private static readonly string[] s_projects = [
+        "Candoumbe.Types.Core",
+        "Candoumbe.Types.Strings",
         "Candoumbe.Types.Calendar",
         "Candoumbe.Types.Numerics"
     ];

@@ -15,7 +15,7 @@ namespace Candoumbe.Types.Strings;
 /// <remarks>
 /// This implementation is specifically designed to not allow appending <see cref="StringSegment.Empty"/> values.
 /// </remarks>
-public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
+public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquatable<StringSegmentLinkedList>
 {
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
@@ -25,26 +25,19 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/> that is empty.
     /// </summary>
-    public StringSegmentLinkedList()
+    public StringSegmentLinkedList() : this(ReadOnlySpan<char>.Empty)
     {
-        _head = EmptyNode;
-        Count = 0;
     }
 
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/>.
     /// </summary>
-    /// <param name="head">the value of the head</param>
-    /// <param name="others">Additional <see cref="StringSegment"/>s to append to the list</param>
-    public StringSegmentLinkedList(StringSegment head, params StringSegment[] others) : this()
+    /// <param name="head">The value of the head</param>
+    public StringSegmentLinkedList(ReadOnlySpan<char> head)
     {
-        _head = new StringSegmentNode(head);
-        Count = 1;
-
-        foreach (StringSegment next in others)
-        {
-            Append(next);
-        }
+        (_head, Count) = head.IsEmpty
+                             ? (EmptyNode, 1)
+                             : (new StringSegmentNode(head), 1);
     }
 
     /// <summary>
@@ -54,7 +47,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <param name="others">Additional elements to append to the list.</param>
     public StringSegmentLinkedList(ReadOnlySpan<char> head, params ReadOnlySpan<StringSegment> others)
     {
-        _head = new StringSegmentNode(head.ToArray());
+        _head = new StringSegmentNode(head);
         Count = 1;
 
         foreach (ReadOnlySpan<char> next in others)
@@ -72,7 +65,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     {
         if (value is { Length: > 0 })
         {
-            StringSegmentNode newNode = new(value.ToArray());
+            StringSegmentNode newNode = new(value);
             AppendInternal(newNode);
         }
 
@@ -106,8 +99,8 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <summary>
     /// Inserts a new link containing <paramref name="value"/> at the given <paramref name="index"/>.
     /// </summary>
-    /// <param name="index">0-based index where the new node will be inserted</param>
-    /// <param name="value">The value of the node to inserts</param>
+    /// <param name="index">0-based index where <paramref name="value"/> will be inserted</param>
+    /// <param name="value">The value of the node to insert.</param>
     /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0. or &gt; <see cref="Count"/>.</exception>
     public void InsertAt(int index, ReadOnlySpan<char> value)
     {
@@ -245,7 +238,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <param name="newChar"><see langword="character"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
-    /// This method does its best to never allocated.
+    /// This method does its best to never allocate.
     /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
     /// the current instance.
     /// </remarks>
@@ -271,11 +264,12 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <param name="replacement"><see langword="string"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
-    /// This method does its best to never allocated.
+    /// This method does its best to never allocate.
     /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
     /// the current instance.
     /// </remarks>
-    public StringSegmentLinkedList Replace(char oldChar, ReadOnlySpan<char> replacement) => Replace(chr => chr == oldChar, replacement);
+    public StringSegmentLinkedList Replace(char oldChar, ReadOnlySpan<char> replacement)
+        => Replace(chr => chr == oldChar, replacement);
 
     /// <summary>
     /// Replaces all <see langword="char"/>s that matches <paramref name="predicate"/>
@@ -285,20 +279,21 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <param name="replacement">The value that will be used to replace <see langword="char"/>s that matches <paramref name="predicate"/>.</param>
     /// <returns>
     /// The <see cref="StringSegmentLinkedList"/> where each <see langword="char"/> that matches <paramref name="predicate"/>
-    /// has been replaced with <paramref name="predicate"/>.
+    /// has been replaced with <paramref name="replacement"/>.
     /// </returns>
     public StringSegmentLinkedList Replace(Func<char, bool> predicate, ReadOnlySpan<char> replacement)
     {
         StringSegmentLinkedList replacementList = [];
         StringSegmentNode current = _head;
+        ReadOnlyMemory<char> replacementMemory = replacement.ToArray();
 
         while (current is not null)
         {
             int indexOfOldChar = current.Value.FirstOccurrence(predicate);
+            IEnumerable<int> occurrences = current.Value.Occurrences(predicate);
 
             if (indexOfOldChar >= 0)
             {
-                IEnumerable<int> occurrences = current.Value.Occurrences(predicate);
                 ReadOnlySpan<char> valueToKeep;
                 if (indexOfOldChar > 0)
                 {
@@ -311,6 +306,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                 int index = indexOfOldChar + 1;
                 foreach (int occurrence in occurrences.Skip(1))
                 {
+                    //replacementList = replacementList.Append(replacementMemory.Span);
                     if (index < occurrence)
                     {
                         valueToKeep = current.Value.Span.Slice(index, occurrence - index);
@@ -324,7 +320,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                 }
 
                 // we did all substitutions, but we did not reach the end of the original input
-                // => copy all remaining original chars starting at index position  
+                // => copy all remaining original chars starting at index position
                 if (index < current.Value.Length)
                 {
                     replacementList = replacementList.Append(current.Value[index..].Span);
@@ -342,15 +338,28 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     }
 
     /// <summary>
-    /// Replaces characters that matches <paramref name="predicate"/>.
+    /// Replaces all <see langword="char"/>s that matches <paramref name="predicate"/>
+    /// with a value from <paramref name="replacements"/>.
     /// </summary>
-    /// <param name="predicate">The predicate to select characters to replace.</param>
-    /// <param name="substitutions">A dictionary mapping characters with their replacement value.</param>
-    /// <returns>A new instance where all characters which match <paramref name="predicate"/> were replaced.</returns>
-    /// <remarks>
-    /// This method will simply remove any character that matches <paramref name="predicate"/> but for which no suitable mapping was found in <paramref name="substitutions"/>.
-    /// </remarks>
-    public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> substitutions)
+    /// <param name="predicate">The predicate used to test which <see langword="char"/> to replace</param>
+    /// <param name="replacements">The value that will be used to replace <see langword="char"/>s that matches <paramref name="predicate"/>.</param>
+    /// <returns>
+    /// The <see cref="StringSegmentLinkedList"/> where each <see langword="char"/> that matches <paramref name="predicate"/>
+    /// has been replaced with a replacement value from <paramref name="replacements"/>.
+    /// </returns>
+    /// <example>
+    /// <code>
+    /// var originalList = new StringSegmentLinkedList(/* initialization */);
+    /// var replacements = new Dictionary&lt;char, ReadOnlyMemory&lt;char&gt;&gt;
+    /// {
+    ///     { 'a', "alpha".AsMemory() },
+    ///     { 'b', "beta".AsMemory() }
+    /// };
+    /// var list = linkedList.Replace(c => c == 'a' || c == 'b', replacements);
+    /// // `list` will have 'a' replaced with "alpha" and 'b' with "beta"
+    /// </code>
+    /// </example>
+public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> replacements)
     {
         StringSegmentLinkedList replacementList = [];
         StringSegmentNode current = _head;
@@ -362,36 +371,50 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
             if (indexOfOldChar >= 0)
             {
-                replacementList = replacementList.Append(current.Value.Span[..indexOfOldChar]);
-
-                char candidate = current.Value.Span[indexOfOldChar];
-                if (!substitutions.TryGetValue(candidate, out ReadOnlyMemory<char> replacement))
+                if (!replacements.TryGetValue(current.Value.Span[indexOfOldChar], out ReadOnlyMemory<char> replacement))
                 {
                     replacement = ReadOnlyMemory<char>.Empty;
                 }
 
-                replacementList = replacementList.Append(replacement.Span);
+                ReadOnlyMemory<char> value;
+                if (indexOfOldChar is 0)
+                {
+                    value = replacement;
+                    replacementList = replacementList.Append(value.Span);
+                }
+                else
+                {
+                    value = current.Value[..indexOfOldChar];
+                    replacementList = replacementList.Append(value.Span).Append(replacement.Span);
+                }
 
                 int index = indexOfOldChar;
                 foreach (int occurrence in occurrences.Skip(1))
                 {
-                    replacementList = replacementList.Append(replacement.Span);
-                    if (index < occurrence)
+                    if (!replacements.TryGetValue(current.Value.Span[occurrence], out replacement))
                     {
-                        ReadOnlyMemory<char> valueToKeep = current.Value.Slice(index, occurrence);
-                        replacementList = replacementList.Append(valueToKeep.Span);
+                        replacement = ReadOnlyMemory<char>.Empty;
                     }
 
-                    // move the cursor right after the current occurrence
-                    indexOfOldChar = occurrence;
+                    if (index < occurrence)
+                    {
+                        ReadOnlyMemory<char> valueToKeep = current.Value[( index + 1 ) .. occurrence];
+                        replacementList = replacementList.Append(valueToKeep.Span)
+                            .Append(replacement.Span);
+                    }
+                    else
+                    {
+                        replacementList = replacementList.Append(replacement.Span);
+                    }
+
+                    index = occurrence;
                 }
 
                 // we did all substitutions, but we did not reach the end of the original input
-                // => copy all remaining original chars starting at index position  
-                if (indexOfOldChar < current.Value.Length)
+                // => copy all remaining original chars starting at the index position
+                if (index < current.Value.Length)
                 {
-                    index = indexOfOldChar + 1;
-                    replacementList = replacementList.Append(current.Value[index..].Span);
+                    replacementList = replacementList.Append(current.Value[( index + 1 )..].Span);
                 }
             }
             else
@@ -402,9 +425,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
             current = current.Next;
         }
 
-        _head = replacementList._head;
-
-        return this;
+        return replacementList;
     }
 
     /// <summary>
@@ -414,7 +435,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <param name="newValue"><see langword="string"/> that will replace <paramref name="oldValue"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
-    /// This method does its best to never allocated.
+    /// This method does its best to never allocate.
     /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
     /// the initial instance had.
     /// </remarks>
@@ -452,7 +473,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                     replacementList = mismatchFound switch
                     {
                         // a mismatch was found: we need to rewind and copy from the previous index up to the current one
-                        true => replacementList.Append(subject[( previousIndex + 1 )..index]),
+                        true => replacementList.Append(subject[(previousIndex + 1)..index]),
                         // we looped through the whole span and, up to here, everything matches => we just append newValue
                         _ => replacementList.Append(newValue)
                     };
@@ -471,7 +492,9 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
             current = current.Next;
         }
 
-        return replacementList;
+        _head = replacementList._head;
+
+        return this;
     }
 
     /// <summary>
@@ -506,7 +529,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     }
 
     /// <summary>
-    /// Builds a new <see cref="StringSegmentLinkedList"/> which is 
+    /// Builds a new <see cref="StringSegmentLinkedList"/> which is
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
@@ -551,6 +574,22 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// <inheritdoc />
     public override bool Equals(object obj) => obj is StringSegmentLinkedList other && Equals(other, CharComparer.InvariantCultureIgnoreCase);
 
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        HashCode hashCode = new();
+
+        StringSegmentNode current = _head;
+
+        while (current is not null)
+        {
+            hashCode.Add(current.Value.Span.GetHashCode());
+            current = current.Next;
+        }
+
+        return hashCode.ToHashCode();
+    }
+
     /// <summary>
     /// Determines whether the current <see cref="StringSegmentLinkedList"/> is equal to another <see cref="StringSegmentLinkedList"/>.
     /// </summary>
@@ -572,88 +611,123 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
             using IEnumerator<ReadOnlyMemory<char>> currentEnumerator = GetEnumerator();
             using IEnumerator<ReadOnlyMemory<char>> otherEnumerator = other.GetEnumerator();
 
-            if (!currentEnumerator.MoveNext() && !otherEnumerator.MoveNext())
+            bool currentHasNext = currentEnumerator.MoveNext();
+            bool otherHasNext = otherEnumerator.MoveNext();
+
+            if (!currentHasNext && !otherHasNext)
             {
                 equals = true;
             }
             else
             {
-                ReadOnlyMemory<char> current = currentEnumerator.Current;
-                ReadOnlyMemory<char> otherCurrent = otherEnumerator.Current;
+                bool mismatchFound = false;
+                Func<char, char, bool> predicateComparer = comparer switch
+                {
+                    null => (x, y) => Equals(x, y),
+                    _    => comparer.Equals,
+                };
 
-                if (current.Length == otherCurrent.Length)
+                bool hasReachedCurrentEnd = false;
+                bool hasReachedOtherEnd = false;
+
+                do
                 {
-                    equals = current.StartsWith(otherCurrent) && otherCurrent.StartsWith(current);
-                }
-                else if (current.Length < otherCurrent.Length && otherCurrent.StartsWith(current))
-                {
-                    bool mismatchFound = false;
-                    int index = current.Length;
-                    Func<char, char, bool> predicate = comparer switch
+                    ReadOnlyMemory<char> current = currentEnumerator.Current;
+                    ReadOnlyMemory<char> otherCurrent = otherEnumerator.Current;
+                    if (current.Length == otherCurrent.Length)
                     {
-                        null => (x, y) => Equals(x, y),
-                        _    => comparer.Equals,
-                    };
-                    while (currentEnumerator.MoveNext() && !mismatchFound)
+                        mismatchFound = !(current.StartsWith(otherCurrent, comparer) || otherCurrent.StartsWith(current, comparer));
+                    }
+                    else if (current.Length < otherCurrent.Length && otherCurrent.StartsWith(current, comparer))
                     {
-                        current = currentEnumerator.Current;
-                        int j = 0;
-                        while (j < current.Length && index < otherCurrent.Length && !mismatchFound)
+                        if (!currentEnumerator.MoveNext())
                         {
-                            mismatchFound = !current.Slice(j, 1).StartsWith(otherCurrent.Slice(index, 1), comparer);
-                            j++;
-                            index++;
-
-                            // No mismatch found, but we read current to the end => grab the next node (if any) and starts again.
-                            if (!mismatchFound && j == current.Length && currentEnumerator.MoveNext())
+                            mismatchFound = true;
+                        }
+                        else
+                        {
+                            int index = current.Length;
+                            current = currentEnumerator.Current;
+                            int j = 0;
+                            do
                             {
-                                current = currentEnumerator.Current;
-                                j = 0;
-                            }
+                                while (j < current.Length && index < otherCurrent.Length && !mismatchFound)
+                                {
+                                    char currentChar = current.Span[j];
+                                    char otherChar = otherCurrent.Span[index];
+                                    mismatchFound = !predicateComparer(currentChar, otherChar);
+                                    j++;
+                                    index++;
 
-                            // No mismatch found, but we read otherCurrent to the end => grab the next node (if any) and starts again.
-                            if (!mismatchFound && index == otherCurrent.Length && otherEnumerator.MoveNext())
-                            {
-                                otherCurrent = otherEnumerator.Current;
-                                index = 0;
-                            }
+                                    // No mismatch found, but we read current to the end => grab the next node (if any) and starts again.
+                                    if (!mismatchFound && j == current.Length && currentEnumerator.MoveNext())
+                                    {
+                                        current = currentEnumerator.Current;
+                                        j = 0;
+                                    }
+
+                                    // No mismatch found, but we read otherCurrent to the end => grab the next node (if any) and starts again.
+                                    if (!mismatchFound && index == otherCurrent.Length && otherEnumerator.MoveNext())
+                                    {
+                                        otherCurrent = otherEnumerator.Current;
+                                        index = 0;
+                                    }
+                                }
+                            } while (j < current.Length && index < otherCurrent.Length && !mismatchFound);
                         }
                     }
-
-                    equals = !mismatchFound;
-                }
-                else
-                {
-                    bool mismatchFound = false;
-                    int index = otherCurrent.Length;
-                    while (otherEnumerator.MoveNext() && !mismatchFound)
+                    else if (otherCurrent.Length < current.Length && current.StartsWith(otherCurrent, comparer))
                     {
-                        otherCurrent = otherEnumerator.Current;
-                        int j = 0;
-                        while (j < otherCurrent.Length && index < current.Length && !mismatchFound)
+                        if (!otherEnumerator.MoveNext())
                         {
-                            mismatchFound = !current.Slice(index, 1).StartsWith(otherCurrent.Slice(j, 1), comparer);
-                            j++;
-                            index++;
-
-                            // No mismatch found, and we read current to the end => grab the next node (if any) and starts again.
-                            if (!mismatchFound && index == current.Length && currentEnumerator.MoveNext())
+                            mismatchFound = true;
+                        }
+                        else
+                        {
+                            int index = otherCurrent.Length;
+                            otherCurrent = otherEnumerator.Current;
+                            int j = 0;
+                            do
                             {
-                                current = currentEnumerator.Current;
-                                index = 0;
-                            }
+                                while (j < otherCurrent.Length && index < current.Length && !mismatchFound)
+                                {
+                                    char currentChar = current.Span[index];
+                                    char otherChar = otherCurrent.Span[j];
+                                    mismatchFound = !predicateComparer(currentChar, otherChar);
+                                    j++;
+                                    index++;
 
-                            // No mismatch found, and we read otherCurrent to the end => grab the next node (if any) and starts again.
-                            if (!mismatchFound && j == otherCurrent.Length && otherEnumerator.MoveNext())
-                            {
-                                otherCurrent = otherEnumerator.Current;
-                                j = 0;
-                            }
+                                    // No mismatch found, but we read current to the end => grab the next node (if any) and starts again.
+                                    if (!mismatchFound && j == otherCurrent.Length && otherEnumerator.MoveNext())
+                                    {
+                                        otherCurrent = otherEnumerator.Current;
+                                        j = 0;
+                                    }
+
+                                    // No mismatch found, but we read otherCurrent to the end => grab the next node (if any) and starts again.
+                                    if (!mismatchFound && index == current.Length && currentEnumerator.MoveNext())
+                                    {
+                                        current = currentEnumerator.Current;
+                                        index = 0;
+                                    }
+                                }
+                            } while (j < otherCurrent.Length && index < current.Length && !mismatchFound);
                         }
                     }
+                    else
+                    {
+                        mismatchFound = true;
+                    }
 
-                    equals = !mismatchFound;
-                }
+                    if (!mismatchFound)
+                    {
+                        hasReachedCurrentEnd = !currentEnumerator.MoveNext();
+                        hasReachedOtherEnd = !otherEnumerator.MoveNext();
+                        equals = hasReachedCurrentEnd && hasReachedOtherEnd;
+                    }
+
+                    //equals = !mismatchFound && hasReachedCurrentEnd && hasReachedOtherEnd;
+                } while (!mismatchFound && (!hasReachedCurrentEnd || !hasReachedOtherEnd));
             }
         }
 
@@ -674,7 +748,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
     /// Checks if the current instance contains <paramref name="search"/>.
     /// </summary>
     /// <param name="search">The value to search in the current instance.</param>
-    /// <param name="comparer">The comparer to use when comparing <see</param>
+    /// <param name="comparer">The comparer to use when comparing each <see cref="char"/> from <paramref name="search"/>.</param>
     /// <returns><see langword="true"/> if the current instance contains the specified <paramref name="search"/> and <see langword="false"/> otherwise.</returns>
     public bool Contains(ReadOnlySpan<char> search, IEqualityComparer<char> comparer)
     {
@@ -694,7 +768,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
                 for (int i = 0; i < valueSpan.Length && !found; i++)
                 {
-                    if (searchIndex < search.Length && comparer.Equals(valueSpan[i],search[searchIndex]))
+                    if (searchIndex < search.Length && comparer.Equals(valueSpan[i], search[searchIndex]))
                     {
                         searchIndex++;
                     }
@@ -707,10 +781,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
                         }
                     }
 
-                    if (searchIndex == search.Length)
-                    {
-                        found = true;
-                    }
+                    found = searchIndex == search.Length;
                 }
 
                 currentNode = currentNode.Next;
@@ -719,4 +790,11 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>
 
         return found;
     }
+
+    ///<inheritdoc/>
+    public bool Equals(StringSegmentLinkedList other) => other switch
+    {
+        null => false,
+        _    => ReferenceEquals(this, other) || Equals(other, null)
+    };
 }
