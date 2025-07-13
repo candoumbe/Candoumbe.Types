@@ -7,18 +7,25 @@ using Candoumbe.Pipelines.Components.NuGet;
 using Candoumbe.Pipelines.Components.Workflows;
 using Candoumbe.Pipelines.Tools;
 using Nuke.Common;
-using Nuke.Common.CI;
 using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.Codecov;
+using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitHub;
+using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
-[GitHubActions("integration", GitHubActionsImage.UbuntuLatest,
+[GitHubActions("integration", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
-    InvokedTargets = [nameof(IUnitTest.Compile), nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Pack), nameof(IPushNugetPackages.Publish)],
+    InvokedTargets =
+    [
+        nameof(ICompile.Compile),
+        nameof(IUnitTest.UnitTests),
+        nameof(IPushNugetPackages.Pack),
+        nameof(IPushNugetPackages.Publish)
+    ],
     CacheKeyFiles =
     [
         "src/**/*.csproj",
@@ -42,12 +49,22 @@ using Nuke.Common.Tools.GitHub;
         "LICENSE"
     ]
 )]
-[GitHubActions("nightly", GitHubActionsImage.UbuntuLatest,
+[GitHubActions("nightly", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
     OnCronSchedule = "0 0 * * *",
-    InvokedTargets = [nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
-    OnPushBranches = [IHaveDevelopBranch.DevelopBranchName],
+    OnPushBranches = [IGitFlow.DevelopBranchName],
+    OnPushExcludePaths =
+    [
+        "docs/*",
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE"
+    ],
+    InvokedTargets = [
+        nameof(IMutationTest.MutationTests),
+        nameof(IPushNugetPackages.Pack)
+    ],
     CacheKeyFiles =
     [
         "src/**/*.csproj",
@@ -62,16 +79,34 @@ using Nuke.Common.Tools.GitHub;
         nameof(IReportCoverage.CodecovToken),
         nameof(IMutationTest.StrykerDashboardApiKey)
     ],
-    PublishArtifacts = true,
-    OnPullRequestExcludePaths =
-    [
-        "docs/*",
-        "README.md",
-        "CHANGELOG.md",
-        "LICENSE"
-    ]
+    PublishArtifacts = true
 )]
-[GitHubActions("delivery", GitHubActionsImage.UbuntuLatest,
+[GitHubActions("nightly-manual", GitHubActionsImage.Ubuntu2204,
+    AutoGenerate = false,
+    FetchDepth = 0,
+    On = [GitHubActionsTrigger.WorkflowDispatch],
+    InvokedTargets = [
+        nameof(IMutationTest.MutationTests),
+        nameof(IPushNugetPackages.Pack)
+    ],
+    CacheKeyFiles =
+    [
+        "src/**/*.csproj",
+        "test/**/*.csproj",
+        "stryker-config.json",
+        "test/**/*/xunit.runner.json"
+    ],
+    EnableGitHubToken = true,
+    ImportSecrets =
+    [
+        nameof(NugetApiKey),
+        nameof(IReportCoverage.CodecovToken),
+        nameof(IMutationTest.StrykerDashboardApiKey)
+    ],
+    PublishArtifacts = true
+)]
+
+[GitHubActions("delivery", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
     InvokedTargets = [nameof(IPushNugetPackages.Pack), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease)],
@@ -98,8 +133,8 @@ using Nuke.Common.Tools.GitHub;
         "LICENSE"
     ]
 )]
-[GitHubActions("perf-manual", GitHubActionsImage.UbuntuLatest,
-    AutoGenerate = true,
+[GitHubActions("perf-manual", GitHubActionsImage.Ubuntu2204,
+    AutoGenerate = false,
     FetchDepth = 0,
     InvokedTargets = [nameof(IBenchmark.Benchmarks)],
     CacheKeyFiles =
@@ -124,17 +159,13 @@ public class Pipelines : EnhancedNukeBuild,
     IUnitTest,
     IBenchmark,
     IHaveGitVersion,
-    IReportUnitTestCoverage,
     IMutationTest,
+    IReportUnitTestCoverage,
     IPack,
     IPushNugetPackages,
     ICreateGithubRelease,
     IGitFlowWithPullRequest
 {
-
-    [CI]
-    public GitHubActions GitHubActions;
-
     [Required]
     [Solution]
     public Solution Solution;
@@ -168,12 +199,32 @@ public class Pipelines : EnhancedNukeBuild,
     ///<inheritdoc/>
     IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests");
 
+
+    /// <summary>
+    /// Architectural test projects
+    /// </summary>
+    public IEnumerable<Project> ArchitecturalTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.ArchitecturalTests");
+
+    public Target ArchitecturalTests => _ => _.TryTriggeredBy<IUnitTest>()
+                                            .TryBefore<IReportUnitTestCoverage>()
+                                            .TryBefore<IReportIntegrationTestCoverage>()
+                                            .Description("Runs architectural tests")
+                                            .Executes(() =>
+
+                                                          DotNetTest(s => s.SetConfiguration(Configuration.Debug)
+                                                                         .CombineWith(ArchitecturalTestsProjects,
+                                                                                      (setting, project) => setting.SetProjectFile(project)
+                                                                                          .CombineWith(project.GetTargetFrameworks(),
+                                                                                                       (x, framework) => x.SetFramework(framework)))
+                                                                    )
+                                                     );
+
     ///<inheritdoc/>
     IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects =>
     [
-        new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, "Candoumbe.Types", StringComparison.InvariantCultureIgnoreCase)),
-                                         this.Get<IHaveSolution>().Solution.GetAllProjects("*UnitTests"),
-                                         this.Get<IHaveTestDirectory>().TestDirectory / "stryker-config.json")
+        .. s_projects.Select(projectName => new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
+                                         this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests"),
+                                         this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
     ];
 
     ///<inheritdoc/>
@@ -190,8 +241,7 @@ public class Pipelines : EnhancedNukeBuild,
         new GitHubPushNugetConfiguration(
             githubToken: this.Get<ICreateGithubRelease>()?.GitHubToken,
             source: new Uri($"https://nuget.pkg.github.com/{this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner()}/index.json"),
-            canBeUsed: () => this is ICreateGithubRelease createRelease && createRelease.GitHubToken is not null
-        )
+            canBeUsed: () => this is ICreateGithubRelease { GitHubToken: not null } )
     ];
 
     public Target Tests => _ => _
@@ -223,4 +273,11 @@ public class Pipelines : EnhancedNukeBuild,
 
     ///<inheritdoc/>
     IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
+
+    private static readonly string[] s_projects = [
+        "Candoumbe.Types.Core",
+        "Candoumbe.Types.Strings",
+        "Candoumbe.Types.Calendar",
+        "Candoumbe.Types.Numerics"
+    ];
 }

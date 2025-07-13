@@ -477,7 +477,10 @@ $RECYCLE.BIN/
 *.lnk
 # Nuke temporary directory
 /.nuke/temp
-/.idea/.idea.Candoumbe.Types/.idea/developer-tools.xml
-
-# Qodo
 .qodo
+
+# Stryker file reports
+*/**/stryker-report.json
+
+# Jetbrains Rider settings
+.idea

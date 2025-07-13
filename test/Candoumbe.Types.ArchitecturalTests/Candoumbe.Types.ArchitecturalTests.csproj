@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\tests.props"/>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TngTech.ArchUnitNET.xUnitV3"/>
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit"/>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Candoumbe.Types.Calendar\Candoumbe.Types.Calendar.csproj" />
+    <ProjectReference Include="..\..\src\Candoumbe.Types.Numerics\Candoumbe.Types.Numerics.csproj" />
+    <ProjectReference Include="..\..\src\Candoumbe.Types.Strings\Candoumbe.Types.Strings.csproj" />
+  </ItemGroup>
+
+</Project>
