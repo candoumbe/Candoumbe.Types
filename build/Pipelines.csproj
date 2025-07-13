@@ -18,7 +18,6 @@
     <PackageDownload Include="GitVersion.Tool" Version="[6.0.5]" />
     <PackageDownload Include="CodeCov.Tool" Version="[1.13.0]" />
     <PackageDownload Include="CodecovUploader" Version="[0.8.0]" />
-    <PackageDownload Include="GitVersion.Tool" Version="[5.11.1]" />
     <PackageDownload Include="ReportGenerator" Version="[5.1.13]" />
     <PackageDownload Include="dotnet-stryker" Version="[4.6.0]" />
   </ItemGroup>
