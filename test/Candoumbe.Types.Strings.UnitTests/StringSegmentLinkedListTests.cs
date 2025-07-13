@@ -343,10 +343,10 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     public void Given_an_initial_list_When_appending_another_list_Then_the_resulting_list_should_match_expectation(StringSegmentLinkedList first, StringSegmentLinkedList second, StringSegmentLinkedList expected)
     {
         // Act
-        StringSegmentLinkedList actual = first.Append(second);
+        object actual = first.Append(second);
 
         // Assert
-        actual.Should().BeEquivalentTo([..first, ..second]);
+        actual.Should().Be(expected);
     }
 
     [Fact]

@@ -25,7 +25,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/> that is empty.
     /// </summary>
-    public StringSegmentLinkedList(): this(ReadOnlySpan<char>.Empty)
+    public StringSegmentLinkedList() : this(ReadOnlySpan<char>.Empty)
     {
     }
 
@@ -36,8 +36,8 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     public StringSegmentLinkedList(ReadOnlySpan<char> head)
     {
         (_head, Count) = head.IsEmpty
-                    ? (EmptyNode, 1)
-                    : (new StringSegmentNode(head), 1);
+                             ? (EmptyNode, 1)
+                             : (new StringSegmentNode(head), 1);
     }
 
     /// <summary>
@@ -50,9 +50,9 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
         _head = new StringSegmentNode(head);
         Count = 1;
 
-        foreach (ReadOnlyMemory<char> next in others)
+        foreach (ReadOnlySpan<char> next in others)
         {
-            Append(next.Span);
+            Append(next);
         }
     }
 
@@ -320,7 +320,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                 }
 
                 // we did all substitutions, but we did not reach the end of the original input
-                // => copy all remaining original chars starting at the index position
+                // => copy all remaining original chars starting at index position
                 if (index < current.Value.Length)
                 {
                     replacementList = replacementList.Append(current.Value[index..].Span);
@@ -366,54 +366,43 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
         while (current is not null)
         {
-            int indexOfOldChar = current.Value.FirstOccurrence(predicate);
             IEnumerable<int> occurrences = current.Value.Occurrences(predicate);
+            int index = 0;
+            ReadOnlySpan<char> replacement = [];
 
-            if (indexOfOldChar >= 0)
+            foreach (int occurrence in occurrences)
             {
-                replacementList = replacementList.Append(current.Value.Span[..indexOfOldChar]);
+                char candidate = current.Value.Span[occurrence];
 
-                char candidate = current.Value.Span[indexOfOldChar];
-                if (!replacements.TryGetValue(candidate, out ReadOnlyMemory<char> replacement))
+                if (replacements.TryGetValue(candidate, out ReadOnlyMemory<char> value))
                 {
-                    replacement = ReadOnlyMemory<char>.Empty;
+                    replacement = value.Span;
                 }
 
-                replacementList = replacementList.Append(replacement.Span);
-
-                int index = indexOfOldChar;
-                foreach (int occurrence in occurrences.Skip(1))
+                if (occurrence is 0)
                 {
-                    replacementList = replacementList.Append(replacement.Span);
-                    if (index < occurrence)
-                    {
-                        ReadOnlyMemory<char> valueToKeep = current.Value.Slice(index, occurrence);
-                        replacementList = replacementList.Append(valueToKeep.Span);
-                    }
-
-                    // move the cursor right after the current occurrence
-                    indexOfOldChar = occurrence;
+                    replacementList = replacementList.Append(replacement);
+                }
+                else
+                {
+                    ReadOnlyMemory<char> valueToKeep = current.Value.Slice(index + 1, occurrence - (index + 1));
+                    replacementList = replacementList.Append(valueToKeep.Span);
                 }
 
-                // we did all substitutions, but we did not reach the end of the original input
-                // => copy all remaining original chars starting at index position
-                if (indexOfOldChar < current.Value.Length)
-                {
-                    index = indexOfOldChar + 1;
-                    replacementList = replacementList.Append(current.Value[index..].Span);
-                }
+                index = occurrence;
             }
-            else
+
+            // we did all substitutions, but we did not reach the end of the original input
+            // => copy all remaining original chars starting at the current index position
+            if (index < current.Value.Length)
             {
-                replacementList = replacementList.Append(current.Value.Span);
+                replacementList = replacementList.Append(current.Value[index..].Span);
             }
 
             current = current.Next;
         }
 
-        _head = replacementList._head;
-
-        return this;
+        return replacementList;
     }
 
     /// <summary>
@@ -461,7 +450,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                     replacementList = mismatchFound switch
                     {
                         // a mismatch was found: we need to rewind and copy from the previous index up to the current one
-                        true => replacementList.Append(subject[( previousIndex + 1 )..index]),
+                        true => replacementList.Append(subject[(previousIndex + 1)..index]),
                         // we looped through the whole span and, up to here, everything matches => we just append newValue
                         _ => replacementList.Append(newValue)
                     };
@@ -480,7 +469,9 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
             current = current.Next;
         }
 
-        return replacementList;
+        _head = replacementList._head;
+
+        return this;
     }
 
     /// <summary>
@@ -622,7 +613,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                     ReadOnlyMemory<char> otherCurrent = otherEnumerator.Current;
                     if (current.Length == otherCurrent.Length)
                     {
-                        mismatchFound = !( current.StartsWith(otherCurrent, comparer) || otherCurrent.StartsWith(current, comparer) );
+                        mismatchFound = !(current.StartsWith(otherCurrent, comparer) || otherCurrent.StartsWith(current, comparer));
                     }
                     else if (current.Length < otherCurrent.Length && otherCurrent.StartsWith(current, comparer))
                     {
@@ -651,6 +642,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                                         current = currentEnumerator.Current;
                                         j = 0;
                                     }
+
                                     // No mismatch found, but we read otherCurrent to the end => grab the next node (if any) and starts again.
                                     if (!mismatchFound && index == otherCurrent.Length && otherEnumerator.MoveNext())
                                     {
@@ -658,7 +650,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                                         index = 0;
                                     }
                                 }
-                            } while (j < current.Length  && index < otherCurrent.Length && !mismatchFound);
+                            } while (j < current.Length && index < otherCurrent.Length && !mismatchFound);
                         }
                     }
                     else if (otherCurrent.Length < current.Length && current.StartsWith(otherCurrent, comparer))
@@ -688,6 +680,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                                         otherCurrent = otherEnumerator.Current;
                                         j = 0;
                                     }
+
                                     // No mismatch found, but we read otherCurrent to the end => grab the next node (if any) and starts again.
                                     if (!mismatchFound && index == current.Length && currentEnumerator.MoveNext())
                                     {
@@ -711,7 +704,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                     }
 
                     //equals = !mismatchFound && hasReachedCurrentEnd && hasReachedOtherEnd;
-                } while (!mismatchFound && ( !hasReachedCurrentEnd || !hasReachedOtherEnd ));
+                } while (!mismatchFound && (!hasReachedCurrentEnd || !hasReachedOtherEnd));
             }
         }
 
@@ -752,7 +745,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
                 for (int i = 0; i < valueSpan.Length && !found; i++)
                 {
-                    if (searchIndex < search.Length && comparer.Equals(valueSpan[i],search[searchIndex]))
+                    if (searchIndex < search.Length && comparer.Equals(valueSpan[i], search[searchIndex]))
                     {
                         searchIndex++;
                     }
