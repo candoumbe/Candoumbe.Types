@@ -14,11 +14,4 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-<<<<<<<< HEAD:test/Candoumbe.Types.Numerics.UnitTests/Candoumbe.Types.Numerics.UnitTests.csproj
-========
-
-  <ItemGroup>
-    <Folder Include="Numerics\" />
-  </ItemGroup>
->>>>>>>> 75ab2c1 (chore!: move types from `Candoumbe.Types.Numerics` into a dedicated `Candoumbe.Types.Numerics` project.):test/Candoumbe.Types.UnitTests/Candoumbe.Types.UnitTests.csproj
 </Project>
