@@ -55,7 +55,6 @@ public class NumericsArchitecture
     [Fact]
     public void Classes_that_are_abstract_should_have_name_ending_with_Base()
     {
-        const string baseD = @"Base";
         IArchRule abstractClassesShouldHaveNameEndingWithBaseRule = Classes()
                 .That()
                 .Are(NumberLayer)
