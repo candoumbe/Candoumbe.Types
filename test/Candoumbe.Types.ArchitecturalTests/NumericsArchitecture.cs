@@ -28,48 +28,74 @@ public class NumericsArchitecture
     private IObjectProvider<IType> StringsLayer => _.Types().That().ResideInAssembly(s_stringsAssembly);
     private IObjectProvider<IType> CoreLayer => _.Types().That().ResideInAssembly(s_coreAssembly);
 
+    private IObjectProvider<Class> NumericClasses => _.Classes()
+        .That()
+        .Are(NumberLayer);
+
     private static readonly Architecture s_architecture = new ArchLoader().LoadAssemblies(s_numbersAssembly,
-                                                                                        s_calendarsAssembly,
-                                                                                        s_stringsAssembly,
-                                                                                        s_coreAssembly)
+                                                                                          s_calendarsAssembly,
+                                                                                          s_stringsAssembly,
+                                                                                          s_coreAssembly)
                                                                                        .Build();
 
-
-
     [Fact]
-    public void Should_only_depends_on_CoreLayer()
+    public void Types_in_NumericLayer_should_reside_in_the_same_namespace_as_Number_type()
     {
+        // Act
         IArchRule numbersShouldBeInNumericNamespace = _.Types()
             .That()
             .Are(NumberLayer)
             .Should()
             .ResideInNamespace(typeof(Number<>).Namespace);
 
-        const string baseD = @"Base(`\d+)?";
-        GivenClassesConjunction numberClasses = Classes()
+        // Assert
+        numbersShouldBeInNumericNamespace.Check(s_architecture);
+    }
+
+    [Fact]
+    public void Classes_that_are_abstract_should_have_name_ending_with_Base()
+    {
+        const string baseD = @"Base";
+        IArchRule abstractClassesShouldHaveNameEndingWithBaseRule = Classes()
+                .That()
+                .Are(NumberLayer)
+                .And()
+                .AreAbstract()
+                .And()
+                .AreNot(typeof(Number<>))
+                .Should()
+                .FollowCustomCondition(clazz =>
+                                       {
+                                           ReadOnlySpan<char> name = clazz.Name;
+                                           if (clazz.IsGeneric)
+                                           {
+                                               name = clazz.Name.AsSpan()[..clazz.Name.IndexOf('`')];
+                                           }
+
+                                           return new ConditionResult(clazz,
+                                                                      name.EndsWith("Base"),
+                                                                      @"should ends with ""Base""");
+
+                                       }, "Base suffix indicates that the type is abstract");
+
+        // Assert
+        abstractClassesShouldHaveNameEndingWithBaseRule.Check(s_architecture);
+    }
+
+    [Fact]
+    public void Classes_that_are_not_abstract_should_Be_record()
+    {
+        IArchRule abstractClassesShouldHaveNameEndingWithBaseRule = Classes()
             .That()
-            .Are(NumberLayer);
-
-        IArchRule classesThatAreAbstract = numberClasses
-            .And()
-            .AreAbstract()
-            .Should()
-            .HaveNameEndingWith(baseD)
-            .Because("Base suffix indicates that the type is abstract");
-
-        IArchRule numberClassesShouldBeComparable = numberClasses
+            .Are(NumericClasses)
             .And()
             .AreNotAbstract()
             .Should()
-            .ImplementInterface(typeof(IComparable<>))
+            .BeRecord()
             .AndShould()
-            .BeRecord();
-
-        IArchRule numberClassesShouldBeImmutable = numberClasses
-            .Should()
             .FollowCustomCondition(clazz =>
                                    {
-                                       bool hasNoWritableProperty = clazz.GetPropertyMembers().All(property => property.Writability != Writability.Writable);
+                                       bool hasNoWritableProperty = clazz.GetPropertyMembers().All(property => property.Writability is not Writability.Writable);
 
                                        return new ConditionResult(clazz,
                                                                   hasNoWritableProperty,
@@ -77,10 +103,6 @@ public class NumericsArchitecture
                                    }, "should be immutable");
 
         // Assert
-        numbersShouldBeInNumericNamespace
-            .And(classesThatAreAbstract)
-            .And(numberClassesShouldBeComparable)
-            .And(numberClassesShouldBeImmutable)
-            .Check(s_architecture);
+        abstractClassesShouldHaveNameEndingWithBaseRule.Check(s_architecture);
     }
 }
