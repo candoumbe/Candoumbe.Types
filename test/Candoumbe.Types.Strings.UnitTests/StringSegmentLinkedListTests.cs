@@ -718,7 +718,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 
     [Theory]
     [MemberData(nameof(ReplaceCharByCharWithPredicateAndReplaceFunctionCases))]
-    public void Given_a_StringSegmentLinkedList_When_replacing_a_char_using_a_predicate_Then_the_result_should_match_expectation(StringSegmentLinkedList input, Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> replacement, StringSegmentLinkedList expected)
+    public void Given_a_StringSegmentLinkedList_When_replacing_a_char_using_a_predicate_and_dictionary_of_replacements_Then_the_result_should_match_expectation(StringSegmentLinkedList input, Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> replacement, StringSegmentLinkedList expected)
     {
         // Act
         StringSegmentLinkedList actual = input.Replace(predicate, replacement);

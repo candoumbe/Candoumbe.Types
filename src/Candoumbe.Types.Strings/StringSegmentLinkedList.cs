@@ -359,44 +359,67 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// // `list` will have 'a' replaced with "alpha" and 'b' with "beta"
     /// </code>
     /// </example>
-    public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> replacements)
+public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> replacements)
     {
         StringSegmentLinkedList replacementList = [];
         StringSegmentNode current = _head;
 
         while (current is not null)
         {
+            int indexOfOldChar = current.Value.FirstOccurrence(predicate);
             IEnumerable<int> occurrences = current.Value.Occurrences(predicate);
-            int index = 0;
-            ReadOnlySpan<char> replacement = [];
 
-            foreach (int occurrence in occurrences)
+            if (indexOfOldChar >= 0)
             {
-                char candidate = current.Value.Span[occurrence];
-
-                if (replacements.TryGetValue(candidate, out ReadOnlyMemory<char> value))
+                if (!replacements.TryGetValue(current.Value.Span[indexOfOldChar], out ReadOnlyMemory<char> replacement))
                 {
-                    replacement = value.Span;
+                    replacement = ReadOnlyMemory<char>.Empty;
                 }
 
-                if (occurrence is 0)
+                ReadOnlyMemory<char> value;
+                if (indexOfOldChar is 0)
                 {
-                    replacementList = replacementList.Append(replacement);
+                    value = replacement;
+                    replacementList = replacementList.Append(value.Span);
                 }
                 else
                 {
-                    ReadOnlyMemory<char> valueToKeep = current.Value.Slice(index + 1, occurrence - (index + 1));
-                    replacementList = replacementList.Append(valueToKeep.Span);
+                    value = current.Value[..indexOfOldChar];
+                    replacementList = replacementList.Append(value.Span).Append(replacement.Span);
                 }
 
-                index = occurrence;
-            }
+                int index = indexOfOldChar;
+                foreach (int occurrence in occurrences.Skip(1))
+                {
+                    if (!replacements.TryGetValue(current.Value.Span[occurrence], out replacement))
+                    {
+                        replacement = ReadOnlyMemory<char>.Empty;
+                    }
 
-            // we did all substitutions, but we did not reach the end of the original input
-            // => copy all remaining original chars starting at the current index position
-            if (index < current.Value.Length)
+                    if (index < occurrence)
+                    {
+                        ReadOnlyMemory<char> valueToKeep = current.Value[( index + 1 ) .. occurrence];
+                        replacementList = replacementList.Append(valueToKeep.Span)
+                            .Append(replacement.Span);
+                    }
+                    else
+                    {
+                        replacementList = replacementList.Append(replacement.Span);
+                    }
+
+                    index = occurrence;
+                }
+
+                // we did all substitutions, but we did not reach the end of the original input
+                // => copy all remaining original chars starting at the index position
+                if (index < current.Value.Length)
+                {
+                    replacementList = replacementList.Append(current.Value[( index + 1 )..].Span);
+                }
+            }
+            else
             {
-                replacementList = replacementList.Append(current.Value[index..].Span);
+                replacementList = replacementList.Append(current.Value.Span);
             }
 
             current = current.Next;
