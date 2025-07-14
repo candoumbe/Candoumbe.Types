@@ -6,29 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### 💥 Breaking changes
-
-- Moved all types from `Candoumbe.Types.Numerics` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Numerics` NuGet package
-- Moved all types from `Candoumbe.Types.Calendar` namespace from `Candoumbe.Types` NuGet package into `Candoumbe.Types.Calendar` NuGet package
-
-### 🚀 New features
-- Added `NonNegativeLong` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
-- Added `PositiveLong` type ([#43](https://github.com/candoumbe/Candoumbe.Types/issues/43))
-- Added `StringSegmentLinkedList.Contains(ReadOnlySpan<char>)` ([#])
-- Added `StringSegmentLinkedList.Contains(ReadOnlySpan<char>, IEqualityComparer<char>)` 
-
-### 🧹 Housekeeping
-- Add `DotNet.ReproducibleBuilds` package to `core.props`
-- Update [`Candoumbe.Pipelines`](https://nuget.org/packages/pipelines) to `0.13.2`
-- Update `README.md` with new badges for nightly and main branches, and mutation testing
-- Improve `StringSegmentLinkedList.Replace` when replacing a `string` by a `string`  method to reduce memory allocations
-    - Optimize character replacement logic
-    - Avoid unnecessary allocations by using `ReadOnlyMemory<char>` and `ReadOnlySpan<char>`
-    - Refactor code for better readability and performance
-
-### 🛠️ Technical
-- Updated GitHub workflows to download required SDKs when running CI. 
-
 ## [0.3.0] / 2025-07-13
 ### 💥 Breaking changes
 
@@ -65,6 +42,15 @@ when there are more than 1 match in a node.
 
 ### 🧹 Housekeeping
 - Move to central package management
+- Add `DotNet.ReproducibleBuilds` package to `core.props`
+- Update [`Candoumbe.Pipelines`](https://nuget.org/packages/pipelines) to `0.13.2`
+- Update `README.md` with new badges for nightly and main branches, and mutation testing
+- Improve `StringSegmentLinkedList.Replace` when replacing a `string` by a `string`  method to reduce memory allocations
+    - Optimize character replacement logic
+    - Avoid unnecessary allocations by using `ReadOnlyMemory<char>` and `ReadOnlySpan<char>`
+    - Refactor code for better readability and performance
+
+### 🧹 Housekeeping
 - Add `DotNet.ReproducibleBuilds` package to `core.props`
 - Update [`Candoumbe.Pipelines`](https://nuget.org/packages/pipelines) to `0.13.2`
 - Update `README.md` with new badges for nightly and main branches, and mutation testing
