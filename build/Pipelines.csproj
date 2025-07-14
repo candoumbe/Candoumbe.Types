@@ -21,4 +21,5 @@
     <PackageDownload Include="ReportGenerator" Version="[5.1.13]" />
     <PackageDownload Include="dotnet-stryker" Version="[4.6.0]" />
   </ItemGroup>
+
 </Project>
