@@ -224,7 +224,12 @@ public class Pipelines : EnhancedNukeBuild,
     [
         .. s_projects.Select(projectName => new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
                                          this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests"),
-                                         this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
+                                         (this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json") switch
+                                         {
+                                             var configFilePath when configFilePath.FileExists() => configFilePath,
+                                             _ => null
+                                         }))
+            .Where(mutationTest => mutationTest.ConfigurationFile is not null)
     ];
 
     ///<inheritdoc/>
