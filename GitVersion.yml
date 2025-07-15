@@ -1,7 +1,7 @@
 mode: ContinuousDeployment
 branches: 
   feature: 
-    regex: "^feature(s)?[/-]"
+    regex: "^feature(s)?[/-](?<BranchName>.+)"
   coldfix:
     regex: "^coldfix(es)?[/-](?<BranchName>.+)"
     mode: ContinuousDelivery
