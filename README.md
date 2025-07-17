@@ -105,11 +105,9 @@ classDiagram
         }
     }
 
-    IEnumerable~ReadOnlyMemory~char~~ <|-- StringSegmentLinkedList
+    IEnumerableOfReadOnlyMemory~char~ <|-- StringSegmentLinkedList
     StringSegmentLinkedList "1" --> "1" StringSegmentNode: head
     StringSegmentLinkedList "0" .. "1" StringSegmentNode: tail
-
-
 ```
 
 ## Contributing
