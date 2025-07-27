@@ -850,6 +850,12 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
                 "HelloWorld".AsMemory(),
                 CharComparer.Ordinal,
                 false
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("Wo").Append("r").Append("ld"),
+                "HelloWorld".AsMemory(),
+                CharComparer.Ordinal,
+                true
             }
         };
 
@@ -863,6 +869,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         // Assert
         actual.Should().Be(expected);
     }
+
 
     [Property(Arbitrary = [typeof(StringSegmentLinkedListGenerator)])]
     public void Given_any_StringSegmentLinkedList_then_GetHashcode_should_never_throw(StringSegmentLinkedList list)

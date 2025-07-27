@@ -20,7 +20,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
 
-    private static StringSegmentNode EmptyNode => new(ReadOnlySpan<char>.Empty);
+    private static StringSegmentNode EmptyNode => new([]);
 
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/> that is empty.
@@ -834,24 +834,32 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
 
                 do
                 {
-                    ReadOnlySpan<char> localSearch = search[offset .. (current.Value.Length)];
+                    i = 0;
                     while (i < current.Value.Length && !mismatchFound)
                     {
-                        mismatchFound = !localComparer.Equals(localSearch[i], current.Value.Span[i]);
+                        char currentChar = current.Value.Span[i];
+                        int searchedCharacterIndex = i + offset;
+                        if (searchedCharacterIndex < search.Length)
+                        {
+                            char searchChar = search[i + (offset)];
+                            mismatchFound = !localComparer.Equals(searchChar, currentChar);
+                        }
+
                         i++;
                     }
 
-                    offset += localSearch.Length;
+                    if (!mismatchFound)
+                    {
+                        offset += current.Value.Length;
+                    }
                     current = current.Next;
+                } while (offset <= search.Length && !mismatchFound && current is not null);
 
-                } while (offset < search.Length && !mismatchFound && current is not null);
-
-                bool hasLoopedThroughAllSearchCharacters = i == search.Length - 1;
+                bool hasLoopedThroughAllSearchCharacters = offset >= search.Length;
                 startsWith = !mismatchFound && hasLoopedThroughAllSearchCharacters;
             }
-
         }
-        
+
         return startsWith;
     }
 }
