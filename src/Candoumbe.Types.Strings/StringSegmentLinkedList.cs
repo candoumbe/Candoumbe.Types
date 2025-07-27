@@ -796,4 +796,62 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
         null => false,
         _    => ReferenceEquals(this, other) || Equals(other, null)
     };
+
+    /// <summary>
+    /// Checks if the current instance starts with <paramref name="search"/>.
+    /// </summary>
+    /// <param name="search">The value to search in the current instance.</param>
+    /// <param name="comparer">The comparer to use when comparing each <see cref="char"/> from <paramref name="search"/>.</param>
+    /// <returns><see langword="true"/> if the current instance starts the specified <paramref name="search"/> and <see langword="false"/> otherwise.</returns>
+    public bool StartsWith(ReadOnlySpan<char> search, IEqualityComparer<char> comparer = null)
+    {
+        IEqualityComparer<char> localComparer = comparer ?? EqualityComparer<char>.Default;
+
+        bool startsWith;
+
+        if (search.IsEmpty)
+        {
+            startsWith = EmptyNode.Equals(_head);
+        }
+        else
+        {
+            StringSegmentNode current = _head;
+            int i = 0;
+            bool mismatchFound = false;
+            if (search.Length <= current.Value.Length)
+            {
+                while (i < search.Length && !mismatchFound)
+                {
+                    mismatchFound = !localComparer.Equals(search[i], current.Value.Span[i]);
+                    i++;
+                }
+
+                startsWith = !mismatchFound;
+            }
+            else
+            {
+                int offset = 0;
+
+                do
+                {
+                    ReadOnlySpan<char> localSearch = search[offset .. (current.Value.Length)];
+                    while (i < current.Value.Length && !mismatchFound)
+                    {
+                        mismatchFound = !localComparer.Equals(localSearch[i], current.Value.Span[i]);
+                        i++;
+                    }
+
+                    offset += localSearch.Length;
+                    current = current.Next;
+
+                } while (offset < search.Length && !mismatchFound && current is not null);
+
+                bool hasLoopedThroughAllSearchCharacters = i == search.Length - 1;
+                startsWith = !mismatchFound && hasLoopedThroughAllSearchCharacters;
+            }
+
+        }
+        
+        return startsWith;
+    }
 }

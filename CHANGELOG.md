@@ -6,11 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### 🚀 New features
+- Added `StringSegmentLinkedList.StartsWith(ReadOnlySpan<char>,IEqualityComparer<char>)` method ([#287](https://github.com/candoumbe/Candoumbe.Types/issues/287))
+
 
 ## [0.3.1] / 2025-07-27
 ### 🐛 Fixes
 
-- `StringSegmentLinkedList.GetHahsCode` throws `NotSupportedException` ([#301](https://github.com/candoumbe/candoumbe.types/))
+- `StringSegmentLinkedList.GetHahsCode` throws `NotSupportedException` ([#301](https://github.com/candoumbe/candoumbe.types/issues/301))
 
 ### 🧹 Housekeeping
 
