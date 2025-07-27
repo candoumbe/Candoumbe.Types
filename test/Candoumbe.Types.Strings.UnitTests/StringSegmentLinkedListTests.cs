@@ -794,6 +794,76 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
+    public static TheoryData<StringSegmentLinkedList, ReadOnlyMemory<char>, CharComparer, bool> StartsWithCases
+        => new()
+        {
+            {
+                new StringSegmentLinkedList("Hello", "world"),
+                "world".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList("Hello", "world"),
+                "low".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList(@"Hello\*", "world"),
+                @"\*".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList(@"Hello\*", "world"),
+                @"\*m".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("world"),
+                "low".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("world"),
+                "Hel".AsMemory(),
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("world"),
+                "Hellow".AsMemory(),
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("world"),
+                "Hello".AsMemory(),
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList("Hello"),
+                "HelloWorld".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            }
+        };
+
+    [Theory]
+    [MemberData(nameof(StartsWithCases))]
+    public void Given_a_StringSegmentLinkedList_Then_StartsWith_should_behave_as_expected(StringSegmentLinkedList list, ReadOnlyMemory<char> search, IEqualityComparer<char> comparer, bool expected)
+    {
+        // Act
+        bool actual = list.StartsWith(search.Span, comparer);
+
+        // Assert
+        actual.Should().Be(expected);
+    }
+
     [Property(Arbitrary = [typeof(StringSegmentLinkedListGenerator)])]
     public void Given_any_StringSegmentLinkedList_then_GetHashcode_should_never_throw(StringSegmentLinkedList list)
     {
