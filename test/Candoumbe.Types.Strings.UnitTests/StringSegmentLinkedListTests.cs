@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Bogus;
 using Candoumbe.MiscUtilities.Comparers;
-using Candoumbe.Types.Strings;
 using Candoumbe.Types.Strings.UnitTests.Generators;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -19,12 +17,12 @@ using Xunit.Categories;
 using ReplacePredicateByReadOnlyMemory = (System.Func<char, bool> Predicate, System.ReadOnlyMemory<char> NewValue);
 using ReplacePredicateByChar = (System.Func<char, bool> Predicate, char NewValue);
 
-namespace Candoumbe.Types.Strings.UnitTests.Strings;
+namespace Candoumbe.Types.Strings.UnitTests;
 
 [UnitTest]
 public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 {
-    private static readonly Faker Faker = new();
+    private static readonly Faker s_faker = new();
 
     [Property]
     public void Given_non_empty_string_segment_Then_constructor_should_initialize_properties(NonEmptyString stringGenerator)
@@ -43,9 +41,9 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     public void Given_index_is_negative_When_calling_InsertAt_Then_throw_ArgumentOutOfRangeException(NegativeInt negativeIndexGenerator)
     {
         // Arrange
-        StringSegment initialSegment = new StringSegment(Faker.Lorem.Word());
+        StringSegment initialSegment = new StringSegment(s_faker.Lorem.Word());
         StringSegmentLinkedList linkedList = new StringSegmentLinkedList(initialSegment);
-        StringSegment newSegment = new StringSegment(Faker.Lorem.Word());
+        StringSegment newSegment = new StringSegment(s_faker.Lorem.Word());
         int negativeIndex = negativeIndexGenerator.Item;
 
         // Act & Assert
@@ -60,7 +58,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         // Arrange
         StringSegment initialSegment = new StringSegment(stringsGenerator.Item[0].Item);
         StringSegmentLinkedList linkedList = new StringSegmentLinkedList(initialSegment);
-        StringSegment newSegment = Faker.PickRandom(stringsGenerator.Item).Item;
+        StringSegment newSegment = s_faker.PickRandom(stringsGenerator.Item).Item;
         int indexOutsideOfRange = stringsGenerator.Item.Length + 1;
 
         // Act & Assert
