@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Bogus;
-using Candoumbe.Types.Strings;
 using FsCheck;
 using FsCheck.Experimental;
 using FsCheck.Fluent;
-using Microsoft.Extensions.Primitives;
 
-namespace Candoumbe.Types.Strings.UnitTests.Strings;
+namespace Candoumbe.Types.Strings.UnitTests;
 
 public class StringSegmentLinkedListSpecification : Machine<StringSegmentLinkedList, StringSegmentLinkedListState>
 {

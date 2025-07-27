@@ -1,9 +1,8 @@
-using Candoumbe.Types.Strings;
 using FsCheck;
 using FsCheck.Experimental;
 using FsCheck.Fluent;
 
-namespace Candoumbe.Types.Strings.UnitTests.Strings;
+namespace Candoumbe.Types.Strings.UnitTests;
 
 /// <summary>
 /// Operation of replacing a <see langword="char"/> by another.

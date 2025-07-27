@@ -801,7 +801,7 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
     /// Checks if the current instance starts with <paramref name="search"/>.
     /// </summary>
     /// <param name="search">The value to search in the current instance.</param>
-    /// <param name="comparer">The comparer to use when comparing each <see cref="char"/> from <paramref name="search"/>.</param>
+    /// <param name="comparer">The comparer to use when comparing each <see langword="char"/> from <paramref name="search"/>.</param>
     /// <returns><see langword="true"/> if the current instance starts the specified <paramref name="search"/> and <see langword="false"/> otherwise.</returns>
     public bool StartsWith(ReadOnlySpan<char> search, IEqualityComparer<char> comparer = null)
     {
