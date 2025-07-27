@@ -9,7 +9,7 @@
     <PackageVersion Include="Candoumbe.Pipelines" Version="0.13.2" />
     <PackageVersion Include="Candoumbe.MiscUtilities" Version="0.14.0" />
     <PackageVersion Include="coverlet.msbuild" Version="6.0.4" />
-    <PackageVersion Include="FluentAssertions" Version="7.2.0" />
+    <PackageVersion Include="FluentAssertions" Version="[7.2.0]" />
     <PackageVersion Include="FluentValidation" Version="11.11.0" />
     <PackageVersion Include="FsCheck.XUnit" Version="3.3.0" />
     <PackageVersion Include="Microsoft.Extensions.Primitives" Version="9.0.7" Condition="'$(TargetFramework)' == 'net8.0'"  />
