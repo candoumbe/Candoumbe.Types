@@ -20,7 +20,7 @@ internal sealed class StringSegmentNode : IEquatable<StringSegmentNode>
     /// <summary>
     /// Pointer to the next node (if any).
     /// </summary>
-    public StringSegmentNode Next { get; internal set; }
+    public WeakReference<StringSegmentNode> Next { get; internal set; }
 
     /// <summary>
     /// Initializes a new instance of the StringSegmentNode class with the specified value.
@@ -33,7 +33,7 @@ internal sealed class StringSegmentNode : IEquatable<StringSegmentNode>
 #else
         Value = value.ToArray();
 #endif
-        Next = null;
+        Next = new WeakReference<StringSegmentNode>(null);
     }
 
     /// <inheritdoc />

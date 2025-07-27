@@ -83,13 +83,13 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
             }
             else
             {
-                _head.Next = _tail;
+                _head.Next = new WeakReference<StringSegmentNode>(_tail);
             }
         }
         else
         {
-            _head.Next ??= _tail;
-            _tail.Next = newNode;
+            _head.Next ??= new WeakReference<StringSegmentNode>(_tail);
+            _tail.Next = new WeakReference<StringSegmentNode>(newNode);
             _tail = newNode;
         }
 
@@ -120,7 +120,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     {
         if (index is 0)
         {
-            newNode.Next = _head;
+            newNode.Next = new WeakReference<StringSegmentNode>(_head);
             _head = newNode;
         }
         else
@@ -131,12 +131,12 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
             for (int i = 0; i < index; i++)
             {
                 previous = current;
-                current = current!.Next;
+                current!.Next.TryGetTarget(out current);
             }
 
             previous ??= newNode;
-            previous.Next = newNode;
-            newNode.Next ??= _tail;
+            previous.Next = new WeakReference<StringSegmentNode>(newNode);
+            newNode.Next ??= new WeakReference<StringSegmentNode>(_tail);
         }
 
         Count++;
@@ -186,7 +186,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
         while (current is not null)
         {
             totalLength += current.Value.Length;
-            current = current.Next;
+            current.Next.TryGetTarget(out current);
         }
 
         return totalLength;
@@ -204,7 +204,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
         {
             ReadOnlyMemory<char> segment = current.Value;
             sb.Append(segment.Span);
-            current = current.Next;
+            current.Next.TryGetTarget(out current);
         }
 
         return sb.ToString();
@@ -220,11 +220,12 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
         yield return _head.Value;
 
-        StringSegmentNode current = _head.Next;
+        StringSegmentNode current = null;
+        _head.Next?.TryGetTarget(out current);
         while (current is not null)
         {
             yield return current.Value;
-            current = current.Next;
+            current.Next.TryGetTarget(out current);
         }
     }
 
@@ -331,7 +332,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                 replacementList = replacementList.Append(current.Value.Span);
             }
 
-            current = current.Next;
+            current.Next.TryGetTarget(out current);
         }
 
         return replacementList;
@@ -422,7 +423,7 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
                 replacementList = replacementList.Append(current.Value.Span);
             }
 
-            current = current.Next;
+            current.Next.TryGetTarget(out current);
         }
 
         return replacementList;
@@ -489,7 +490,7 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
                 }
             }
 
-            current = current.Next;
+            current.Next.TryGetTarget(out current);
         }
 
         _head = replacementList._head;
@@ -522,7 +523,7 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
             }
 
             previous = current;
-            current = current.Next;
+            current.Next.TryGetTarget(out current);
         }
 
         return this;
@@ -548,23 +549,23 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
             while (current is not null)
             {
                 result = result.Append(current.Value.Span);
-                current = current.Next;
+                current.Next.TryGetTarget(out current);
             }
         }
 
         current = other._head;
         if (!current.Equals(EmptyNode))
         {
-            if (result.Count == 0)
+            if (result.Count is 0)
             {
                 result = new StringSegmentLinkedList(current.Value.Span);
-                current = current.Next;
+                current.Next.TryGetTarget(out current);
             }
 
             while (current is not null)
             {
                 result = result.Append(current.Value.Span);
-                current = current.Next;
+                current.Next.TryGetTarget(out current);
             }
         }
 
@@ -783,7 +784,7 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
                     found = searchIndex == search.Length;
                 }
 
-                currentNode = currentNode.Next;
+                currentNode.Next.TryGetTarget(out currentNode);
             }
         }
 
@@ -852,7 +853,7 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
                     {
                         offset += current.Value.Length;
                     }
-                    current = current.Next;
+                    current.Next.TryGetTarget(out current);
                 } while (offset <= search.Length && !mismatchFound && current is not null);
 
                 bool hasLoopedThroughAllSearchCharacters = offset >= search.Length;
