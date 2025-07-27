@@ -579,12 +579,11 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
     {
         HashCode hashCode = new();
 
-        StringSegmentNode current = _head;
+        using IEnumerator<ReadOnlyMemory<char>> enumerator = GetEnumerator();
 
-        while (current is not null)
+        while (enumerator.MoveNext())
         {
-            hashCode.Add(current.Value.Span.GetHashCode());
-            current = current.Next;
+            hashCode.Add(enumerator.Current.GetHashCode());
         }
 
         return hashCode.ToHashCode();

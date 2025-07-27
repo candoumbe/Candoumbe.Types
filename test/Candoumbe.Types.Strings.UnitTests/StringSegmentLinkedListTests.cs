@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using Bogus;
 using Candoumbe.MiscUtilities.Comparers;
 using Candoumbe.Types.Strings;
+using Candoumbe.Types.Strings.UnitTests.Generators;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using FsCheck;
@@ -791,5 +792,15 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 
         // Assert
         actual.Should().Be(expected);
+    }
+
+    [Property(Arbitrary = [typeof(StringSegmentLinkedListGenerator)])]
+    public void Given_any_StringSegmentLinkedList_then_GetHashcode_should_never_throw(StringSegmentLinkedList list)
+    {
+        // Act
+        Action computeGetHashCode = () => _ = list.GetHashCode();
+
+        // Assert
+        computeGetHashCode.Should().NotThrow();
     }
 }
