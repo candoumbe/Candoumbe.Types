@@ -1,4 +1,7 @@
 using System;
+#if NET8_0_OR_GREATER
+using System.Collections.Immutable;
+#endif
 using System.Diagnostics.CodeAnalysis;
 
 namespace Candoumbe.Types.Strings;
@@ -25,7 +28,11 @@ internal sealed class StringSegmentNode : IEquatable<StringSegmentNode>
     /// <param name="value">The StringSegment value to be stored in the node.</param>
     public StringSegmentNode(ReadOnlySpan<char> value)
     {
+#if NET8_0_OR_GREATER
+        Value = value.ToImmutableArray().AsMemory();
+#else
         Value = value.ToArray();
+#endif
         Next = null;
     }
 
