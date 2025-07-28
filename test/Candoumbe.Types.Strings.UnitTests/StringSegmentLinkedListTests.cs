@@ -878,4 +878,20 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         // Assert
         computeGetHashCode.Should().NotThrow();
     }
+
+    [Property(Arbitrary = [typeof(StringSegmentLinkedListGenerator)])]
+    public void Given_any_StringSegmentLinkedList_When_Inserting_any_value_at_a_negative_index_Then_an_ArgumentOutOfRangeException_should_be_thrown(StringSegmentLinkedList list, NegativeInt indexGenerator, NonEmptyString valueGenerator)
+    {
+        // Arrange
+        int index = indexGenerator.Item;
+        string value = valueGenerator.Item;
+
+        // Act
+        Action insertingValueAtNegativeIndex = () => list.InsertAt(index, value);
+
+        // Assert
+        insertingValueAtNegativeIndex.Should().Throw<ArgumentOutOfRangeException>()
+            .Which.Message.Should()
+            .StartWithEquivalentOf("Index is out of range.");
+    }
 }
