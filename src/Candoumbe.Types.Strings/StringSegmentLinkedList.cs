@@ -109,7 +109,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
             throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
         }
 
-        if (value is not { Length: 0 })
+        if (!value.IsEmpty)
         {
             StringSegmentNode newNode = new(value);
             InsertAtInternal(index, newNode);
@@ -136,7 +136,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
             previous ??= newNode;
             previous.Next = new WeakReference<StringSegmentNode>(newNode);
-            if (!newNode.Next.TryGetTarget(out StringSegmentNode next) || next is null)
+            if (!newNode.Next.TryGetTarget(out StringSegmentNode _))
             {
                 newNode.Next.SetTarget(_tail);
             }
