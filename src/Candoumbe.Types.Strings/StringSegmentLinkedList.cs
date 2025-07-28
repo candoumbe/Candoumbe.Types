@@ -136,7 +136,10 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
             previous ??= newNode;
             previous.Next = new WeakReference<StringSegmentNode>(newNode);
-            newNode.Next ??= new WeakReference<StringSegmentNode>(_tail);
+            if (!newNode.Next.TryGetTarget(out StringSegmentNode next) || next is null)
+            {
+                newNode.Next.SetTarget(_tail);
+            }
         }
 
         Count++;
@@ -286,7 +289,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     {
         StringSegmentLinkedList replacementList = [];
         StringSegmentNode current = _head;
-        ReadOnlyMemory<char> replacementMemory = replacement.ToArray();
 
         while (current is not null)
         {
@@ -321,7 +323,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                 }
 
                 // we did all substitutions, but we did not reach the end of the original input
-                // => copy all remaining original chars starting at index position
+                // => copy all remaining original chars starting at the "index" position
                 if (index < current.Value.Length)
                 {
                     replacementList = replacementList.Append(current.Value[index..].Span);

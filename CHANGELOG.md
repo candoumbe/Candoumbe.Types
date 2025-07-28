@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚀 New features
 - Added `StringSegmentLinkedList.StartsWith(ReadOnlySpan<char>,IEqualityComparer<char>)` method ([#287](https://github.com/candoumbe/Candoumbe.Types/issues/287))
 
-
 ## [0.3.1] / 2025-07-27
 ### 🐛 Fixes
 
