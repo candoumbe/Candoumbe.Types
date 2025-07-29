@@ -220,8 +220,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
         yield return _head.Value;
 
-        StringSegmentNode current = null;
-        current = _head.Next;
+        StringSegmentNode current = _head.Next;
         while (current is not null)
         {
             yield return current.Value;
@@ -289,9 +288,13 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
         while (current is not null)
         {
+#if NET
+            IEnumerable<int> occurrences = current.Value.Occurrences(predicate);
+            int indexOfOldChar = occurrences.FirstOrDefault(-1);
+#else
             int indexOfOldChar = current.Value.FirstOccurrence(predicate);
             IEnumerable<int> occurrences = current.Value.Occurrences(predicate);
-
+#endif
             if (indexOfOldChar >= 0)
             {
                 ReadOnlySpan<char> valueToKeep;
@@ -306,7 +309,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                 int index = indexOfOldChar + 1;
                 foreach (int occurrence in occurrences.Skip(1))
                 {
-                    //replacementList = replacementList.Append(replacementMemory.Span);
                     if (index < occurrence)
                     {
                         valueToKeep = current.Value.Span.Slice(index, occurrence - index);
@@ -366,9 +368,13 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
 
         while (current is not null)
         {
+#if NET
+            IEnumerable<int> occurrences = current.Value.Occurrences(predicate);
+            int indexOfOldChar = occurrences.FirstOrDefault(-1);
+#else
             int indexOfOldChar = current.Value.FirstOccurrence(predicate);
             IEnumerable<int> occurrences = current.Value.Occurrences(predicate);
-
+#endif
             if (indexOfOldChar >= 0)
             {
                 if (!replacements.TryGetValue(current.Value.Span[indexOfOldChar], out ReadOnlyMemory<char> replacement))
