@@ -220,8 +220,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
         yield return _head.Value;
 
-        StringSegmentNode current = null;
-        current = _head.Next;
+        StringSegmentNode current = _head.Next;
         while (current is not null)
         {
             yield return current.Value;
@@ -320,7 +319,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                 }
 
                 // we did all substitutions, but we did not reach the end of the original input
-                // => copy all remaining original chars starting at the "index" position
+                // => copy all remaining original chars starting at index position
                 if (index < current.Value.Length)
                 {
                     replacementList = replacementList.Append(current.Value[index..].Span);
