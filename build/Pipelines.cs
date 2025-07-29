@@ -206,8 +206,7 @@ public class Pipelines : EnhancedNukeBuild,
     public IEnumerable<Project> ArchitecturalTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.ArchitecturalTests");
 
     public Target ArchitecturalTests => _ => _.TryTriggeredBy<IUnitTest>()
-                                            .TryBefore<IReportUnitTestCoverage>()
-                                            .TryBefore<IReportIntegrationTestCoverage>()
+                                            .TryBefore<IMutationTest>(target => target.MutationTests)
                                             .Description("Runs architectural tests")
                                             .Executes(() =>
 
