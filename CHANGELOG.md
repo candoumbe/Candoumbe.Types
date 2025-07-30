@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚀 New features
 - Added `StringSegmentLinkedList.StartsWith(ReadOnlySpan<char>,IEqualityComparer<char>)` method ([#287](https://github.com/candoumbe/Candoumbe.Types/issues/287))
 
+### 🧹 Housekeeping
+- updated cache key for Stryker config file.
+
 ## [0.3.1] / 2025-07-27
 ### 🐛 Fixes
-
 - `StringSegmentLinkedList.GetHahsCode` throws `NotSupportedException` ([#301](https://github.com/candoumbe/candoumbe.types/issues/301))
 
 ### 🧹 Housekeeping
@@ -35,13 +37,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `StringSegmentLinkedList.Contains(ReadOnlySpan<char>, IEqualityComparer<char>)` ([#284](https://github.com/candoumbe/Candoumbe.Types/issues/284))
 
 ### 🧹 Housekeeping
-
 - Moved to central package management
 
 ## [0.2.1] / 2025-06-17
 ### 🚨 Breaking changes
 - Renamed `StringSegmentLinkedList.Equals(StringSegmentLinkedList, IEqualityComparer<char>)` to `StringSegmentLinkedList.IsEquivalentTo(StringSegmentLinkedList, IEqualityComparer<char>)`
-
 
 ### 🐛 Fixes
 - Fixed `ArgumentOutOfRangeException` thrown by `StringSegmentLinkedList.Replace(Func<char, bool>, IReadOnlyDictionary<char, ReadOnlyMemory<char>>)` 

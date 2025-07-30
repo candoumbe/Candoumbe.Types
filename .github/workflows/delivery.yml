@@ -44,7 +44,7 @@ jobs:
           path: |
             .nuke/temp
             ~/.nuget/packages
-          key: ${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'test/**/*.csproj', 'stryker-config.json', 'test/**/*/xunit.runner.json') }}
+          key: ${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'test/**/*.csproj', 'test/**/*/stryker-config.json', 'test/**/*/xunit.runner.json') }}
       - name: 'Run: Pack, Publish, AddGithubRelease'
         run: ./build.cmd Pack Publish AddGithubRelease
         env:

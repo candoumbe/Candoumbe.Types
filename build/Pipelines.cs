@@ -30,7 +30,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     [
         "src/**/*.csproj",
         "test/**/*.csproj",
-        "stryker-config.json",
+        "test/**/*/stryker-config.json",
         "test/**/*/xunit.runner.json"
     ],
     OnPushBranchesIgnore = [IGitFlowWithPullRequest.MainBranchName],
@@ -69,7 +69,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     [
         "src/**/*.csproj",
         "test/**/*.csproj",
-        "stryker-config.json",
+        "test/**/*/stryker-config.json",
         "test/**/*/xunit.runner.json"
     ],
     EnableGitHubToken = true,
@@ -93,7 +93,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     [
         "src/**/*.csproj",
         "test/**/*.csproj",
-        "stryker-config.json",
+        "test/**/*/stryker-config.json",
         "test/**/*/xunit.runner.json"
     ],
     EnableGitHubToken = true,
@@ -114,7 +114,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     [
         "src/**/*.csproj",
         "test/**/*.csproj",
-        "stryker-config.json",
+        "test/**/*/stryker-config.json",
         "test/**/*/xunit.runner.json"
     ],
     OnPushBranches = [IGitFlowWithPullRequest.MainBranchName],
@@ -141,7 +141,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     [
         "src/**/*.csproj",
         "test/**/*.csproj",
-        "stryker-config.json",
+        "test/**/*/stryker-config.json",
         "test/**/*/xunit.runner.json"
     ],
     On = [GitHubActionsTrigger.WorkflowDispatch],
@@ -251,11 +251,7 @@ public class Pipelines : EnhancedNukeBuild,
     public Target Tests => _ => _
         .TryDependsOn<IUnitTest>(x => x.UnitTests)
         .TryDependsOn<IMutationTest>(x => x.MutationTests)
-        .Description("Run both unit and mutation tests")
-        .Executes(() =>
-        {
-            // Nothing to set here
-        });
+        .Description("Run both unit and mutation tests");
 
     ///<inheritdoc/>
     bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;
