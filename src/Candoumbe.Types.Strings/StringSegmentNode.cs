@@ -64,6 +64,12 @@ internal sealed class StringSegmentNode : IEquatable<StringSegmentNode>
         _next = null;
     }
 
+    /// <summary>
+    /// Checks if the current node is the last of the string.
+    /// </summary>
+    /// <returns><see langword="true"/> if the current node is the last of the string; otherwise, <see langword="false"/>.</returns>
+    public bool HasNext() => _next is not null;
+
     /// <inheritdoc />
     public override bool Equals(object obj) => obj is StringSegmentNode other && Equals(other);
 
