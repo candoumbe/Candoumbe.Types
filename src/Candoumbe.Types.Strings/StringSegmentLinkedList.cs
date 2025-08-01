@@ -63,7 +63,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
     public StringSegmentLinkedList Append(ReadOnlySpan<char> value)
     {
-        if (value is { Length: > 0 })
+        if (!value.IsEmpty)
         {
             StringSegmentNode newNode = new(value);
             AppendInternal(newNode);
@@ -305,7 +305,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                 int index = indexOfOldChar + 1;
                 foreach (int occurrence in occurrences.Skip(1))
                 {
-                    //replacementList = replacementList.Append(replacementMemory.Span);
                     if (index < occurrence)
                     {
                         valueToKeep = current.Value.Span.Slice(index, occurrence - index);

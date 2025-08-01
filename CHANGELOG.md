@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### 🚀 New features
 - Added `StringSegmentLinkedList.StartsWith(ReadOnlySpan<char>,IEqualityComparer<char>)` method ([#287](https://github.com/candoumbe/Candoumbe.Types/issues/287))
+- Added `net9.0` support
+- Optimize `StringSegmentLinkedList` memory consumption by using weak references when possible.
 
 ### 🧹 Housekeeping
 - updated cache key for Stryker config file.
