@@ -4,7 +4,6 @@ using System.Linq;
 using Candoumbe.Pipelines.Components;
 using Candoumbe.Pipelines.Components.GitHub;
 using Candoumbe.Pipelines.Components.NuGet;
-using Candoumbe.Pipelines.Components.Workflows;
 using Candoumbe.Pipelines.Tools;
 using Nuke.Common;
 using Nuke.Common.CI.GitHubActions;
