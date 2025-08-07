@@ -1,4 +1,4 @@
-namespace Candoumbe.Types.Strings.UnitTests.Strings;
+namespace Candoumbe.Types.Strings.UnitTests;
 
 public record StringSegmentLinkedListState(string[] Inputs, string Value)
 {

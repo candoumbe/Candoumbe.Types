@@ -4,7 +4,6 @@ using System.Linq;
 using Candoumbe.Pipelines.Components;
 using Candoumbe.Pipelines.Components.GitHub;
 using Candoumbe.Pipelines.Components.NuGet;
-using Candoumbe.Pipelines.Components.Workflows;
 using Candoumbe.Pipelines.Tools;
 using Nuke.Common;
 using Nuke.Common.CI.GitHubActions;
@@ -30,7 +29,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     [
         "src/**/*.csproj",
         "test/**/*.csproj",
-        "stryker-config.json",
+        "test/**/*/stryker-config.json",
         "test/**/*/xunit.runner.json"
     ],
     OnPushBranchesIgnore = [IGitFlowWithPullRequest.MainBranchName],
@@ -69,7 +68,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     [
         "src/**/*.csproj",
         "test/**/*.csproj",
-        "stryker-config.json",
+        "test/**/*/stryker-config.json",
         "test/**/*/xunit.runner.json"
     ],
     EnableGitHubToken = true,
@@ -93,7 +92,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     [
         "src/**/*.csproj",
         "test/**/*.csproj",
-        "stryker-config.json",
+        "test/**/*/stryker-config.json",
         "test/**/*/xunit.runner.json"
     ],
     EnableGitHubToken = true,
@@ -114,7 +113,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     [
         "src/**/*.csproj",
         "test/**/*.csproj",
-        "stryker-config.json",
+        "test/**/*/stryker-config.json",
         "test/**/*/xunit.runner.json"
     ],
     OnPushBranches = [IGitFlowWithPullRequest.MainBranchName],
@@ -141,7 +140,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     [
         "src/**/*.csproj",
         "test/**/*.csproj",
-        "stryker-config.json",
+        "test/**/*/stryker-config.json",
         "test/**/*/xunit.runner.json"
     ],
     On = [GitHubActionsTrigger.WorkflowDispatch],
@@ -206,8 +205,7 @@ public class Pipelines : EnhancedNukeBuild,
     public IEnumerable<Project> ArchitecturalTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.ArchitecturalTests");
 
     public Target ArchitecturalTests => _ => _.TryTriggeredBy<IUnitTest>()
-                                            .TryBefore<IReportUnitTestCoverage>()
-                                            .TryBefore<IReportIntegrationTestCoverage>()
+                                            .TryBefore<IMutationTest>(target => target.MutationTests)
                                             .Description("Runs architectural tests")
                                             .Executes(() =>
 
@@ -224,7 +222,12 @@ public class Pipelines : EnhancedNukeBuild,
     [
         .. s_projects.Select(projectName => new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
                                          this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests"),
-                                         this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
+                                         (this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json") switch
+                                         {
+                                             var configFilePath when configFilePath.FileExists() => configFilePath,
+                                             _ => null
+                                         }))
+            .Where(mutationTest => mutationTest.ConfigurationFile is not null)
     ];
 
     ///<inheritdoc/>
@@ -247,11 +250,7 @@ public class Pipelines : EnhancedNukeBuild,
     public Target Tests => _ => _
         .TryDependsOn<IUnitTest>(x => x.UnitTests)
         .TryDependsOn<IMutationTest>(x => x.MutationTests)
-        .Description("Run both unit and mutation tests")
-        .Executes(() =>
-        {
-            // Nothing to set here
-        });
+        .Description("Run both unit and mutation tests");
 
     ///<inheritdoc/>
     bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;

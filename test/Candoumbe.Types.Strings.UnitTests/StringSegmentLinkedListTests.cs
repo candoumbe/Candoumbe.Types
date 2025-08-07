@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Bogus;
 using Candoumbe.MiscUtilities.Comparers;
-using Candoumbe.Types.Strings;
 using Candoumbe.Types.Strings.UnitTests.Generators;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -19,12 +17,12 @@ using Xunit.Categories;
 using ReplacePredicateByReadOnlyMemory = (System.Func<char, bool> Predicate, System.ReadOnlyMemory<char> NewValue);
 using ReplacePredicateByChar = (System.Func<char, bool> Predicate, char NewValue);
 
-namespace Candoumbe.Types.Strings.UnitTests.Strings;
+namespace Candoumbe.Types.Strings.UnitTests;
 
 [UnitTest]
 public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 {
-    private static readonly Faker Faker = new();
+    private static readonly Faker s_faker = new();
 
     [Property]
     public void Given_non_empty_string_segment_Then_constructor_should_initialize_properties(NonEmptyString stringGenerator)
@@ -43,9 +41,9 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     public void Given_index_is_negative_When_calling_InsertAt_Then_throw_ArgumentOutOfRangeException(NegativeInt negativeIndexGenerator)
     {
         // Arrange
-        StringSegment initialSegment = new StringSegment(Faker.Lorem.Word());
+        StringSegment initialSegment = new StringSegment(s_faker.Lorem.Word());
         StringSegmentLinkedList linkedList = new StringSegmentLinkedList(initialSegment);
-        StringSegment newSegment = new StringSegment(Faker.Lorem.Word());
+        StringSegment newSegment = new StringSegment(s_faker.Lorem.Word());
         int negativeIndex = negativeIndexGenerator.Item;
 
         // Act & Assert
@@ -60,7 +58,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         // Arrange
         StringSegment initialSegment = new StringSegment(stringsGenerator.Item[0].Item);
         StringSegmentLinkedList linkedList = new StringSegmentLinkedList(initialSegment);
-        StringSegment newSegment = Faker.PickRandom(stringsGenerator.Item).Item;
+        StringSegment newSegment = s_faker.PickRandom(stringsGenerator.Item).Item;
         int indexOutsideOfRange = stringsGenerator.Item.Length + 1;
 
         // Act & Assert
@@ -794,6 +792,83 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
+    public static TheoryData<StringSegmentLinkedList, ReadOnlyMemory<char>, CharComparer, bool> StartsWithCases
+        => new()
+        {
+            {
+                new StringSegmentLinkedList("Hello", "world"),
+                "world".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList("Hello", "world"),
+                "low".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList(@"Hello\*", "world"),
+                @"\*".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList(@"Hello\*", "world"),
+                @"\*m".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("world"),
+                "low".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("world"),
+                "Hel".AsMemory(),
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("world"),
+                "Hellow".AsMemory(),
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("world"),
+                "Hello".AsMemory(),
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList("Hello"),
+                "HelloWorld".AsMemory(),
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("Wo").Append("r").Append("ld"),
+                "HelloWorld".AsMemory(),
+                CharComparer.Ordinal,
+                true
+            }
+        };
+
+    [Theory]
+    [MemberData(nameof(StartsWithCases))]
+    public void Given_a_StringSegmentLinkedList_Then_StartsWith_should_behave_as_expected(StringSegmentLinkedList list, ReadOnlyMemory<char> search, IEqualityComparer<char> comparer, bool expected)
+    {
+        // Act
+        bool actual = list.StartsWith(search.Span, comparer);
+
+        // Assert
+        actual.Should().Be(expected);
+    }
+
+
     [Property(Arbitrary = [typeof(StringSegmentLinkedListGenerator)])]
     public void Given_any_StringSegmentLinkedList_then_GetHashcode_should_never_throw(StringSegmentLinkedList list)
     {
@@ -802,5 +877,21 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 
         // Assert
         computeGetHashCode.Should().NotThrow();
+    }
+
+    [Property(Arbitrary = [typeof(StringSegmentLinkedListGenerator)])]
+    public void Given_any_StringSegmentLinkedList_When_Inserting_any_value_at_a_negative_index_Then_an_ArgumentOutOfRangeException_should_be_thrown(StringSegmentLinkedList list, NegativeInt indexGenerator, NonEmptyString valueGenerator)
+    {
+        // Arrange
+        int index = indexGenerator.Item;
+        string value = valueGenerator.Item;
+
+        // Act
+        Action insertingValueAtNegativeIndex = () => list.InsertAt(index, value);
+
+        // Assert
+        insertingValueAtNegativeIndex.Should().Throw<ArgumentOutOfRangeException>()
+            .Which.Message.Should()
+            .StartWithEquivalentOf("Index is out of range.");
     }
 }

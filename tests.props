@@ -10,7 +10,6 @@
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="FsCheck.XUnit" />
     <PackageReference Include="coverlet.msbuild" />
-    <PackageReference Include="Moq" />
     <PackageReference Include="NodaTime.Bogus" />
     <PackageReference Include="Bogus" />
   </ItemGroup>

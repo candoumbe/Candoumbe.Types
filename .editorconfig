@@ -8,6 +8,8 @@ indent_style = space
 indent_size = 2
 
 
+[{*.csproj,*.json,*.xml,*.props}]
+indent_size = 2
 [*.cs]
 dotnet_style_readonly_field = true:suggestion
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent

@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CBA8B736-1EAC-43BA-B0FC-B44815EDE42F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{21863EEB-52A7-4FC1-918A-DB69E443C9A0}"
+	ProjectSection(SolutionItems) = preProject
+		test\Candoumbe.Types.PerformanceTests\obj\Debug\net8.0\.NETCoreApp,Version = v8.0.AssemblyAttributes.cs = test\Candoumbe.Types.PerformanceTests\obj\Debug\net8.0\.NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Candoumbe.Types.Strings.UnitTests", "test\Candoumbe.Types.Strings.UnitTests\Candoumbe.Types.Strings.UnitTests.csproj", "{5EDEFDBC-DE3C-4F8F-87E9-E0ED18693349}"
 EndProject

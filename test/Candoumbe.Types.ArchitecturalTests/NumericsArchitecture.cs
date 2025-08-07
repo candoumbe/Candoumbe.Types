@@ -2,7 +2,6 @@
 using ArchUnitNET.Domain.Extensions;
 using ArchUnitNET.Fluent;
 using ArchUnitNET.Fluent.Conditions;
-using ArchUnitNET.Fluent.Syntax.Elements.Types.Classes;
 using ArchUnitNET.Loader;
 using ArchUnitNET.xUnitV3;
 using Candoumbe.Types.Calendar;
@@ -28,7 +27,7 @@ public class NumericsArchitecture
     private IObjectProvider<IType> StringsLayer => _.Types().That().ResideInAssembly(s_stringsAssembly);
     private IObjectProvider<IType> CoreLayer => _.Types().That().ResideInAssembly(s_coreAssembly);
 
-    private IObjectProvider<Class> NumericClasses => _.Classes()
+    private IObjectProvider<Class> NumericClasses => Classes()
         .That()
         .Are(NumberLayer);
 

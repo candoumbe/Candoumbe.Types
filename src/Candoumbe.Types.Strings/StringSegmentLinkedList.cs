@@ -20,7 +20,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
 
-    private static StringSegmentNode EmptyNode => new(ReadOnlySpan<char>.Empty);
+    private static StringSegmentNode EmptyNode => new([]);
 
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/> that is empty.
@@ -63,7 +63,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
     public StringSegmentLinkedList Append(ReadOnlySpan<char> value)
     {
-        if (value is { Length: > 0 })
+        if (!value.IsEmpty)
         {
             StringSegmentNode newNode = new(value);
             AppendInternal(newNode);
@@ -109,7 +109,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
             throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
         }
 
-        if (value is not { Length: 0 })
+        if (!value.IsEmpty)
         {
             StringSegmentNode newNode = new(value);
             InsertAtInternal(index, newNode);
@@ -285,7 +285,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     {
         StringSegmentLinkedList replacementList = [];
         StringSegmentNode current = _head;
-        ReadOnlyMemory<char> replacementMemory = replacement.ToArray();
 
         while (current is not null)
         {
@@ -306,7 +305,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                 int index = indexOfOldChar + 1;
                 foreach (int occurrence in occurrences.Skip(1))
                 {
-                    //replacementList = replacementList.Append(replacementMemory.Span);
                     if (index < occurrence)
                     {
                         valueToKeep = current.Value.Span.Slice(index, occurrence - index);
@@ -555,7 +553,7 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
         current = other._head;
         if (!current.Equals(EmptyNode))
         {
-            if (result.Count == 0)
+            if (result.Count is 0)
             {
                 result = new StringSegmentLinkedList(current.Value.Span);
                 current = current.Next;
@@ -796,4 +794,70 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
         null => false,
         _    => ReferenceEquals(this, other) || Equals(other, null)
     };
+
+    /// <summary>
+    /// Checks if the current instance starts with <paramref name="search"/>.
+    /// </summary>
+    /// <param name="search">The value to search in the current instance.</param>
+    /// <param name="comparer">The comparer to use when comparing each <see langword="char"/> from <paramref name="search"/>.</param>
+    /// <returns><see langword="true"/> if the current instance starts the specified <paramref name="search"/> and <see langword="false"/> otherwise.</returns>
+    public bool StartsWith(ReadOnlySpan<char> search, IEqualityComparer<char> comparer = null)
+    {
+        IEqualityComparer<char> localComparer = comparer ?? EqualityComparer<char>.Default;
+
+        bool startsWith;
+
+        if (search.IsEmpty)
+        {
+            startsWith = EmptyNode.Equals(_head);
+        }
+        else
+        {
+            StringSegmentNode current = _head;
+            int i = 0;
+            bool mismatchFound = false;
+            if (search.Length <= current.Value.Length)
+            {
+                while (i < search.Length && !mismatchFound)
+                {
+                    mismatchFound = !localComparer.Equals(search[i], current.Value.Span[i]);
+                    i++;
+                }
+
+                startsWith = !mismatchFound;
+            }
+            else
+            {
+                int offset = 0;
+
+                do
+                {
+                    i = 0;
+                    while (i < current.Value.Length && !mismatchFound)
+                    {
+                        char currentChar = current.Value.Span[i];
+                        int searchedCharacterIndex = i + offset;
+                        if (searchedCharacterIndex < search.Length)
+                        {
+                            char searchChar = search[i + (offset)];
+                            mismatchFound = !localComparer.Equals(searchChar, currentChar);
+                        }
+
+                        i++;
+                    }
+
+                    if (!mismatchFound)
+                    {
+                        offset += current.Value.Length;
+                    }
+                    current = current.Next;
+                } while (offset <= search.Length && !mismatchFound && current is not null);
+
+                bool hasLoopedThroughAllSearchCharacters = offset >= search.Length;
+                startsWith = !mismatchFound && hasLoopedThroughAllSearchCharacters;
+            }
+        }
+
+        return startsWith;
+    }
 }
