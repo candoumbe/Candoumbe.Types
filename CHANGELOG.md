@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🐛 Fixes
 - Revert usage of weak references to optimize `StringSegmentLinkedList` memory consumption.
 
+### 🧹 Housekeeping
+- Fix versioning for hotfix branches.
 
 ## [0.4.0] / 2025-08-08
 ### 🚀 New features
@@ -21,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.1] / 2025-07-27
 ### 🐛 Fixes
-- `StringSegmentLinkedList.GetHahsCode` throws `NotSupportedException` ([#301](https://github.com/candoumbe/candoumbe.types/issues/301))
+- `StringSegmentLinkedList.GetHashCode` throws `NotSupportedException` ([#301](https://github.com/candoumbe/candoumbe.types/issues/301))
 
 ### 🧹 Housekeeping
 
