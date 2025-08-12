@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] / 2025-08-12
+### 🐛 Fixes
+- Revert usage of weak references to optimize `StringSegmentLinkedList` memory consumption.
+
+### 🧹 Housekeeping
+- Fix versioning for hotfix branches.
+
 ## [0.4.0] / 2025-08-08
 ### 🚀 New features
 - Added `StringSegmentLinkedList.StartsWith(ReadOnlySpan<char>,IEqualityComparer<char>)` method ([#287](https://github.com/candoumbe/Candoumbe.Types/issues/287))
@@ -18,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.1] / 2025-07-27
 ### 🐛 Fixes
-- `StringSegmentLinkedList.GetHahsCode` throws `NotSupportedException` ([#301](https://github.com/candoumbe/candoumbe.types/issues/301))
+- `StringSegmentLinkedList.GetHashCode` throws `NotSupportedException` ([#301](https://github.com/candoumbe/candoumbe.types/issues/301))
 
 ### 🧹 Housekeeping
 
@@ -109,7 +116,8 @@ which is now redundant
 ## [0.1.0] / 2023-01-29
 - Initial release
 
-[Unreleased]: https://github.com/candoumbe/Candoumbe.Types/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/candoumbe/Candoumbe.Types/compare/0.4.1...HEAD
+[0.4.1]: https://github.com/candoumbe/Candoumbe.Types/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/candoumbe/Candoumbe.Types/compare/0.3.1...0.4.0
 [0.3.1]: https://github.com/candoumbe/Candoumbe.Types/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/candoumbe/Candoumbe.Types/compare/0.2.1...0.3.0

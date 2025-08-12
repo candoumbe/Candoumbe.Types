@@ -318,7 +318,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                 }
 
                 // we did all substitutions, but we did not reach the end of the original input
-                // => copy all remaining original chars starting at index position
+                // => copy all remaining original chars starting at the "index" position
                 if (index < current.Value.Length)
                 {
                     replacementList = replacementList.Append(current.Value[index..].Span);
