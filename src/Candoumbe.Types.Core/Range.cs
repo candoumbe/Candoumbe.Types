@@ -124,4 +124,13 @@ public abstract record Range<TBound>(TBound Start, TBound End) : IRange<Range<TB
                 var value => value
             }
         };
+
+#if !NET
+    /// <inheritdoc/>
+    public virtual bool Overlaps(TBound other) => (Start.CompareTo(other), End.CompareTo(other)) switch
+    {
+        (<= 0, <= 0) => true,
+        _ => false
+    };
+#endif
 }

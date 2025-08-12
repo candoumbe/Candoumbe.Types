@@ -294,6 +294,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
     public override bool Equals(object obj) => Equals(obj as MultiDateTimeRange);
 
     ///<inheritdoc/>
+#if NET
     public override int GetHashCode()
     {
         HashCode hashCode = new();
@@ -305,4 +306,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
 
         return hashCode.ToHashCode();
     }
+#else
+    public override int GetHashCode() => _ranges.GetHashCode();
+#endif
 }
