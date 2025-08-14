@@ -746,7 +746,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         actual.Should().Be(string.Empty.Contains(string.Empty));
     }
 
-    public static TheoryData<StringSegmentLinkedList, ReadOnlyMemory<char>, CharComparer, bool> ContainsCases
+    public static TheoryData<StringSegmentLinkedList, ReadOnlyMemory<char>, IEqualityComparer<char>, bool> ContainsCases
         => new()
         {
             {
@@ -792,7 +792,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
-    public static TheoryData<StringSegmentLinkedList, ReadOnlyMemory<char>, CharComparer, bool> StartsWithCases
+    public static TheoryData<StringSegmentLinkedList, ReadOnlyMemory<char>, IEqualityComparer<char>, bool> StartsWithCases
         => new()
         {
             {
