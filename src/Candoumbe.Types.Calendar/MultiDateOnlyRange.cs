@@ -297,7 +297,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
     /// <param name="right">The value to compare to <paramref name="left"/></param>
     /// <returns><see langword="true"/> if <paramref name="left"/> is equal to <paramref name="right"/>; otherwise, <see langword="false"/></returns>
 #else
-    /// <inheritdoc /> 
+    /// <inheritdoc />
 #endif
     public static bool operator ==(MultiDateOnlyRange left, MultiDateOnlyRange right)
         => ( left, right ) switch
@@ -315,7 +315,7 @@ public class MultiDateOnlyRange : IEquatable<MultiDateOnlyRange>, IEnumerable<Da
     /// <param name="right">The value to compare to <paramref name="left"/></param>
     /// <returns><see langword="true"/> if <paramref name="left"/> is not equal to <paramref name="right"/>; otherwise, <see langword="false"/></returns>
 #else
-    /// <inheritdoc /> 
+    /// <inheritdoc />
 #endif
     public static bool operator !=(MultiDateOnlyRange left, MultiDateOnlyRange right) => !(left == right);
 }
