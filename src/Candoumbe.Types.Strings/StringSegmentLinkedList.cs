@@ -13,11 +13,54 @@ namespace Candoumbe.Types.Strings;
 /// </summary>
 /// <remarks>
 /// This implementation is specifically designed to not allow appending <see cref="StringSegment.Empty"/> values.
+/// <para>The implementation provides four properties that can be used to tune the performance of the linked list:</para>
+/// <list type="bullet">
+///   <item>
+///     <term><see cref="ChunkSize"/></term>
+///     <description>The size of the chunks used to compact the list.</description>
+///   </item>
+///   <item>
+///     <term><see cref="MaxSmallSegmentLength"/></term>
+///     <description>The length threshold under which a segment is considered small.</description>
+///   </item>
+///   <item>
+///     <term><see cref="MaxNodeCountBeforeCompact"/></term>
+///     <description>The maximum number of nodes to keep before compacting the list.</description>
+///   </item>
+///   <item>
+///     <term><see cref="ReplaceCloneThreshold"/></term>
+///     <description>The number of characters beyond which replace operations uses a clone/copy strategy.</description>
+///   </item>
+/// </list>
+///
+///
 /// </remarks>
 public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquatable<StringSegmentLinkedList>
 {
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
+
+    /// <summary>
+    /// Size of the chunks used to compact the list.
+    /// </summary>
+    public int ChunkSize { get; set; } = 4_096;
+
+    /// <summary>
+    /// Length of the smallest segment that will be kept in the list.
+    /// </summary>
+    public int MaxSmallSegmentLength { get; set; } = 64;
+
+    /// <summary>
+    /// Number of nodes that will be kept in the list before compacting it.
+    /// </summary>
+    public int MaxNodeCountBeforeCompact { get; set; } = 10_000;
+
+    /// <summary>
+    /// Number of characters threshold beyond which a "replace" operation adopts a different strategy.
+    /// For example, cloning/copying a block instead of replacing character by character.
+    /// </summary>
+    public int ReplaceCloneThreshold { get; set; } = 1_000_000;
+
 
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/> that is empty.
@@ -369,12 +412,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// Gets the number of nodes in the current linked list
     /// </summary>
     public int Count { get; private set; }
-
-    // Configuration/Heuristics
-    public int ChunkSize { get; set; } = 4096;
-    public int MaxSmallSegmentLength { get; set; } = 64;
-    public int MaxNodeCountBeforeCompact { get; set; } = 10_000;
-    public int ReplaceCloneThreshold { get; set; } = 1_000_000;
 
     /// <summary>
     /// Compacts the list into larger chunks to reduce node count and improve locality.
