@@ -52,7 +52,7 @@ public class ConcatVsStringSegmentLinkedList
         {
             list.Append(word);
         }
-        
+
         return list.ToStringValue();
     }
 }

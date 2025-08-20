@@ -14,9 +14,9 @@ public class CharReplacementBenchmark
     private const char NewChar = '0';
     private StringBuilder _stringBuilder;
     private StringSegmentLinkedList _stringSegments;
-    
+
     [Params(10, 100, 1000, 10000)]
-    public int NodeCount {get; set;} 
+    public int NodeCount {get; set;}
 
     [GlobalSetup]
     public void SetUp()
@@ -28,11 +28,11 @@ public class CharReplacementBenchmark
             _stringBuilder.Append(InputString);
             _stringSegments.Append(InputString);
         }
-        
+
         InputString = _stringBuilder.ToString();
-        
+
     }
-    
+
     [Benchmark(Baseline = true)]
     public string ReplaceUsingStringReplace() => InputString.Replace(OldChar, NewChar);
 
@@ -42,11 +42,11 @@ public class CharReplacementBenchmark
         _stringBuilder.Replace(OldChar, NewChar);
         return _stringBuilder.ToString();
     }
-    
+
     [Benchmark]
     public string NoReplacement() => _stringBuilder.ToString();
-    
+
     [Benchmark]
     public string ReplacementWithStringSegmentLinkedList() => _stringSegments.Replace(OldChar, NewChar).ToStringValue();
-    
+
 }

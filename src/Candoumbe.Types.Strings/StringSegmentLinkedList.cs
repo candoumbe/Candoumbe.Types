@@ -249,7 +249,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
         }
         else
         {
-            _tail!.Next = newNode;
+            _tail.Next = newNode;
             _tail = newNode;
         }
 
@@ -430,18 +430,6 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
             int pos = 0;
             StringSegmentLinkedList compacted = new();
 
-            void Flush()
-            {
-                if (pos == 0)
-                {
-                    return;
-                }
-
-                string chunk = new string(buffer, 0, pos);
-                compacted.Append(chunk);
-                pos = 0;
-            }
-
             StringSegmentNode node = _head;
             while (node is not null)
             {
@@ -471,6 +459,16 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
             _tail = compacted._tail;
             Count = compacted.Count;
             return this;
+
+            void Flush()
+            {
+                if (pos is not 0)
+                {
+                    string chunk = new string(buffer, 0, pos);
+                    compacted.Append(chunk);
+                    pos = 0;
+                }
+            }
         }
         finally
         {

@@ -52,7 +52,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
 #if !NETSTANDARD2_1_OR_GREATER || !NET5_0_OR_GREATER
         _ranges = new HashSet<DateTimeRange>();
 #else
-        _ranges = new HashSet<DateTimeRange>(ranges.Length); 
+        _ranges = new HashSet<DateTimeRange>(ranges.Length);
 #endif
         foreach (DateTimeRange range in ranges.OrderBy(x => x.Start))
         {
