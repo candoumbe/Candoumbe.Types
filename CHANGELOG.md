@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### 🚀 New features
+
+- Optimized memory usage of `StringSegmentLinkedList`
+  - Add new constructors for `StringSegmentNode` and `StringSegmentLinkedList`
+  - Improve `Append` and `InsertAt` methods to handle different types of inputs
+  - Add `Compact` method to reduce node count and improve locality
+
+### 🧹 Housekeeping
+- Removed unnecessary imports and simplify code
+- Added performance tests for `StringSegmentLinkedList`
 
 ## [0.4.1] / 2025-08-12
 ### 🐛 Fixes

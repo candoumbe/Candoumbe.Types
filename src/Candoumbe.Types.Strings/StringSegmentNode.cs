@@ -1,7 +1,4 @@
 using System;
-#if NET8_0_OR_GREATER
-using System.Collections.Immutable;
-#endif
 using System.Diagnostics.CodeAnalysis;
 
 namespace Candoumbe.Types.Strings;
@@ -23,16 +20,32 @@ internal sealed class StringSegmentNode : IEquatable<StringSegmentNode>
     public StringSegmentNode Next { get; internal set; }
 
     /// <summary>
-    /// Initializes a new instance of the StringSegmentNode class with the specified value.
+    /// Builds a new instance of <see cref="StringSegmentNode"/> initialized with the specified <paramref name="value"/>.
     /// </summary>
-    /// <param name="value">The StringSegment value to be stored in the node.</param>
-    public StringSegmentNode(ReadOnlySpan<char> value)
+    /// <param name="value">The value to store in the node.</param>
+    public StringSegmentNode(ReadOnlyMemory<char> value)
     {
-#if NET8_0_OR_GREATER
-        Value = value.ToImmutableArray().AsMemory();
-#else
-        Value = value.ToArray();
-#endif
+        Value = value;
+        Next = null;
+    }
+
+    /// <summary>
+    /// Builds a new instance of <see cref="StringSegmentNode"/> initialized with the specified <paramref name="value"/>.
+    /// </summary>
+    /// <param name="value"></param>
+    public StringSegmentNode(string value)
+    {
+        Value = value?.AsMemory() ?? ReadOnlyMemory<char>.Empty;
+        Next = null;
+    }
+
+    /// <summary>
+    /// Builds a new instance of <see cref="StringSegmentNode"/> initialized with the specified <paramref name="span"/>.
+    /// </summary>
+    /// <param name="span"></param>
+    public StringSegmentNode(ReadOnlySpan<char> span)
+    {
+        Value = span.ToArray();
         Next = null;
     }
 
