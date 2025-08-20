@@ -266,18 +266,18 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         StringSegmentLinkedList actualList = initialList.Append(segment);
 
         // Assert
-        actualList.Count.Should().Be(2);
+        actualList.Count.Should().Be(1);
         actualList.GetTotalLength().Should().Be(segment.Length);
     }
 
     [Fact]
-    public void Given_initial_empty_list_Then_Count_should_return_one()
+    public void Given_initial_empty_list_Then_Count_should_return_zero()
     {
         // Arrange
         StringSegmentLinkedList initialList = new(StringSegment.Empty);
 
         // Act
-        initialList.Count.Should().Be(1);
+        initialList.Count.Should().Be(0);
         initialList.GetTotalLength().Should().Be(0);
     }
 

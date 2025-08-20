@@ -24,10 +24,19 @@ public class StringSegmentLinkedListSpecification : Machine<StringSegmentLinkedL
         }
 
         /// <inheritdoc />
-        public override StringSegmentLinkedList Actual() => new(_value.Span, [.. _additionalValues ]);
+        public override StringSegmentLinkedList Actual()
+        {
+            var list = new StringSegmentLinkedList(_value);
+            foreach (string s in _additionalValues)
+            {
+                list.Append(s);
+            }
+            return list;
+        }
 
         /// <inheritdoc />
-        public override StringSegmentLinkedListState Model() => new ([ _value.ToString(), ..  _additionalValues ], string.Concat([ _value, ..  _additionalValues ]));
+        public override StringSegmentLinkedListState Model()
+            => new ([ _value.ToString(), ..  _additionalValues ], string.Concat(new[] { _value.ToString() }.Concat(_additionalValues)));
     }
 
     /// <inheritdoc />
