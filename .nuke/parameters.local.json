@@ -1,5 +1,6 @@
 {
+  "$schema": "./build.schema.json",
   "GitHubToken": "v1:Rgp0YSiizCZNIoK6m7DVObx5tTCZO0lOMOHyWJmvrhv9ImRrGgLZQUnUx7Ny9xPKozoFzcKMFGFAy8fXsJWriultDRHtCZkx54lA2raJGaZpFb+I7hBm7RQLh7K9MuFM",
-  "NugetApiKey": "v1:jPyKrvPYjmdgN0TqM/zAt+aRIBa5q1Tg+BWJYmMyFnyEfBTdIbkknjiVJYT/i0Qk",
+  "NuGetApiKey": "v1:jPyKrvPYjmdgN0TqM/zAt+aRIBa5q1Tg+BWJYmMyFnyEfBTdIbkknjiVJYT/i0Qk",
   "StrykerDashboardApiKey": "v1:07d0pKblcWk/3O9mP3aWBmVU+YATC0me8jgH1du1bnp306X/W4JHZ/82ZeJwdKbW"
 }
