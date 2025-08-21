@@ -24,14 +24,15 @@ public class StringSegmentLinkedListBenchmarks
             .Select(_ => RandomWord(rnd, 5, 20))
             .ToArray();
 
-        char[] buffer = ArrayPool<char>.Shared.Rent(1_048_576);
+        const int length = 1_048_576;
+        char[] buffer = ArrayPool<char>.Shared.Rent(length);
         try
         {
-            for (int i = 0; i < 1_048_576; i++)
+            for (int i = 0; i < length; i++)
             {
                 buffer[i] = rnd.NextDouble() < HitRate ? 'x' : 'y';
             }
-            _oneMbText = new string(buffer, 0, 1_048_576);
+            _oneMbText = new string(buffer, 0, length);
         }
         finally
         {
@@ -91,7 +92,7 @@ public class StringSegmentLinkedListBenchmarks
             list.Append(s);
         }
         string before = list.ToStringValue();
-        list.Compact(4096);
+        list.Compact();
         string after = list.ToStringValue();
         return before.Length + after.Length;
     }

@@ -2,9 +2,8 @@ using System.Text;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using Bogus;
-using Candoumbe.Types.Strings;
 
-namespace Candoumbe.Types.PerformanceTests;
+namespace Candoumbe.Types.Strings.PerformanceTests;
 
 [MemoryDiagnoser]
 [SimpleJob(RuntimeMoniker.Net80)]
