@@ -9,11 +9,11 @@ using Microsoft.Extensions.Primitives;
 namespace Candoumbe.Types.Strings;
 
 /// <summary>
-/// Represents a linked list data structure for managing <see cref="StringSegment"/> nodes.
+/// Represents a linked list data structure for managing string nodes.
 /// </summary>
 /// <remarks>
-/// This implementation is specifically designed to not allow appending <see cref="StringSegment.Empty"/> values.
-/// <para>The implementation provides four properties that can be used to tune the performance of the linked list:</para>
+/// This implementation is specifically designed to not allow appending empty string values.
+/// <para>The implementation provides four properties that can be used to fine-tune the performance of the linked list:</para>
 /// <list type="bullet">
 ///   <item>
 ///     <term><see cref="ChunkSize"/></term>
@@ -32,8 +32,6 @@ namespace Candoumbe.Types.Strings;
 ///     <description>The number of characters beyond which replace operations uses a clone/copy strategy.</description>
 ///   </item>
 /// </list>
-///
-///
 /// </remarks>
 public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquatable<StringSegmentLinkedList>
 {
@@ -43,6 +41,9 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <summary>
     /// Size of the chunks used to compact the list.
     /// </summary>
+    /// <remarks>
+    /// This value is used to determine the size of the buffer used to <see cref="Compact">compact</see> the list.
+    /// </remarks>
     public int ChunkSize { get; set; } = 4_096;
 
     /// <summary>
@@ -167,7 +168,12 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// </summary>
     /// <param name="value">The value to append</param>
     /// <returns>The current instance with <paramref name="value"/> at the tail.</returns>
-    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
+    /// <remarks>
+    /// The current instance remains untouched if <paramref name="value"/> is empty.
+    /// <para>
+    /// Note: this method will increase the output of <see cref="Count"/> by 1 when <paramref name="value"/> is not empty.
+    /// </para>
+    /// </remarks>
     public StringSegmentLinkedList Append(ReadOnlySpan<char> value)
     {
         if (!value.IsEmpty)
@@ -184,7 +190,12 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// </summary>
     /// <param name="value">The value to append</param>
     /// <returns>The current instance with <paramref name="value"/> at the tail.</returns>
-    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
+    /// <remarks>
+    /// The current instance remains untouched if <paramref name="value"/> is empty.
+    /// <para>
+    /// Note: this method will increase the output of <see cref="Count"/> by 1 when <paramref name="value"/> is not empty.
+    /// </para>
+    /// </remarks>
     public StringSegmentLinkedList Append(StringSegment value)
     {
         if (value is { HasValue: true, Length: > 0 })
@@ -282,7 +293,12 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// </summary>
     /// <param name="index">0-based index where <paramref name="value"/> will be inserted</param>
     /// <param name="value">The value of the node to insert.</param>
-    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
+    /// <remarks>
+    /// The current instance remains untouched if <paramref name="value"/> is empty.
+    /// <para>
+    /// Note: this method will increase the output of <see cref="Count"/> by 1 when <paramref name="value"/> is not empty.
+    /// </para>
+    /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0 or &gt; <see cref="Count"/>.</exception>
     public void InsertAt(int index, StringSegment value)
     {
@@ -302,11 +318,16 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     }
 
     /// <summary>
-    /// Inserts a new link containing <paramref name="value"/> at the given <paramref name="index"/>.
+    /// Inserts a new node containing <paramref name="value"/> at the given <paramref name="index"/>.
     /// </summary>
     /// <param name="index">0-based index where <paramref name="value"/> will be inserted</param>
     /// <param name="value">The value of the node to insert.</param>
-    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
+    /// <remarks>
+    /// The current instance remains untouched if <paramref name="value"/> is empty.
+    /// <para>
+    /// Note: this method will increase the output of <see cref="Count"/> by 1 when <paramref name="value"/> is not empty.
+    /// </para>
+    /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0 or &gt; <see cref="Count"/>.</exception>
     public void InsertAt(int index, string value)
     {
@@ -330,7 +351,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0 or &gt; <see cref="Count"/>.</exception>
     public void InsertAt(int index, ReadOnlyMemory<char> value)
     {
-        if (index < 0 || index > Count)
+        if (index is < 0 || index > Count)
         {
             throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
         }
@@ -409,14 +430,25 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     }
 
     /// <summary>
-    /// Gets the number of nodes in the current linked list
+    /// Gets the number of nodes.
     /// </summary>
+    /// <remarks>
+    /// The value obtained must be discarded after any call to :
+    /// <list type="bullet">
+    ///
+    /// </list>
+    /// <see cref="InsertAt(int, string)"/>, <see cref="InsertAt(int, string)"/>
+    /// </remarks>
     public int Count { get; private set; }
 
     /// <summary>
     /// Compacts the list into larger chunks to reduce node count and improve locality.
     /// </summary>
-    public StringSegmentLinkedList Compact(int targetChunkSize = 4096)
+    /// <remarks>
+    /// Calling this method will have no impact on the value returned by <see cref="GetTotalLength"/>.
+    /// But it will, in certain cases, reduce the number of nodes in the list, which, in turn, could make subsequent operations faster by reducing the <see cref="Count">internal node count</see>.
+    /// </remarks>
+    public StringSegmentLinkedList Compact()
     {
         if (_head is null)
         {
@@ -424,7 +456,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
         }
 
         ArrayPool<char> pool = ArrayPool<char>.Shared;
-        char[] buffer = pool.Rent(targetChunkSize);
+        char[] buffer = pool.Rent(ChunkSize);
         try
         {
             int pos = 0;
@@ -439,12 +471,12 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
                 while (remaining > 0)
                 {
-                    int toCopy = Math.Min(remaining, targetChunkSize - pos);
+                    int toCopy = Math.Min(remaining, ChunkSize - pos);
                     span.Slice(offset, toCopy).CopyTo(buffer.AsSpan(pos));
                     pos += toCopy;
                     offset += toCopy;
                     remaining -= toCopy;
-                    if (pos == targetChunkSize)
+                    if (pos == ChunkSize)
                     {
                         Flush();
                     }
@@ -542,9 +574,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <param name="newChar"><see langword="character"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
-    /// This method does its best to never allocate.
-    /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
-    /// the current instance.
+    /// The returned <see cref="StringSegmentLinkedList"/>'s <see cref="Count">node count</see> may differ from the original instance's.
     /// </remarks>
     public StringSegmentLinkedList Replace(char oldChar, char newChar) => Replace(oldChar, [newChar]);
 
@@ -555,9 +585,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <param name="newChar"><see langword="character"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
-    /// This method does its best to never allocated.
-    /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
-    /// the current instance.
+    /// The returned <see cref="StringSegmentLinkedList"/>'s <see cref="Count">node count</see> may differ from the original instance's.
     /// </remarks>
     public StringSegmentLinkedList Replace(Func<char, bool> oldChar, char newChar) => Replace(oldChar, [newChar]);
 
@@ -568,9 +596,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <param name="replacement"><see langword="string"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
-    /// This method does its best to never allocate.
-    /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
-    /// the current instance.
+    /// The returned <see cref="StringSegmentLinkedList"/>'s <see cref="Count">node count</see> may differ from the original instance's.
     /// </remarks>
     public StringSegmentLinkedList Replace(char oldChar, ReadOnlySpan<char> replacement)
         => Replace(chr => chr == oldChar, replacement);
@@ -585,6 +611,9 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// The <see cref="StringSegmentLinkedList"/> where each <see langword="char"/> that matches <paramref name="predicate"/>
     /// has been replaced with <paramref name="replacement"/>.
     /// </returns>
+    /// <remarks>
+    /// The returned <see cref="StringSegmentLinkedList"/>'s <see cref="Count">node count</see> may differ from the original instance's.
+    /// </remarks>
     public StringSegmentLinkedList Replace(Func<char, bool> predicate, ReadOnlySpan<char> replacement)
     {
         if (predicate is null)
