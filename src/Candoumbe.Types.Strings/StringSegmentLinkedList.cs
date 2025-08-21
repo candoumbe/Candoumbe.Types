@@ -1232,4 +1232,65 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
         return startsWith;
     }
+
+    /// <summary>
+    /// Checks if the current instance ends with <paramref name="search"/>.
+    /// </summary>
+    /// <param name="search">The value to search in the current instance.</param>
+    /// <param name="comparer">The comparer to use when comparing each <see cref="char"/> from <paramref name="search"/>.</param>
+    /// <returns><see langword="true"/> if the current instance ends with the specified <paramref name="search"/> and <see langword="false"/> otherwise.</returns>
+    public bool EndsWith(ReadOnlySpan<char> search, IEqualityComparer<char> comparer = null)
+    {
+        IEqualityComparer<char> localComparer = comparer ?? EqualityComparer<char>.Default;
+
+        if (search.IsEmpty)
+        {
+            return true;
+        }
+
+        if (_head is null)
+        {
+            return false;
+        }
+
+        int totalLength = GetTotalLength();
+        if (search.Length > totalLength)
+        {
+            return false;
+        }
+
+        int skip = totalLength - search.Length;
+        StringSegmentNode current = _head;
+        while (current is not null && skip >= current.Value.Length)
+        {
+            skip -= current.Value.Length;
+            current = current.Next;
+        }
+
+        if (current is null)
+        {
+            return false;
+        }
+
+        int indexInNode = skip;
+        int searchIndex = 0;
+        while (current is not null && searchIndex < search.Length)
+        {
+            ReadOnlySpan<char> span = current.Value.Span;
+            for (int i = indexInNode; i < span.Length && searchIndex < search.Length; i++)
+            {
+                if (!localComparer.Equals(span[i], search[searchIndex]))
+                {
+                    return false;
+                }
+
+                searchIndex++;
+            }
+
+            current = current.Next;
+            indexInNode = 0;
+        }
+
+        return searchIndex == search.Length;
+    }
 }
