@@ -868,72 +868,72 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
-    public static TheoryData<StringSegmentLinkedList, ReadOnlyMemory<char>, IEqualityComparer<char>, bool> EndsWithCases
+    public static TheoryData<StringSegmentLinkedList, string, IEqualityComparer<char>, bool> EndsWithCases
         => new()
         {
             {
                 new StringSegmentLinkedList("Hello", "world"),
-                "world".AsMemory(),
+                "world",
                 CharComparer.Ordinal,
                 true
             },
             {
                 new StringSegmentLinkedList("Hello", "world"),
-                "low".AsMemory(),
+                "low",
                 CharComparer.Ordinal,
                 false
             },
             {
                 new StringSegmentLinkedList("Hello").Append("world"),
-                "world".AsMemory(),
+                "world",
                 CharComparer.Ordinal,
                 true
             },
             {
                 new StringSegmentLinkedList("Hello").Append("world"),
-                "oworld".AsMemory(),
+                "oworld",
                 CharComparer.Ordinal,
                 true
             },
             {
                 new StringSegmentLinkedList("Hello").Append("world"),
-                "low".AsMemory(),
+                "low",
                 CharComparer.Ordinal,
                 false
             },
             {
                 new StringSegmentLinkedList("Hello"),
-                "HelloWorld".AsMemory(),
+                "HelloWorld",
                 CharComparer.Ordinal,
                 false
             },
             {
                 new StringSegmentLinkedList("Hello").Append("Wo").Append("r").Append("ld"),
-                "World".AsMemory(),
+                "World",
                 CharComparer.Ordinal,
                 true
             },
             {
                 new StringSegmentLinkedList("Hello").Append("wo").Append("r").Append("ld"),
-                "World".AsMemory(),
+                "World",
                 CharComparer.Ordinal,
                 false
             },
             {
                 new StringSegmentLinkedList("Hello").Append("wo").Append("r").Append("ld"),
-                "World".AsMemory(),
+                "World",
                 CharComparer.InvariantCultureIgnoreCase,
                 true
             },
             {
                 new StringSegmentLinkedList(),
-                ReadOnlyMemory<char>.Empty,
+                string.Empty,
                 CharComparer.Ordinal,
                 true
             },
             {
                 new StringSegmentLinkedList(),
-                "a".AsMemory(),
+                "a",
                 CharComparer.Ordinal,
                 false
             }
@@ -941,10 +941,10 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
 
     [Theory]
     [MemberData(nameof(EndsWithCases))]
-    public void Given_a_StringSegmentLinkedList_Then_EndsWith_should_behave_as_expected(StringSegmentLinkedList list, ReadOnlyMemory<char> search, IEqualityComparer<char> comparer, bool expected)
+    public void Given_a_StringSegmentLinkedList_Then_EndsWith_should_behave_as_expected(StringSegmentLinkedList list, string search, IEqualityComparer<char> comparer, bool expected)
     {
         // Act
-        bool actual = list.EndsWith(search.Span, comparer);
+        bool actual = list.EndsWith(search, comparer);
 
         // Assert
         actual.Should().Be(expected);

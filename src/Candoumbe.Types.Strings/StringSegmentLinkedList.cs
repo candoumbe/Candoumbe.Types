@@ -1240,57 +1240,64 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <param name="comparer">The comparer to use when comparing each <see cref="char"/> from <paramref name="search"/>.</param>
     /// <returns><see langword="true"/> if the current instance ends with the specified <paramref name="search"/> and <see langword="false"/> otherwise.</returns>
     public bool EndsWith(ReadOnlySpan<char> search, IEqualityComparer<char> comparer = null)
+{
+    IEqualityComparer<char> localComparer = comparer ?? EqualityComparer<char>.Default;
+
+    bool result = false;
+
+    if (!search.IsEmpty)
     {
-        IEqualityComparer<char> localComparer = comparer ?? EqualityComparer<char>.Default;
-
-        if (search.IsEmpty)
+        if (_head is not null)
         {
-            return true;
-        }
-
-        if (_head is null)
-        {
-            return false;
-        }
-
-        int totalLength = GetTotalLength();
-        if (search.Length > totalLength)
-        {
-            return false;
-        }
-
-        int skip = totalLength - search.Length;
-        StringSegmentNode current = _head;
-        while (current is not null && skip >= current.Value.Length)
-        {
-            skip -= current.Value.Length;
-            current = current.Next;
-        }
-
-        if (current is null)
-        {
-            return false;
-        }
-
-        int indexInNode = skip;
-        int searchIndex = 0;
-        while (current is not null && searchIndex < search.Length)
-        {
-            ReadOnlySpan<char> span = current.Value.Span;
-            for (int i = indexInNode; i < span.Length && searchIndex < search.Length; i++)
+            int totalLength = GetTotalLength();
+            if (search.Length <= totalLength)
             {
-                if (!localComparer.Equals(span[i], search[searchIndex]))
+                int skip = totalLength - search.Length;
+                StringSegmentNode current = _head;
+
+                // Skip nodes until we reach the position where the search should start
+                while (current is not null && skip >= current.Value.Length)
                 {
-                    return false;
+                    skip -= current.Value.Length;
+                    current = current.Next;
                 }
 
-                searchIndex++;
+                if (current is not null)
+                {
+                    int indexInNode = skip;
+                    int searchIndex = 0;
+                    bool mismatchFound = false;
+
+                    // Compare characters from the current position to the end
+                    while (current is not null && searchIndex < search.Length && !mismatchFound)
+                    {
+                        ReadOnlySpan<char> span = current.Value.Span;
+                        for (int i = indexInNode; i < span.Length && searchIndex < search.Length && !mismatchFound; i++)
+                        {
+                            if (!localComparer.Equals(span[i], search[searchIndex]))
+                            {
+                                mismatchFound = true;
+                            }
+                            else
+                            {
+                                searchIndex++;
+                            }
+                        }
+
+                        current = current.Next;
+                        indexInNode = 0;
+                    }
+
+                    result = searchIndex == search.Length && !mismatchFound;
+                }
             }
-
-            current = current.Next;
-            indexInNode = 0;
         }
-
-        return searchIndex == search.Length;
     }
+    else
+    {
+        result = true;
+    }
+
+    return result;
+}
 }
