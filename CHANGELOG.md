@@ -8,10 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### 🚀 New features
 
+- Added `StringSegmentLinkedList.EndsWith(ReadOnlySpan<char>,IEqualityComparer<char>)` method (#[287](https://github.com/candoumbe/candoumbe.types/issues/287)
 - Optimized memory usage of `StringSegmentLinkedList`
-  - Add new constructors for `StringSegmentNode` and `StringSegmentLinkedList`
-  - Improve `Append` and `InsertAt` methods to handle different types of inputs
-  - Add `Compact` method to reduce node count and improve locality
+  - Added new constructors for `StringSegmentNode` and `StringSegmentLinkedList`
+  - Improved `Append` and `InsertAt` methods to handle different types of inputs
+  - Added `Compact` method to reduce node count and improve locality
 
 ### 🧹 Housekeeping
 - Removed unnecessary imports and simplify code
