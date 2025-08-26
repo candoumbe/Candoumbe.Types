@@ -778,4 +778,19 @@ public class NonNegativeIntegerTests
         // Assert
         actual.Should().Be(expected);
     }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_an_string_value_converted_from_an_integer_with_the_range_of_NonNegativeInteger_min_and_max_When_parsing_it_Then_the_result_should_be_equal_to_the_original_value(NonNegativeInteger expected, CultureInfo cultureInfo)
+    {
+        // Arrange
+        string value = expected.ToString("D5", cultureInfo);
+
+        NonNegativeInteger actual = null;
+
+        // Act
+        Action parsing = () =>  actual = NonNegativeInteger.Parse(value, cultureInfo.NumberFormat);
+
+        parsing.Should().NotThrow();
+        actual.Should().Be(expected);
+    }
 }

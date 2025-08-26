@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 #if NET7_0_OR_GREATER
 using System.Numerics;
 #endif
@@ -26,6 +28,8 @@ public record PositiveInteger :
         , IComparisonOperators<PositiveInteger, PositiveInteger, bool>
         , IMinMaxValue<PositiveInteger>
         , IMultiplicativeIdentity<PositiveInteger, PositiveInteger>
+        , ISpanParsable<PositiveInteger>
+        , ISpanFormattable
 #endif
 {
 #if NET7_0_OR_GREATER
@@ -296,6 +300,30 @@ public record PositiveInteger :
     ///<inheritdoc/>
     public override int GetHashCode() => Value.GetHashCode();
 
+#if NETSTANDARD
+    /// <summary>
+    /// Converts the value of the current <see cref="PositiveInteger"/> object to its equivalent string representation using the specified format and culture-specific format information...
+    /// </summary>
+    /// <param name="format">A numeric format string.</param>
+    /// <param name="provider">An object that supplies culture-specific formatting information.</param>
+    /// <returns>A string representation of the value of the current <see cref="PositiveInteger"/> object as specified by <paramref name="format"/> and <paramref name="provider"/>.</returns>
+    public string ToString(string format, IFormatProvider provider)
+#else
+    /// <inheritdoc />
+    public string ToString([StringSyntax(StringSyntaxAttribute.NumericFormat)] string format, IFormatProvider provider)
+#endif
+        => Value.ToString(format, provider);
+
+#if NETSTANDARD
+    /// <summary>
+    /// Converts the value of the current <see cref="PositiveInteger"/> object to its equivalent string representation using the specified format and culture-specific format information...
+    /// </summary>
+    ///
+#else
+    /// <inheritdoc />
+#endif
+    public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider provider) => Value.TryFormat(destination, out charsWritten, format, provider);
+
     /// <summary>
     /// Implicitly cast to <see cref="int"/> type
     /// </summary>
@@ -331,4 +359,108 @@ public record PositiveInteger :
     /// </summary>
     /// <param name="x"></param>
     public static implicit operator NonNegativeInteger(PositiveInteger x) => NonNegativeInteger.From(x.Value);
+
+#if NETSTANDARD2_1_OR_GREATER
+    /// <summary>
+    /// Parses a string into a value.
+    /// </summary>
+    /// <param name="s">The string to parse</param>
+    /// <param name="provider">An object that provides culture-specific formatting information about <paramref name="s"/>.</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"><paramref name="s"/> is <c>null</c>.</exception>
+    /// <exception cref="FormatException"><paramref name="s"/> is not in correct format.</exception>
+    /// <exception cref="OverflowException"><paramref name="s"/> is not representable by <see cref="PositiveInteger"/>.</exception>
+#else
+    /// <inheritdoc/>
+#endif
+    public static PositiveInteger Parse(string s, IFormatProvider provider)
+    {
+        int value = int.Parse(s, provider);
+        return MinValue <= value && value <= MaxValue
+                   ? From(value)
+                   : throw new OverflowException($"""
+                                                  "{s}" represents a value that is outside range of {nameof(PositiveInteger)} values
+                                                  """);
+    }
+
+#if NETSTANDARD2_1_OR_GREATER
+    /// <summary>
+    /// Tries to parse a string into a value.
+    /// </summary>
+    /// <param name="s">The string to parse</param>
+    /// <param name="provider">An object that provides culture-specific formatting information about <paramref name="s"/>.</param>
+    /// <param name="result">The parsed value</param>
+    /// <returns><see langword="true"/> if <paramref name="s"/> was parsed successfully and <paramref name="result"/> contains the parsed value, <see langword="false"/> otherwise.</returns>
+#else
+    /// <inheritdoc/>
+#endif
+    public static bool TryParse([NotNullWhen(true)] string s,
+                                IFormatProvider provider,
+                                [NotNullWhen(true)] out PositiveInteger result)
+    {
+#if NETSTANDARD2_1_OR_GREATER
+        bool parsingDone = int.TryParse(s, NumberStyles.None, provider, out int value) && MinValue <= value && value <= MaxValue;
+#else
+        bool parsingDone = int.TryParse(s, provider, out int value) && MinValue <= value && value <= MaxValue;
+#endif
+        result = null;
+        if (parsingDone)
+        {
+            result = From(value);
+        }
+
+        return parsingDone;
+    }
+
+#if NETSTANDARD2_1_OR_GREATER
+    /// <summary>
+    /// Parses a span of characters into a value.
+    /// </summary>
+    /// <param name="s">The span of characters to parse.</param>
+    /// <param name="provider">An object that provides culture-specific formatting information about <paramref name="s"/>.</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"><paramref name="s"/> is <c>null</c>.</exception>
+    /// <exception cref="FormatException"><paramref name="s"/> is not in correct format.</exception>
+    /// <exception cref="OverflowException"><paramref name="s"/> is not representable by <see cref="PositiveInteger"/>.</exception>
+#else
+    /// <inheritdoc />
+#endif
+    public static PositiveInteger Parse(ReadOnlySpan<char> s, IFormatProvider provider)
+    {
+        int value = int.Parse(s, NumberStyles.Integer, provider);
+        return value < MinValue || value > MaxValue
+#if NETSTANDARD2_1_OR_GREATER
+                   ? throw new OverflowException($"""
+                                                  "{s.ToString()}" represents a value that is outside range of {nameof(PositiveInteger)} values
+                                                  """)
+#else
+                   ? throw new OverflowException($@"""{s}"" represents a value that is outside range of {nameof(PositiveInteger)} values")
+#endif
+                   : From(value);
+    }
+
+
+#if NETSTANDARD2_1_OR_GREATER
+/// <summary>
+/// Tries to parse a span of characters into a value.
+/// </summary>
+/// <param name="s">The span of characters to parse.</param>
+/// <param name="provider">An object that provides culture-specific formatting information about <paramref name="s"/>.</param>
+/// <param name="result">The parsed value</param>
+/// <returns><see langword="true"/> if <paramref name="s"/> was parsed successfully and <paramref name="result"/> contains the parsed value, <see langword="false"/> otherwise.</returns>
+/// <exception cref="ArgumentNullException"><paramref name="s"/> is <c>null</c>.</exception>
+#else
+    /// <inheritdoc />
+#endif
+    public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider provider, [NotNullWhen(true)] out PositiveInteger result)
+    {
+        bool parsingDone = int.TryParse(s, NumberStyles.Integer, provider, out int value) && MinValue <= value && value <= MaxValue;
+        result = null;
+        if (parsingDone)
+        {
+            result = From(value);
+        }
+
+        return parsingDone;
+    }
 }

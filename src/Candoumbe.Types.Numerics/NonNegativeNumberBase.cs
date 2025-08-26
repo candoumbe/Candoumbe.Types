@@ -13,7 +13,7 @@ namespace Candoumbe.Types.Numerics;
 public abstract record NonNegativeNumberBase<TNumber, TSelf> : Number<TNumber>, IComparable<TSelf>
 #if NET7_0_OR_GREATER
     where TNumber : ISignedNumber<TNumber>, IComparable<TNumber>
-    where TSelf : NonNegativeNumberBase<TNumber, TSelf>, IMinMaxValue<TSelf>, IComparisonOperators<TSelf, TSelf, bool>,
+    where TSelf : NonNegativeNumberBase<TNumber, TSelf>, IMinMaxValue<TSelf>, IComparisonOperators<TSelf, TSelf, bool>, IParsable<TSelf>, ISpanParsable<TSelf>,
     IAdditiveIdentity<TSelf, TSelf>
 #else
         where TNumber : IComparable<TNumber>

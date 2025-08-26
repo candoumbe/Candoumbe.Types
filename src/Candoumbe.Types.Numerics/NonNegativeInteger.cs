@@ -20,6 +20,8 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
     , IMultiplyOperators<NonNegativeInteger, NonNegativeInteger, NonNegativeInteger>
     , IMultiplyOperators<NonNegativeInteger, PositiveInteger, NonNegativeInteger>
     , IComparisonOperators<NonNegativeInteger, NonNegativeInteger, bool>
+    , ISpanParsable<NonNegativeInteger>
+    , ISpanFormattable
 #endif
 {
     private NonNegativeInteger(int value)
@@ -133,7 +135,7 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         => From(( left.Value - right ) switch
         {
             < 0 => 0,
-            int value => value
+            var value => value
         });
 
     /// <summary>
@@ -446,7 +448,7 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         }
         catch
         {
-            result = default;
+            result = null;
         }
 
         return successfullyParsed;
@@ -454,29 +456,37 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
 #endif
 
     /// <inheritdoc/>
-    public static NonNegativeInteger Parse(string s, IFormatProvider provider)
+    public static NonNegativeInteger Parse(string s,
+                                           IFormatProvider provider)
     {
         long value = long.Parse(s, provider);
         return value < MinValue || value > MaxValue
-            ? throw new OverflowException(
-                $@"""{s}"" represents a value that is outside range of {nameof(NonNegativeInteger)} values")
+            ? throw new OverflowException($"""
+                                           "{s}" represents a value that is outside range of {nameof(NonNegativeInteger)} values
+                                           """)
             : From((int)value);
     }
 
     /// <inheritdoc/>
-    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider,
-        [MaybeNullWhen(false)] out NonNegativeInteger result)
+    public static bool TryParse([NotNullWhen(true)] string s,
+                                IFormatProvider provider,
+                                [MaybeNullWhen(false)] out NonNegativeInteger result)
     {
         bool parsingDone = false;
+        result = null;
 
-        try
+        if (s is not null)
         {
-            result = Parse(s, provider);
-            parsingDone = true;
-        }
-        catch
-        {
-            result = default;
+
+            try
+            {
+                result = Parse(s, provider);
+                parsingDone = true;
+            }
+            catch
+            {
+                result = null;
+            }
         }
 
         return parsingDone;
