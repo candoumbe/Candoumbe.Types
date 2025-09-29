@@ -24,7 +24,7 @@
     <PackageVersion Include="TngTech.ArchUnitNET.xUnitV3" Version="0.12.3"/>
   </ItemGroup>
   <ItemGroup Condition="'$(IsTestProject)' == 'false'">
-    <PackageVersion Include="DotNet.ReproducibleBuilds" Version="1.2.25" />
+    <PackageVersion Include="DotNet.ReproducibleBuilds" Version="1.2.39" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3'">
