@@ -300,6 +300,9 @@ public record PositiveInteger :
     ///<inheritdoc/>
     public override int GetHashCode() => Value.GetHashCode();
 
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString();
+
 #if NETSTANDARD
     /// <summary>
     /// Converts the value of the current <see cref="PositiveInteger"/> object to its equivalent string representation using the specified format and culture-specific format information...

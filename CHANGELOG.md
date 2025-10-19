@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### 🐛 Fixes
 - Add missing `Parse` and `TryParse` methods for `NonNegativeInteger` and `PositiveInteger` types.
+- Add mising `PositiveInteger.ToString()` to better display positive integer values in logs.
 
 
 ## [0.4.1] / 2025-08-12
