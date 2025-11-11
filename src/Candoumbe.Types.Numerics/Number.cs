@@ -46,7 +46,12 @@ public abstract record Number<TNumber> : IComparable<Number<TNumber>>
     ///<inheritdoc/>
     public override int GetHashCode() => Value.GetHashCode();
 
-    ///<inheritdoc/>
+    /// <summary>
+    /// Compares two <see cref="Number{TNumber}"/> instances.
+    /// </summary>
+    /// <param name="left">left operand</param>
+    /// <param name="right">right operand</param>
+    /// <returns><c>true</c> when <paramref name="left"/> is less than <paramref name="right"/> and <c>false</c> otherwise. </returns>
     public static bool operator <(Number<TNumber> left, TNumber right)
         => left.Value.CompareTo(right) < 0;
 

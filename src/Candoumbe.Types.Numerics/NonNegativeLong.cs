@@ -25,6 +25,7 @@ public record NonNegativeLong :
     , IMultiplyOperators<NonNegativeLong, PositiveLong, NonNegativeLong>
     , IComparisonOperators<NonNegativeLong, NonNegativeLong, bool>
     , IComparisonOperators<NonNegativeLong, long, bool>
+    , ISpanParsable<NonNegativeLong>
 #endif
 {
     private NonNegativeLong(long value)

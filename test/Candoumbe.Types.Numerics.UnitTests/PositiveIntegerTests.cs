@@ -2,6 +2,7 @@ using System;
 using Bogus;
 using FluentAssertions;
 using System.Collections.Generic;
+using System.Globalization;
 using Candoumbe.Types.Numerics.UnitTests.Generators;
 using Xunit;
 using Xunit.Abstractions;
@@ -357,4 +358,19 @@ public class PositiveIntegerTests
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public Property Given_an_existing_PositiveInteger_When_multiplying_by_multiplicative_identity_Then_the_result_should_be_equal_to_the_initial_value(PositiveInteger initial)
         => ((initial * PositiveInteger.MultiplicativeIdentity) == initial).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public void Given_an_string_value_converted_from_an_integer_with_the_range_of_PositiveInteger_min_and_max_When_parsing_it_Then_the_result_should_be_equal_to_the_original_value(PositiveInteger expected, CultureInfo cultureInfo)
+    {
+        // Arrange
+        string value = expected.ToString("D5", cultureInfo);
+
+        PositiveInteger actual = null;
+
+        // Act
+        Action parsing = () =>  actual = PositiveInteger.Parse(value, cultureInfo.NumberFormat);
+
+        parsing.Should().NotThrow();
+        actual.Should().Be(expected);
+    }
 }
