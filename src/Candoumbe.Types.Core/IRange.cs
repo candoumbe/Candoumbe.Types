@@ -26,16 +26,24 @@ public interface IRange<TInterval, TBound> : IComparable<TInterval>, IEquatable<
     /// </summary>
     /// <param name="other">The other instance</param>
     /// <returns><see langword="true"/> if the current instance overlaps <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
+#if NET
     public bool Overlaps(TBound other) => (Start.CompareTo(other), other.CompareTo(End)) switch
     {
         ( <= 0, <= 0) => true,
-        _ => false
+        _             => false
     };
+    #else
+    bool Overlaps(TBound other);
+#endif
 
     /// <summary>
-    /// Checks if the current instance overlaps with <paramref name="other"/>
+    /// Checks if the current instance overlaps with <paramref name="other"/>.
     /// </summary>
     /// <param name="other">The other instance</param>
     /// <returns><see langword="true"/> if the current instance overlaps <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
+#if NET
     public bool Overlaps(TInterval other) => Overlaps(other.Start) || Overlaps(other.End);
+#else
+    bool Overlaps(TInterval other);
+#endif
 }

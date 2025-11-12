@@ -22,7 +22,7 @@ public abstract record Number<TNumber> : IComparable<Number<TNumber>>
 #if NET7_0_OR_GREATER
         protected init;
 #else
-            protected set;
+        protected set;
 #endif
     } = default;
 

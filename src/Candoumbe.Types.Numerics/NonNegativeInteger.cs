@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+#if NET
 using System.Numerics;
+#endif
 
 namespace Candoumbe.Types.Numerics;
 
@@ -9,7 +11,7 @@ namespace Candoumbe.Types.Numerics;
 /// A numeric type that can only hold an <see langword="int" /> value &gt;= <c>0</c>.
 /// </summary>
 public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger>
-#if NET7_0_OR_GREATER
+#if NET
     , IAdditiveIdentity<NonNegativeInteger, NonNegativeInteger>
     , IMinMaxValue<NonNegativeInteger>
     , IAdditionOperators<NonNegativeInteger, NonNegativeInteger, NonNegativeInteger>
@@ -87,7 +89,8 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         /// <param name="right">The value to subtract from <paramref name="left"/>.</param>
         /// <returns>the sum of left and right.</returns>
 #endif
-    public static NonNegativeInteger operator +(NonNegativeInteger left, NonNegativeInteger right)
+    public static NonNegativeInteger operator +(NonNegativeInteger left,
+                                                NonNegativeInteger right)
         => From(left.Value + right.Value);
 
 #if NET7_0_OR_GREATER
@@ -100,11 +103,12 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         /// <param name="right">The value to subtract from <paramref name="left"/>.</param>
         /// <returns>the sum of left and right.</returns>
 #endif
-    public static NonNegativeInteger operator +(NonNegativeInteger left, int right)
+    public static NonNegativeInteger operator +(NonNegativeInteger left,
+                                                int right)
         => From(( left.Value + right ) switch
         {
             < 0 => 0,
-            int value => value
+            var value => value
         });
 
 #if NET7_0_OR_GREATER
@@ -117,7 +121,8 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         /// <param name="right">The value to subtract from <paramref name="left"/>.</param>
         /// <returns>the result of the subtraction.</returns>
 #endif
-    public static NonNegativeInteger operator -(NonNegativeInteger left, NonNegativeInteger right)
+    public static NonNegativeInteger operator -(NonNegativeInteger left,
+                                                NonNegativeInteger right)
         => left - right.Value;
 
 #if NET7_0_OR_GREATER
@@ -131,7 +136,8 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         /// <returns>the result of the subtraction.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="left"/> is <see langword="null"/></exception>
 #endif
-    public static NonNegativeInteger operator -(NonNegativeInteger left, int right)
+    public static NonNegativeInteger operator -(NonNegativeInteger left,
+                                                int right)
         => From(( left.Value - right ) switch
         {
             < 0 => 0,
@@ -169,22 +175,28 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
     public static implicit operator uint(NonNegativeInteger value) => (uint)value.Value;
 
     ///<inheritdoc/>
-    public static bool operator <(NonNegativeInteger left, NonNegativeInteger right) => left.Value < right.Value;
+    public static bool operator <(NonNegativeInteger left,
+                                  NonNegativeInteger right) => left.Value < right.Value;
 
     ///<inheritdoc/>
-    public static bool operator >(NonNegativeInteger left, NonNegativeInteger right) => left.Value > right.Value;
+    public static bool operator >(NonNegativeInteger left,
+                                  NonNegativeInteger right) => left.Value > right.Value;
 
     ///<inheritdoc/>
-    public static bool operator >=(NonNegativeInteger left, NonNegativeInteger right) => left.Value >= right.Value;
+    public static bool operator >=(NonNegativeInteger left,
+                                   NonNegativeInteger right) => left.Value >= right.Value;
 
     ///<inheritdoc/>
-    public static bool operator <=(NonNegativeInteger left, NonNegativeInteger right) => left.Value <= right.Value;
+    public static bool operator <=(NonNegativeInteger left,
+                                   NonNegativeInteger right) => left.Value <= right.Value;
 
     ///<inheritdoc/>
-    public static bool operator ==(NonNegativeInteger left, int right) => left.Value == right;
+    public static bool operator ==(NonNegativeInteger left,
+                                   int right) => left.Value == right;
 
     ///<inheritdoc/>
-    public static bool operator !=(NonNegativeInteger left, int right) => !( left.Value == right );
+    public static bool operator !=(NonNegativeInteger left,
+                                   int right) => !( left.Value == right );
 
 #if NET7_0_OR_GREATER
     ///<inheritdoc/>
@@ -198,7 +210,8 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         /// <exception cref="ArgumentNullException"><paramref name="left"/> is <see langword="null"/></exception>
         /// <exception cref="OverflowException">The result of <paramref name="left"/> <c>*</c> <paramref name="right"/> falls outside of <see cref="NonNegativeInteger"/> values.</exception>
 #endif
-    public static NonNegativeInteger operator *(NonNegativeInteger left, NonNegativeInteger right) =>
+    public static NonNegativeInteger operator *(NonNegativeInteger left,
+                                                NonNegativeInteger right) =>
         From(left.Value * right.Value);
 
 #if NET7_0_OR_GREATER
@@ -213,7 +226,8 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         /// <exception cref="ArgumentNullException"><paramref name="left"/> is <see langword="null"/></exception>
         /// <exception cref="OverflowException">The result of <paramref name="left"/> <c>*</c> <paramref name="right"/> falls outside of <see cref="NonNegativeInteger"/> values.</exception>
 #endif
-    public static NonNegativeInteger operator *(NonNegativeInteger left, PositiveInteger right) =>
+    public static NonNegativeInteger operator *(NonNegativeInteger left,
+                                                PositiveInteger right) =>
         From(left.Value * right.Value);
 
     /// <inheritdoc/>
@@ -225,7 +239,8 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         };
 
     /// <inheritdoc/>
-    public static NonNegativeInteger operator /(NonNegativeInteger left, NonNegativeInteger right)
+    public static NonNegativeInteger operator /(NonNegativeInteger left,
+                                                NonNegativeInteger right)
         => right.Value switch
         {
             0 => throw new DivideByZeroException(),
@@ -373,7 +388,8 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         /// <param name="y">The value to compare to <paramref name="x"/>.</param>
         /// <returns><paramref name="x"/> if <paramref name="x"/> is greater than <paramref name="y"/>; otherwise <paramref name="y"/>.</returns>
 #endif
-    public static NonNegativeInteger MaxMagnitude(NonNegativeInteger x, NonNegativeInteger y)
+    public static NonNegativeInteger MaxMagnitude(NonNegativeInteger x,
+                                                  NonNegativeInteger y)
         => ( x > y ) switch
         {
             true => x,
@@ -390,55 +406,71 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         /// <param name="y">The value to compare to <paramref name="x"/>.</param>
         /// <returns><paramref name="x"/> if <paramref name="x"/> is greater than <paramref name="y"/>; otherwise <paramref name="y"/>.</returns>
 #endif
-    public static NonNegativeInteger MaxMagnitudeNumber(NonNegativeInteger x, NonNegativeInteger y) =>
+    public static NonNegativeInteger MaxMagnitudeNumber(NonNegativeInteger x,
+                                                        NonNegativeInteger y) =>
         MaxMagnitude(x, y);
 
     /// <inheritdoc/>
-    public static NonNegativeInteger MinMagnitude(NonNegativeInteger x, NonNegativeInteger y) =>
+    public static NonNegativeInteger MinMagnitude(NonNegativeInteger x,
+                                                  NonNegativeInteger y) =>
         MaxMagnitude(x, y) == x ? y : x;
 
     /// <inheritdoc/>
-    public static NonNegativeInteger MinMagnitudeNumber(NonNegativeInteger x, NonNegativeInteger y) =>
+    public static NonNegativeInteger MinMagnitudeNumber(NonNegativeInteger x,
+                                                        NonNegativeInteger y) =>
         MinMagnitude(x, y);
 
     /// <inheritdoc/>
-    public static NonNegativeInteger Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider) =>
+    public static NonNegativeInteger Parse(ReadOnlySpan<char> s,
+                                           NumberStyles style,
+                                           IFormatProvider provider) =>
         throw new NotImplementedException();
 
     /// <inheritdoc/>
-    public static NonNegativeInteger Parse(string s, NumberStyles style, IFormatProvider provider) =>
+    public static NonNegativeInteger Parse(string s,
+                                           NumberStyles style,
+                                           IFormatProvider provider) =>
         throw new NotImplementedException();
-
-    /// <inheritdoc/>
-    public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider,
-        [MaybeNullWhen(false)] out NonNegativeInteger result) => throw new NotImplementedException();
-
-    /// <inheritdoc/>
-    public static bool TryParse([NotNullWhen(true)] string s, NumberStyles style, IFormatProvider provider,
-        [MaybeNullWhen(false)] out NonNegativeInteger result)
-        => throw new NotImplementedException();
 
 #if NET7_0_OR_GREATER
     /// <inheritdoc/>
-    public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format,
-        IFormatProvider provider)
+    public static bool TryParse(ReadOnlySpan<char> s,
+                                NumberStyles style,
+                                IFormatProvider provider,
+                                [NotNullWhen(true)] out NonNegativeInteger result) => throw new NotImplementedException();
+
+    /// <inheritdoc/>
+    public static bool TryParse([NotNullWhen(true)] string s,
+                                NumberStyles style,
+                                IFormatProvider provider,
+                                [MaybeNullWhen(false)] out NonNegativeInteger result)
+        => throw new NotImplementedException();
+
+    /// <inheritdoc/>
+    public bool TryFormat(Span<char> destination,
+                          out int charsWritten,
+                          ReadOnlySpan<char> format,
+                          IFormatProvider provider)
         => Value.TryFormat(destination, out charsWritten, format, provider);
 #endif
 
     /// <inheritdoc/>
-    public string ToString(string format, IFormatProvider formatProvider) => Value.ToString(format, formatProvider);
+    public string ToString(string format,
+                           IFormatProvider formatProvider) => Value.ToString(format, formatProvider);
 
     /// <inheritdoc/>
     public override string ToString() => Value.ToString();
 
 #if NET7_0_OR_GREATER
     /// <inheritdoc/>
-    public static NonNegativeInteger Parse(ReadOnlySpan<char> s, IFormatProvider provider) =>
+    public static NonNegativeInteger Parse(ReadOnlySpan<char> s,
+                                           IFormatProvider provider) =>
         From(int.Parse(s, provider));
 
     /// <inheritdoc/>
-    public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider provider,
-        [MaybeNullWhen(false)] out NonNegativeInteger result)
+    public static bool TryParse(ReadOnlySpan<char> s,
+                                IFormatProvider provider,
+                                [MaybeNullWhen(false)] out NonNegativeInteger result)
     {
         bool successfullyParsed = false;
         try
@@ -455,7 +487,15 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
     }
 #endif
 
-    /// <inheritdoc/>
+#if NETSTANDARD2_0
+    ///<summary>Tries to parses <paramref name="s"/> into a <see cref="NonNegativeInteger"/> value.</summary>
+    /// <param name="s">The value to parse</param>
+    /// <param name="provider"></param>
+    /// <returns>The parsed value</returns>
+    /// <exception cref="OverflowException">the parsed value is &lt; <see cref="MinValue"/> and &gt; <see cref="MaxValue"/>.</exception>
+#else
+    ///<inheritdoc/>
+#endif
     public static NonNegativeInteger Parse(string s,
                                            IFormatProvider provider)
     {
@@ -467,17 +507,25 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
             : From((int)value);
     }
 
+#if NETSTANDARD2_0
+    ///<summary>Tries to parses <paramref name="s"/> into a <see cref="NonNegativeInteger"/> value.</summary>
+    /// <param name="s">The value to parse</param>
+    /// <param name="provider"></param>
+    /// <param name="result">The parsed value.</param>
+    /// <returns><see langword="true"/> if <paramref name="s"/> was successfully parsed into a <see cref="NonNegativeInteger"/>, and <see langword="false"/> otherwise.</returns>
+    public static bool TryParse(string s, IFormatProvider provider, out NonNegativeInteger result)
+#else
     /// <inheritdoc/>
     public static bool TryParse([NotNullWhen(true)] string s,
-                                IFormatProvider provider,
-                                [MaybeNullWhen(false)] out NonNegativeInteger result)
+        IFormatProvider provider,
+        [MaybeNullWhen(false)] out NonNegativeInteger result)
+#endif
     {
         bool parsingDone = false;
         result = null;
 
         if (s is not null)
         {
-
             try
             {
                 result = Parse(s, provider);

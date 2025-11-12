@@ -104,8 +104,8 @@ public record PositiveLong : PositiveNumberBase<long, PositiveLong>
 
                         _ => (left.Value + right.Value) switch
                         {
-                                long result when result < 1 => From(1 + Math.Abs(result)),
-                                long result => From(result)
+                                var result when result < 1 => From(1 + Math.Abs(result)),
+                                var result => From(result)
                         }
                 };
         }
@@ -158,9 +158,9 @@ public record PositiveLong : PositiveNumberBase<long, PositiveLong>
         public static PositiveLong operator -(PositiveLong left, PositiveLong right)
                 => (left.Value - right.Value) switch
                 {
-                        long value when value == 0 => MaxValue,
-                        long value when value < 0 => From(MaxValue.Value - Math.Abs(value)),
-                        long result => From(result)
+                        var value when value == 0 => MaxValue,
+                        var value when value < 0 => From(MaxValue.Value - Math.Abs(value)),
+                        var result => From(result)
                 };
 
 #if NET7_0_OR_GREATER
@@ -177,7 +177,7 @@ public record PositiveLong : PositiveNumberBase<long, PositiveLong>
                 => (left.Value - right.Value) switch
                 {
                         < 1 => throw new OverflowException(),
-                        long result => From(result)
+                        var result => From(result)
                 };
 
 #if NET7_0_OR_GREATER
