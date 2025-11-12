@@ -317,6 +317,7 @@ public record PositiveInteger :
 #endif
         => Value.ToString(format, provider);
 
+#if NET || NETSTANDARD2_1_OR_GREATER
 #if NETSTANDARD
     /// <summary>
     /// Converts the value of the current <see cref="PositiveInteger"/> object to its equivalent string representation using the specified format and culture-specific format information...
@@ -326,6 +327,7 @@ public record PositiveInteger :
     /// <inheritdoc />
 #endif
     public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider provider) => Value.TryFormat(destination, out charsWritten, format, provider);
+#endif
 
     /// <summary>
     /// Implicitly cast to <see cref="int"/> type
@@ -397,11 +399,16 @@ public record PositiveInteger :
 #else
     /// <inheritdoc/>
 #endif
+
+    #if NETSTANDARD2_0
+    public static bool TryParse(string s, IFormatProvider provider, out PositiveInteger result)
+    #else
     public static bool TryParse([NotNullWhen(true)] string s,
                                 IFormatProvider provider,
                                 [NotNullWhen(true)] out PositiveInteger result)
+#endif
     {
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_0_OR_GREATER
         bool parsingDone = int.TryParse(s, NumberStyles.None, provider, out int value) && MinValue <= value && value <= MaxValue;
 #else
         bool parsingDone = int.TryParse(s, provider, out int value) && MinValue <= value && value <= MaxValue;
@@ -414,7 +421,7 @@ public record PositiveInteger :
 
         return parsingDone;
     }
-
+#if NETSTANDARD2_1_OR_GREATER || NET
 #if NETSTANDARD2_1_OR_GREATER
     /// <summary>
     /// Parses a span of characters into a value.
@@ -432,7 +439,7 @@ public record PositiveInteger :
     {
         int value = int.Parse(s, NumberStyles.Integer, provider);
         return value < MinValue || value > MaxValue
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_0_OR_GREATER
                    ? throw new OverflowException($"""
                                                   "{s.ToString()}" represents a value that is outside range of {nameof(PositiveInteger)} values
                                                   """)
@@ -466,4 +473,5 @@ public record PositiveInteger :
 
         return parsingDone;
     }
+#endif
 }

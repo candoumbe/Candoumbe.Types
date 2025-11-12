@@ -487,7 +487,15 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
     }
 #endif
 
-    /// <inheritdoc/>
+#if NETSTANDARD2_0
+    ///<summary>Tries to parses <paramref name="s"/> into a <see cref="NonNegativeInteger"/> value.</summary>
+    /// <param name="s">The value to parse</param>
+    /// <param name="provider"></param>
+    /// <returns>The parsed value</returns>
+    /// <exception cref="OverflowException">the parsed value is &lt; <see cref="MinValue"/> and &gt; <see cref="MaxValue"/>.</exception>
+#else
+    ///<inheritdoc/>
+#endif
     public static NonNegativeInteger Parse(string s,
                                            IFormatProvider provider)
     {
@@ -499,17 +507,25 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
             : From((int)value);
     }
 
+#if NETSTANDARD2_0
+    ///<summary>Tries to parses <paramref name="s"/> into a <see cref="NonNegativeInteger"/> value.</summary>
+    /// <param name="s">The value to parse</param>
+    /// <param name="provider"></param>
+    /// <param name="result">The parsed value.</param>
+    /// <returns><see langword="true"/> if <paramref name="s"/> was successfully parsed into a <see cref="NonNegativeInteger"/>, and <see langword="false"/> otherwise.</returns>
+    public static bool TryParse(string s, IFormatProvider provider, out NonNegativeInteger result)
+#else
     /// <inheritdoc/>
     public static bool TryParse([NotNullWhen(true)] string s,
-                                IFormatProvider provider,
-                                [MaybeNullWhen(false)] out NonNegativeInteger result)
+        IFormatProvider provider,
+        [MaybeNullWhen(false)] out NonNegativeInteger result)
+#endif
     {
         bool parsingDone = false;
         result = null;
 
         if (s is not null)
         {
-
             try
             {
                 result = Parse(s, provider);
