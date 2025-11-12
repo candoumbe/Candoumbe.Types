@@ -109,8 +109,8 @@ public record PositiveInteger :
 
             _ => ( left.Value + right.Value ) switch
             {
-                int result when result < 1 => From(1 + Math.Abs(result)),
-                int result => From(result)
+                var result when result < 1 => From(1 + Math.Abs(result)),
+                var result => From(result)
             }
         };
     }
@@ -166,8 +166,8 @@ public record PositiveInteger :
         => ( left.Value - right.Value ) switch
         {
             0 => MaxValue,
-            int value and < 0 => From(MaxValue.Value - Math.Abs(value)),
-            int result => From(result)
+            var value and < 0 => From(MaxValue.Value - Math.Abs(value)),
+            var result => From(result)
         };
 
 #if NET7_0_OR_GREATER
@@ -184,7 +184,7 @@ public record PositiveInteger :
         => ( left.Value - right.Value ) switch
         {
             < 1 => throw new OverflowException(),
-            int result => From(result)
+            var result => From(result)
         };
 
 #if NET7_0_OR_GREATER
@@ -213,9 +213,9 @@ public record PositiveInteger :
     public static PositiveInteger operator checked *(PositiveInteger left, PositiveInteger right)
         => ( left.Value * right.Value ) switch
         {
-            int result when result < left.Value && result < right.Value => throw new OverflowException(
-                $@"multiplying ""{left}"" and ""{right}"" result is outside of {nameof(PositiveInteger)} values"),
-            int result => From(result)
+            var result when result < left.Value && result < right.Value => throw new OverflowException(
+                $"""multiplying "{left}" and "{right}" result is outside of {nameof(PositiveInteger)} values"""),
+            var result => From(result)
         };
 
 #if NET7_0_OR_GREATER

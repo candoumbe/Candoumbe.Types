@@ -109,7 +109,7 @@ public record NonNegativeLong :
         => From(( left.Value + right ) switch
         {
             < 0 => 0,
-            long value => value
+            var value => value
         });
 
 #if NET7_0_OR_GREATER
@@ -142,7 +142,7 @@ public record NonNegativeLong :
         => From(( left.Value - right ) switch
         {
             < 0 => 0,
-            long value => value
+            var value => value
         });
 
     /// <summary>

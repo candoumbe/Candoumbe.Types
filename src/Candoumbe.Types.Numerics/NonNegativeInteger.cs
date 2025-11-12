@@ -108,7 +108,7 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         => From(( left.Value + right ) switch
         {
             < 0 => 0,
-            int value => value
+            var value => value
         });
 
 #if NET7_0_OR_GREATER
