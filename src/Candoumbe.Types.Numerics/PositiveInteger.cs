@@ -229,7 +229,27 @@ public record PositiveInteger :
     /// <returns>The result of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
 #endif
     public static NonNegativeInteger operator /(PositiveInteger left, PositiveInteger right)
+    {
+        try
+        {
+            return NonNegativeInteger.From(left.Value / right.Value);
+        }
+        catch (OverflowException)
+        {
+            return NonNegativeInteger.Zero;
+        }
+    }
+
+    /// <summary>
+    /// Divides two values together to compute their fraction.
+    /// </summary>
+    /// <param name="left">The left value</param>
+    /// <param name="right">The right value</param>
+    /// <returns>The result of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
+    /// <remarks>This is the checked version of the operation</remarks>
+    public static NonNegativeInteger operator checked /(PositiveInteger left, PositiveInteger right)
         => NonNegativeInteger.From(left.Value / right.Value);
+
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -253,7 +273,7 @@ public record PositiveInteger :
         ///<inheritdoc/>
 #else
     /// <summary>
-    /// Substracts <paramref name="right"/> from <paramref name="left"/>.
+    /// Subtracts <paramref name="right"/> from <paramref name="left"/>.
     /// </summary>
     /// <param name="left">The left value</param>
     /// <param name="right">The right value</param>
