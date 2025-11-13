@@ -36,6 +36,7 @@
         "Hotfix",
         "Pack",
         "Publish",
+        "RegenerateWorkflow",
         "Release",
         "ReportUnitTestCoverage",
         "Restore",

@@ -61,7 +61,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
         "LICENSE"
     ],
     InvokedTargets = [
-        nameof(IMutationTest.MutationTests),
+        nameof(Tests),
         nameof(IPushNugetPackages.Pack)
     ],
     CacheKeyFiles =
@@ -85,7 +85,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     FetchDepth = 0,
     On = [GitHubActionsTrigger.WorkflowDispatch],
     InvokedTargets = [
-        nameof(IMutationTest.MutationTests),
+        nameof(Tests),
         nameof(IPushNugetPackages.Pack)
     ],
     CacheKeyFiles =
@@ -164,7 +164,8 @@ public class Pipelines : EnhancedNukeBuild,
     IPack,
     IPushNugetPackages,
     ICreateGithubRelease,
-    IGitFlowWithPullRequest
+    IGitFlowWithPullRequest,
+    ICanRegenerateGitHubWorkflows
 {
     [Required]
     [Solution]
@@ -218,6 +219,7 @@ public class Pipelines : EnhancedNukeBuild,
                                                                     )
                                                      );
 
+    // TODO reintroduce mutation tests once https://github.com/stryker-mutator/issues/318 is resolved.
     // ///<inheritdoc/>
     // IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects =>
     // [
