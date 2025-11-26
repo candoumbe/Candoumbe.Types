@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### 🚀 New features
-- Added `net10.0` support ([#346](https://github.com/candoumbe/candoumbe.types/issues/346))
+- Added `net10.0` TFM support ([#346](https://github.com/candoumbe/candoumbe.types/issues/346))
+- Added `netstandard2.0` TFM support ([#355](https://github.com/candoumbe/candoumbe.types/issues/355))
 - Added `StringSegmentLinkedList.EndsWith(ReadOnlySpan<char>,IEqualityComparer<char>)` method ([#287](https://github.com/candoumbe/candoumbe.types/issues/287))
 - Optimized memory usage of `StringSegmentLinkedList`
   - Added new constructors for `StringSegmentNode` and `StringSegmentLinkedList`
