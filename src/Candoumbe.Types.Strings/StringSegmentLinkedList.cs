@@ -33,7 +33,7 @@ namespace Candoumbe.Types.Strings;
 ///   </item>
 /// </list>
 /// </remarks>
-public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquatable<StringSegmentLinkedList>
+public sealed class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquatable<StringSegmentLinkedList>
 {
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
@@ -536,18 +536,30 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
         if (total is not 0)
         {
+#if NETSTANDARD2_0
+            System.Text.StringBuilder sb = new (total);
+            StringSegmentNode current = _head;
+            do
+            {
+                ReadOnlySpan<char> span = current.Value.Span;
+                sb.Append(span.ToString());
+                current = current.Next;
+            } while (current is not null);
+
+#else
             result = string.Create(total, _head, static (dest, head) =>
-                                                 {
-                                                     int offset = 0;
-                                                     StringSegmentNode current = head;
-                                                     while (current is not null)
-                                                     {
-                                                         ReadOnlySpan<char> span = current.Value.Span;
-                                                         span.CopyTo(dest[offset..]);
-                                                         offset += span.Length;
-                                                         current = current.Next;
-                                                     }
-                                                 });
+            {
+                int offset = 0;
+                StringSegmentNode current = head;
+                while (current is not null)
+                {
+                    ReadOnlySpan<char> span = current.Value.Span;
+                    span.CopyTo(dest[offset..]);
+                    offset += span.Length;
+                    current = current.Next;
+                }
+            });
+#endif
         }
 
         return result;
@@ -944,6 +956,21 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     public override bool Equals(object obj) => obj is StringSegmentLinkedList other && Equals(other, CharComparer.InvariantCultureIgnoreCase);
 
     /// <inheritdoc />
+#if NETSTANDARD2_0
+    public override int GetHashCode()
+    {
+        int hashCode = 17;
+
+        using IEnumerator<ReadOnlyMemory<char>> enumerator = GetEnumerator();
+
+        while (enumerator.MoveNext())
+        {
+            hashCode = hashCode * 31 + enumerator.Current.GetHashCode();
+        }
+
+        return hashCode;
+    }
+#else
     public override int GetHashCode()
     {
         HashCode hashCode = new();
@@ -957,6 +984,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
         return hashCode.ToHashCode();
     }
+#endif
 
     /// <summary>
     /// Determines whether the current <see cref="StringSegmentLinkedList"/> is equal to another <see cref="StringSegmentLinkedList"/>.
