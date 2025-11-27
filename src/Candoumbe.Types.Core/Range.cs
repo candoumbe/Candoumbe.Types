@@ -18,7 +18,7 @@ public abstract class Range<TBound> : IRange<Range<TBound>, TBound>, ICanReprese
 /// <summary>
 /// Builds a new instance of <see cref="Range{TBound}"/> which spans from <see cref="Start"/> to <see cref="End"/>
 /// </summary>
-/// <param name="Start">The lowest bound</param>    
+/// <param name="Start">The lowest bound</param>
 /// <param name="End">The highest bound</param>
 /// <typeparam name="TBound">Type of the <see cref="Start"/> and <see cref="End"/> bounds.</typeparam>
 public abstract record Range<TBound>(TBound Start, TBound End) : IRange<Range<TBound>, TBound>, ICanRepresentEmpty<Range<TBound>, TBound>
@@ -124,4 +124,13 @@ public abstract record Range<TBound>(TBound Start, TBound End) : IRange<Range<TB
                 var value => value
             }
         };
+
+#if !NET
+    /// <inheritdoc/>
+    public virtual bool Overlaps(TBound other) => (Start.CompareTo(other), End.CompareTo(other)) switch
+    {
+        (<= 0, <= 0) => true,
+        _ => false
+    };
+#endif
 }

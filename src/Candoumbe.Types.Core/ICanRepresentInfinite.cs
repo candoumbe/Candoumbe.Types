@@ -12,11 +12,13 @@ public interface ICanRepresentInfinite<TInterval, TBound>
     where TInterval : IRange<TInterval, TBound>, IComparable<TInterval> where TBound : IComparable<TBound>
 
 {
+#if NET
     /// <summary>
     /// The infinite <typeparamref name="TBound"/> interval per <typeparamref name="TInterval"/>'s definition.
     /// Such an interval overlaps any <typeparamref name="TBound"/> value and <typeparamref name="TInterval"/>.
     /// </summary>
     static TInterval Infinite { get; }
+#endif
 
     /// <summary>
     /// Checks if the current instance is infinite.

@@ -109,8 +109,8 @@ public record PositiveInteger :
 
             _ => ( left.Value + right.Value ) switch
             {
-                int result when result < 1 => From(1 + Math.Abs(result)),
-                int result => From(result)
+                var result when result < 1 => From(1 + Math.Abs(result)),
+                var result => From(result)
             }
         };
     }
@@ -166,8 +166,8 @@ public record PositiveInteger :
         => ( left.Value - right.Value ) switch
         {
             0 => MaxValue,
-            int value and < 0 => From(MaxValue.Value - Math.Abs(value)),
-            int result => From(result)
+            var value and < 0 => From(MaxValue.Value - Math.Abs(value)),
+            var result => From(result)
         };
 
 #if NET7_0_OR_GREATER
@@ -184,7 +184,7 @@ public record PositiveInteger :
         => ( left.Value - right.Value ) switch
         {
             < 1 => throw new OverflowException(),
-            int result => From(result)
+            var result => From(result)
         };
 
 #if NET7_0_OR_GREATER
@@ -213,9 +213,9 @@ public record PositiveInteger :
     public static PositiveInteger operator checked *(PositiveInteger left, PositiveInteger right)
         => ( left.Value * right.Value ) switch
         {
-            int result when result < left.Value && result < right.Value => throw new OverflowException(
-                $@"multiplying ""{left}"" and ""{right}"" result is outside of {nameof(PositiveInteger)} values"),
-            int result => From(result)
+            var result when result < left.Value && result < right.Value => throw new OverflowException(
+                $"""multiplying "{left}" and "{right}" result is outside of {nameof(PositiveInteger)} values"""),
+            var result => From(result)
         };
 
 #if NET7_0_OR_GREATER
@@ -229,7 +229,27 @@ public record PositiveInteger :
     /// <returns>The result of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
 #endif
     public static NonNegativeInteger operator /(PositiveInteger left, PositiveInteger right)
+    {
+        try
+        {
+            return NonNegativeInteger.From(left.Value / right.Value);
+        }
+        catch (OverflowException)
+        {
+            return NonNegativeInteger.Zero;
+        }
+    }
+
+    /// <summary>
+    /// Divides two values together to compute their fraction.
+    /// </summary>
+    /// <param name="left">The left value</param>
+    /// <param name="right">The right value</param>
+    /// <returns>The result of <paramref name="left"/> divided by <paramref name="right"/>.</returns>
+    /// <remarks>This is the checked version of the operation</remarks>
+    public static NonNegativeInteger operator checked /(PositiveInteger left, PositiveInteger right)
         => NonNegativeInteger.From(left.Value / right.Value);
+
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>
@@ -253,7 +273,7 @@ public record PositiveInteger :
         ///<inheritdoc/>
 #else
     /// <summary>
-    /// Substracts <paramref name="right"/> from <paramref name="left"/>.
+    /// Subtracts <paramref name="right"/> from <paramref name="left"/>.
     /// </summary>
     /// <param name="left">The left value</param>
     /// <param name="right">The right value</param>
@@ -317,6 +337,7 @@ public record PositiveInteger :
 #endif
         => Value.ToString(format, provider);
 
+#if NET || NETSTANDARD2_1_OR_GREATER
 #if NETSTANDARD
     /// <summary>
     /// Converts the value of the current <see cref="PositiveInteger"/> object to its equivalent string representation using the specified format and culture-specific format information...
@@ -326,6 +347,7 @@ public record PositiveInteger :
     /// <inheritdoc />
 #endif
     public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider provider) => Value.TryFormat(destination, out charsWritten, format, provider);
+#endif
 
     /// <summary>
     /// Implicitly cast to <see cref="int"/> type
@@ -397,11 +419,16 @@ public record PositiveInteger :
 #else
     /// <inheritdoc/>
 #endif
+
+    #if NETSTANDARD2_0
+    public static bool TryParse(string s, IFormatProvider provider, out PositiveInteger result)
+    #else
     public static bool TryParse([NotNullWhen(true)] string s,
                                 IFormatProvider provider,
                                 [NotNullWhen(true)] out PositiveInteger result)
+#endif
     {
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_0_OR_GREATER
         bool parsingDone = int.TryParse(s, NumberStyles.None, provider, out int value) && MinValue <= value && value <= MaxValue;
 #else
         bool parsingDone = int.TryParse(s, provider, out int value) && MinValue <= value && value <= MaxValue;
@@ -414,7 +441,7 @@ public record PositiveInteger :
 
         return parsingDone;
     }
-
+#if NETSTANDARD2_1_OR_GREATER || NET
 #if NETSTANDARD2_1_OR_GREATER
     /// <summary>
     /// Parses a span of characters into a value.
@@ -432,7 +459,7 @@ public record PositiveInteger :
     {
         int value = int.Parse(s, NumberStyles.Integer, provider);
         return value < MinValue || value > MaxValue
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_0_OR_GREATER
                    ? throw new OverflowException($"""
                                                   "{s.ToString()}" represents a value that is outside range of {nameof(PositiveInteger)} values
                                                   """)
@@ -466,4 +493,5 @@ public record PositiveInteger :
 
         return parsingDone;
     }
+#endif
 }

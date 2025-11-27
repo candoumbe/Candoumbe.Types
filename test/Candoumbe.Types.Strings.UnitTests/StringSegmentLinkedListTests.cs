@@ -266,18 +266,18 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         StringSegmentLinkedList actualList = initialList.Append(segment);
 
         // Assert
-        actualList.Count.Should().Be(2);
+        actualList.Count.Should().Be(1);
         actualList.GetTotalLength().Should().Be(segment.Length);
     }
 
     [Fact]
-    public void Given_initial_empty_list_Then_Count_should_return_one()
+    public void Given_initial_empty_list_Then_Count_should_return_zero()
     {
         // Arrange
         StringSegmentLinkedList initialList = new(StringSegment.Empty);
 
         // Act
-        initialList.Count.Should().Be(1);
+        initialList.Count.Should().Be(0);
         initialList.GetTotalLength().Should().Be(0);
     }
 
@@ -746,7 +746,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         actual.Should().Be(string.Empty.Contains(string.Empty));
     }
 
-    public static TheoryData<StringSegmentLinkedList, ReadOnlyMemory<char>, CharComparer, bool> ContainsCases
+    public static TheoryData<StringSegmentLinkedList, ReadOnlyMemory<char>, IEqualityComparer<char>, bool> ContainsCases
         => new()
         {
             {
@@ -792,7 +792,7 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
         actual.Should().Be(expected);
     }
 
-    public static TheoryData<StringSegmentLinkedList, ReadOnlyMemory<char>, CharComparer, bool> StartsWithCases
+    public static TheoryData<StringSegmentLinkedList, ReadOnlyMemory<char>, IEqualityComparer<char>, bool> StartsWithCases
         => new()
         {
             {
@@ -863,6 +863,88 @@ public class StringSegmentLinkedListTests(ITestOutputHelper outputHelper)
     {
         // Act
         bool actual = list.StartsWith(search.Span, comparer);
+
+        // Assert
+        actual.Should().Be(expected);
+    }
+
+    public static TheoryData<StringSegmentLinkedList, string, IEqualityComparer<char>, bool> EndsWithCases
+        => new()
+        {
+            {
+                new StringSegmentLinkedList("Hello", "world"),
+                "world",
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList("Hello", "world"),
+                "low",
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("world"),
+                "world",
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("world"),
+                "oworld",
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("world"),
+                "low",
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList("Hello"),
+                "HelloWorld",
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("Wo").Append("r").Append("ld"),
+                "World",
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("wo").Append("r").Append("ld"),
+                "World",
+                CharComparer.Ordinal,
+                false
+            },
+            {
+                new StringSegmentLinkedList("Hello").Append("wo").Append("r").Append("ld"),
+                "World",
+                CharComparer.InvariantCultureIgnoreCase,
+                true
+            },
+            {
+                new StringSegmentLinkedList(),
+                string.Empty,
+                CharComparer.Ordinal,
+                true
+            },
+            {
+                new StringSegmentLinkedList(),
+                "a",
+                CharComparer.Ordinal,
+                false
+            }
+        };
+
+    [Theory]
+    [MemberData(nameof(EndsWithCases))]
+    public void Given_a_StringSegmentLinkedList_Then_EndsWith_should_behave_as_expected(StringSegmentLinkedList list, string search, IEqualityComparer<char> comparer, bool expected)
+    {
+        // Act
+        bool actual = list.EndsWith(search, comparer);
 
         // Assert
         actual.Should().Be(expected);

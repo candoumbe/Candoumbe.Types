@@ -26,7 +26,7 @@ internal static class ValueGenerators
                                                                          .Generator
                                                                          .Select(value => NonNegativeInteger.From(value.Item))
         .ToArbitrary();
-    
+
     public static Arbitrary<NonNegativeLong> NonNegativeLongs() => ArbMap.Default.ArbFor<long>()
         .Filter(value => value >= 0)
         .Generator

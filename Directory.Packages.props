@@ -4,27 +4,27 @@
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="BenchmarkDotNet" Version="0.15.2" />
-    <PackageVersion Include="Bogus" Version="35.6.3" />
-    <PackageVersion Include="Candoumbe.Pipelines" Version="0.13.3" />
-    <PackageVersion Include="Candoumbe.MiscUtilities" Version="0.14.0" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.7" />
+    <PackageVersion Include="Bogus" Version="35.6.5" />
+    <PackageVersion Include="Candoumbe.Pipelines" Version="1.3.0" />
+    <PackageVersion Include="Candoumbe.MiscUtilities" Version="0.15.0" />
     <PackageVersion Include="coverlet.msbuild" Version="6.0.4" />
     <PackageVersion Include="FluentAssertions" Version="[7.2.0]" />
-    <PackageVersion Include="FluentValidation" Version="11.11.0" />
-    <PackageVersion Include="FsCheck.XUnit" Version="3.3.0" />
-    <PackageVersion Include="Microsoft.Extensions.Primitives" Version="9.0.7" Condition="'$(TargetFramework)' == 'net8.0'"  />
+    <PackageVersion Include="FluentValidation" Version="11.12.0" />
+    <PackageVersion Include="FsCheck.XUnit" Version="3.3.2" />
+    <PackageVersion Include="Microsoft.Extensions.Primitives" Version="9.0.11" Condition="'$(TargetFramework)' == 'net8.0'"  />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="NodaTime.Bogus" Version="3.0.2" />
     <PackageVersion Include="Optional" Version="4.0.0" />
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.14.0" />
-    <PackageVersion Include="Stateless" Version="5.17.0" />
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.14.1" />
+    <PackageVersion Include="Stateless" Version="5.20.0" />
     <PackageVersion Include="Ultimately" Version="3.0.0" />
     <PackageVersion Include="xunit.categories" Version="2.0.8" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.3" />
-    <PackageVersion Include="TngTech.ArchUnitNET.xUnitV3" Version="0.12.1"/>
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageVersion Include="TngTech.ArchUnitNET.xUnitV3" Version="0.12.3"/>
   </ItemGroup>
   <ItemGroup Condition="'$(IsTestProject)' == 'false'">
-    <PackageVersion Include="DotNet.ReproducibleBuilds" Version="1.2.25" />
+    <PackageVersion Include="DotNet.ReproducibleBuilds" Version="1.2.39" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3'">

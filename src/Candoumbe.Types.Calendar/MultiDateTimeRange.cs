@@ -52,7 +52,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
 #if !NETSTANDARD2_1_OR_GREATER || !NET5_0_OR_GREATER
         _ranges = new HashSet<DateTimeRange>();
 #else
-        _ranges = new HashSet<DateTimeRange>(ranges.Length); 
+        _ranges = new HashSet<DateTimeRange>(ranges.Length);
 #endif
         foreach (DateTimeRange range in ranges.OrderBy(x => x.Start))
         {
@@ -294,6 +294,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
     public override bool Equals(object obj) => Equals(obj as MultiDateTimeRange);
 
     ///<inheritdoc/>
+#if NET
     public override int GetHashCode()
     {
         HashCode hashCode = new();
@@ -305,4 +306,7 @@ public class MultiDateTimeRange : IEquatable<MultiDateTimeRange>, IEnumerable<Da
 
         return hashCode.ToHashCode();
     }
+#else
+    public override int GetHashCode() => _ranges.GetHashCode();
+#endif
 }

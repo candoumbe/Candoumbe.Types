@@ -9,13 +9,13 @@
       ]
     },
     "dotnet-stryker": {
-      "version": "4.7.0",
+      "version": "4.8.1",
       "commands": [
         "dotnet-stryker"
       ]
     },
     "gitversion.tool": {
-      "version": "6.3.0",
+      "version": "6.5.1",
       "commands": [
         "dotnet-gitversion"
       ]

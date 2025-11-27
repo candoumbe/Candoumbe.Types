@@ -46,28 +46,18 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'test/**/*.csproj', 'test/**/*/stryker-config.json', 'test/**/*/xunit.runner.json') }}
-      - name: 'Run: MutationTests, Pack'
-        run: ./build.cmd MutationTests Pack
+      - name: 'Run: Tests, Pack'
+        run: ./build.cmd Tests Pack
         env:
           NugetApiKey: ${{ secrets.NUGET_API_KEY }}
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
           StrykerDashboardApiKey: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: 'Publish: mutation-tests'
-        uses: actions/upload-artifact@v4
-        with:
-          name: mutation-tests
-          path: output/artifacts/tests-results/mutation-tests
       - name: 'Publish: unit-tests'
         uses: actions/upload-artifact@v4
         with:
           name: unit-tests
           path: output/artifacts/tests-results/unit-tests
-      - name: 'Publish: packages'
-        uses: actions/upload-artifact@v4
-        with:
-          name: packages
-          path: output/artifacts/packages
       - name: 'Publish: unit-tests-coverage'
         uses: actions/upload-artifact@v4
         with:
@@ -78,3 +68,8 @@ jobs:
         with:
           name: unit-tests-coverage-history
           path: output/artifacts/reports/coverage-history/unit-tests-coverage-history
+      - name: 'Publish: packages'
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: output/artifacts/packages

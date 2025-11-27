@@ -476,14 +476,14 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         // Arrange
         MultiDateTimeRange range = multiDateTimeRangeGenerator.Item;
         MultiDateTimeRange expected = range.Complement();
-        
+
         // Act
         MultiDateTimeRange actual = -range;
-        
+
         // Assert
         actual.Should().BeEquivalentTo(expected);
     }
-    
+
     [Fact]
     public void Overlaps_returns_false_when_no_overlapping_date_time_ranges()
     {
@@ -524,8 +524,8 @@ public class MultiDateTimeRangeTests(ITestOutputHelper outputHelper)
         => new TheoryData<MultiDateTimeRange, object, bool, string> ()
         {
             {
-                
-                
+
+
                 /*
                  * multirange : |
                  * other    : |

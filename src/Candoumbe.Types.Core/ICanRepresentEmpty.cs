@@ -9,10 +9,12 @@ namespace Candoumbe.Types;
 /// <typeparam name="TBound">Type of the interval boundaries</typeparam>
 public interface ICanRepresentEmpty<in TInterval, TBound> where TInterval : IRange<TInterval, TBound> where TBound : IComparable<TBound>
 {
+#if NET
     /// <summary>
     /// Checks if the current instance is empty (by <typeparamref name="TInterval"/>'s definition).
     /// </summary>
     static TInterval Empty { get; }
+#endif
 
     /// <summary>
     /// Checks if the current instance is empty (by <typeparamref name="TInterval"/>'s definition)

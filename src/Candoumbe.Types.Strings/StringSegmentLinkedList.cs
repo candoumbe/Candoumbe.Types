@@ -1,32 +1,76 @@
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using Candoumbe.MiscUtilities.Comparers;
 using Microsoft.Extensions.Primitives;
 
 namespace Candoumbe.Types.Strings;
 
 /// <summary>
-/// Represents a linked list data structure for managing <see cref="StringSegment"/> nodes.
+/// Represents a linked list data structure for managing string nodes.
 /// </summary>
 /// <remarks>
-/// This implementation is specifically designed to not allow appending <see cref="StringSegment.Empty"/> values.
+/// This implementation is specifically designed to not allow appending empty string values.
+/// <para>The implementation provides four properties that can be used to fine-tune the performance of the linked list:</para>
+/// <list type="bullet">
+///   <item>
+///     <term><see cref="ChunkSize"/></term>
+///     <description>The size of the chunks used to compact the list.</description>
+///   </item>
+///   <item>
+///     <term><see cref="MaxSmallSegmentLength"/></term>
+///     <description>The length threshold under which a segment is considered small.</description>
+///   </item>
+///   <item>
+///     <term><see cref="MaxNodeCountBeforeCompact"/></term>
+///     <description>The maximum number of nodes to keep before compacting the list.</description>
+///   </item>
+///   <item>
+///     <term><see cref="ReplaceCloneThreshold"/></term>
+///     <description>The number of characters beyond which replace operations uses a clone/copy strategy.</description>
+///   </item>
+/// </list>
 /// </remarks>
-public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquatable<StringSegmentLinkedList>
+public sealed class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquatable<StringSegmentLinkedList>
 {
     private StringSegmentNode _head;
     private StringSegmentNode _tail;
 
-    private static StringSegmentNode EmptyNode => new([]);
+    /// <summary>
+    /// Size of the chunks used to compact the list.
+    /// </summary>
+    /// <remarks>
+    /// This value is used to determine the size of the buffer used to <see cref="Compact">compact</see> the list.
+    /// </remarks>
+    public int ChunkSize { get; set; } = 4_096;
+
+    /// <summary>
+    /// Length of the smallest segment that will be kept in the list.
+    /// </summary>
+    public int MaxSmallSegmentLength { get; set; } = 64;
+
+    /// <summary>
+    /// Number of nodes that will be kept in the list before compacting it.
+    /// </summary>
+    public int MaxNodeCountBeforeCompact { get; set; } = 10_000;
+
+    /// <summary>
+    /// Number of characters threshold beyond which a "replace" operation adopts a different strategy.
+    /// For example, cloning/copying a block instead of replacing character by character.
+    /// </summary>
+    public int ReplaceCloneThreshold { get; set; } = 1_000_000;
+
 
     /// <summary>
     /// Builds a new instance of <see cref="StringSegmentLinkedList"/> that is empty.
     /// </summary>
-    public StringSegmentLinkedList() : this(ReadOnlySpan<char>.Empty)
+    public StringSegmentLinkedList()
     {
+        _head = null;
+        _tail = null;
+        Count = 0;
     }
 
     /// <summary>
@@ -35,9 +79,71 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <param name="head">The value of the head</param>
     public StringSegmentLinkedList(ReadOnlySpan<char> head)
     {
-        (_head, Count) = head.IsEmpty
-                             ? (EmptyNode, 1)
-                             : (new StringSegmentNode(head), 1);
+        if (head.IsEmpty)
+        {
+            _head = _tail = null;
+            Count = 0;
+        }
+        else
+        {
+            _head = _tail = new StringSegmentNode(head);
+            Count = 1;
+        }
+    }
+
+    /// <summary>
+    /// Builds a new instance of <see cref="StringSegmentLinkedList"/>.
+    /// </summary>
+    /// <param name="head">The value of the head</param>
+    public StringSegmentLinkedList(string head)
+    {
+        if (string.IsNullOrEmpty(head))
+        {
+            _head = _tail = null;
+            Count = 0;
+        }
+        else
+        {
+            _head = _tail = new StringSegmentNode(head);
+            Count = 1;
+        }
+    }
+
+    /// <summary>
+    /// Builds a new instance of <see cref="StringSegmentLinkedList"/>.
+    /// </summary>
+    /// <param name="head">The value of the head</param>
+    public StringSegmentLinkedList(ReadOnlyMemory<char> head)
+    {
+        if (head.IsEmpty)
+        {
+            _head = _tail = null;
+            Count = 0;
+        }
+        else
+        {
+            _head = _tail = new StringSegmentNode(head);
+            Count = 1;
+        }
+    }
+
+    /// <summary>
+    /// Builds a new instance of <see cref="StringSegmentLinkedList"/>.
+    /// </summary>
+    /// <param name="head">The head StringSegment</param>
+    public StringSegmentLinkedList(StringSegment head)
+    {
+        if (!head.HasValue || head.Length == 0)
+        {
+            _head = _tail = null;
+            Count = 0;
+        }
+        else
+        {
+            ReadOnlyMemory<char> mem = head.Buffer?.AsMemory(head.Offset, head.Length) ?? ReadOnlyMemory<char>.Empty;
+            _head = _tail = new StringSegmentNode(mem);
+            Count = 1;
+        }
     }
 
     /// <summary>
@@ -45,14 +151,15 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// </summary>
     /// <param name="head">the value of the head</param>
     /// <param name="others">Additional elements to append to the list.</param>
-    public StringSegmentLinkedList(ReadOnlySpan<char> head, params ReadOnlySpan<StringSegment> others)
+    public StringSegmentLinkedList(string head, params string[] others)
+        : this(head)
     {
-        _head = new StringSegmentNode(head);
-        Count = 1;
-
-        foreach (ReadOnlySpan<char> next in others)
+        if (others is { Length: > 0 })
         {
-            Append(next);
+            foreach (string s in others)
+            {
+                Append(s);
+            }
         }
     }
 
@@ -60,7 +167,13 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// Appends <paramref name="value"/> to the end of the list.
     /// </summary>
     /// <param name="value">The value to append</param>
-    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
+    /// <returns>The current instance with <paramref name="value"/> at the tail.</returns>
+    /// <remarks>
+    /// The current instance remains untouched if <paramref name="value"/> is empty.
+    /// <para>
+    /// Note: this method will increase the output of <see cref="Count"/> by 1 when <paramref name="value"/> is not empty.
+    /// </para>
+    /// </remarks>
     public StringSegmentLinkedList Append(ReadOnlySpan<char> value)
     {
         if (!value.IsEmpty)
@@ -72,23 +185,81 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
         return this;
     }
 
+    /// <summary>
+    /// Appends <paramref name="value"/> to the end of the list.
+    /// </summary>
+    /// <param name="value">The value to append</param>
+    /// <returns>The current instance with <paramref name="value"/> at the tail.</returns>
+    /// <remarks>
+    /// The current instance remains untouched if <paramref name="value"/> is empty.
+    /// <para>
+    /// Note: this method will increase the output of <see cref="Count"/> by 1 when <paramref name="value"/> is not empty.
+    /// </para>
+    /// </remarks>
+    public StringSegmentLinkedList Append(StringSegment value)
+    {
+        if (value is { HasValue: true, Length: > 0 })
+        {
+            ReadOnlyMemory<char> mem = value.Buffer?.AsMemory(value.Offset, value.Length) ?? ReadOnlyMemory<char>.Empty;
+            if (!mem.IsEmpty)
+            {
+                AppendInternal(new StringSegmentNode(mem));
+            }
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    /// Appends <paramref name="value"/> to the end of the list.
+    /// </summary>
+    /// <param name="value">The value to append</param>
+    /// <returns>The current instance with <paramref name="value"/> at the tail.</returns>
+    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
+    public StringSegmentLinkedList Append(string value)
+    {
+        if (!string.IsNullOrEmpty(value))
+        {
+            AppendInternal(new StringSegmentNode(value));
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    /// Appends <paramref name="value"/> to the end of the list.
+    /// </summary>
+    /// <param name="value">The value to append</param>
+    /// <returns>The current instance with <paramref name="value"/> at the tail.</returns>
+    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
+    public StringSegmentLinkedList Append(ReadOnlyMemory<char> value)
+    {
+        if (!value.IsEmpty)
+        {
+            AppendInternal(new StringSegmentNode(value));
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    /// Appends <paramref name="value"/> to the end of the list.
+    /// </summary>
+    /// <param name="value">The value to append</param>
+    /// <returns>The current instance with <paramref name="value"/> at the tail.</returns>
+    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
+    public StringSegmentLinkedList Append(char[] value) => value is { Length: > 0 }
+                                                               ? Append((ReadOnlyMemory<char>)value)
+                                                               : this;
+
     private void AppendInternal(StringSegmentNode newNode)
     {
-        if (_tail is null)
+        if (_head is null)
         {
-            _tail = newNode;
-            if (_head.Equals(EmptyNode))
-            {
-                _head = newNode;
-            }
-            else
-            {
-                _head.Next = _tail;
-            }
+            _head = _tail = newNode;
         }
         else
         {
-            _head.Next ??= _tail;
             _tail.Next = newNode;
             _tail = newNode;
         }
@@ -102,6 +273,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <param name="index">0-based index where <paramref name="value"/> will be inserted</param>
     /// <param name="value">The value of the node to insert.</param>
     /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0. or &gt; <see cref="Count"/>.</exception>
+    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
     public void InsertAt(int index, ReadOnlySpan<char> value)
     {
         if (index < 0 || index > Count)
@@ -116,27 +288,114 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
         }
     }
 
+    /// <summary>
+    /// Inserts a new link containing <paramref name="value"/> at the given <paramref name="index"/>.
+    /// </summary>
+    /// <param name="index">0-based index where <paramref name="value"/> will be inserted</param>
+    /// <param name="value">The value of the node to insert.</param>
+    /// <remarks>
+    /// The current instance remains untouched if <paramref name="value"/> is empty.
+    /// <para>
+    /// Note: this method will increase the output of <see cref="Count"/> by 1 when <paramref name="value"/> is not empty.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0 or &gt; <see cref="Count"/>.</exception>
+    public void InsertAt(int index, StringSegment value)
+    {
+        if (index < 0 || index > Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
+        }
+
+        if (value is { HasValue: true, Length: > 0 })
+        {
+            ReadOnlyMemory<char> mem = value.Buffer?.AsMemory(value.Offset, value.Length) ?? ReadOnlyMemory<char>.Empty;
+            if (!mem.IsEmpty)
+            {
+                InsertAtInternal(index, new StringSegmentNode(mem));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Inserts a new node containing <paramref name="value"/> at the given <paramref name="index"/>.
+    /// </summary>
+    /// <param name="index">0-based index where <paramref name="value"/> will be inserted</param>
+    /// <param name="value">The value of the node to insert.</param>
+    /// <remarks>
+    /// The current instance remains untouched if <paramref name="value"/> is empty.
+    /// <para>
+    /// Note: this method will increase the output of <see cref="Count"/> by 1 when <paramref name="value"/> is not empty.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0 or &gt; <see cref="Count"/>.</exception>
+    public void InsertAt(int index, string value)
+    {
+        if (index < 0 || index > Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
+        }
+
+        if (!string.IsNullOrEmpty(value))
+        {
+            InsertAtInternal(index, new StringSegmentNode(value));
+        }
+    }
+
+    /// <summary>
+    /// Inserts a new link containing <paramref name="value"/> at the given <paramref name="index"/>.
+    /// </summary>
+    /// <param name="index">0-based index where <paramref name="value"/> will be inserted</param>
+    /// <param name="value">The value of the node to insert.</param>
+    /// <remarks>The current instance remains untouched if <paramref name="value"/> is empty.</remarks>
+    /// <exception cref="ArgumentOutOfRangeException">if <paramref name="index"/> is &lt; 0 or &gt; <see cref="Count"/>.</exception>
+    public void InsertAt(int index, ReadOnlyMemory<char> value)
+    {
+        if (index is < 0 || index > Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
+        }
+
+        if (!value.IsEmpty)
+        {
+            InsertAtInternal(index, new StringSegmentNode(value));
+        }
+    }
+
     private void InsertAtInternal(int index, StringSegmentNode newNode)
     {
-        if (index is 0)
+        if (index == 0)
         {
             newNode.Next = _head;
             _head = newNode;
+            if (_tail is null)
+            {
+                _tail = newNode;
+            }
+        }
+        else if (index == Count)
+        {
+            // insert at end
+            if (_tail is null)
+            {
+                _head = _tail = newNode;
+            }
+            else
+            {
+                _tail.Next = newNode;
+                _tail = newNode;
+            }
         }
         else
         {
-            StringSegmentNode current = _head;
-            StringSegmentNode previous = null;
-
-            for (int i = 0; i < index; i++)
+            StringSegmentNode previous = _head;
+            for (int i = 1; i < index; i++)
             {
-                previous = current;
-                current = current!.Next;
+                previous = previous!.Next;
             }
 
-            previous ??= newNode;
+            newNode.Next = previous!.Next;
             previous.Next = newNode;
-            newNode.Next ??= _tail;
         }
 
         Count++;
@@ -171,9 +430,83 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     }
 
     /// <summary>
-    /// Gets the number of nodes in the current linked list
+    /// Gets the number of nodes.
     /// </summary>
+    /// <remarks>
+    /// The value obtained must be discarded after any call to :
+    /// <list type="bullet">
+    ///
+    /// </list>
+    /// <see cref="InsertAt(int, string)"/>, <see cref="InsertAt(int, string)"/>
+    /// </remarks>
     public int Count { get; private set; }
+
+    /// <summary>
+    /// Compacts the list into larger chunks to reduce node count and improve locality.
+    /// </summary>
+    /// <remarks>
+    /// Calling this method will have no impact on the value returned by <see cref="GetTotalLength"/>.
+    /// But it will, in certain cases, reduce the number of nodes in the list, which, in turn, could make subsequent operations faster by reducing the <see cref="Count">internal node count</see>.
+    /// </remarks>
+    public StringSegmentLinkedList Compact()
+    {
+        if (_head is null)
+        {
+            return this;
+        }
+
+        ArrayPool<char> pool = ArrayPool<char>.Shared;
+        char[] buffer = pool.Rent(ChunkSize);
+        try
+        {
+            int pos = 0;
+            StringSegmentLinkedList compacted = new();
+
+            StringSegmentNode node = _head;
+            while (node is not null)
+            {
+                ReadOnlySpan<char> span = node.Value.Span;
+                int remaining = span.Length;
+                int offset = 0;
+
+                while (remaining > 0)
+                {
+                    int toCopy = Math.Min(remaining, ChunkSize - pos);
+                    span.Slice(offset, toCopy).CopyTo(buffer.AsSpan(pos));
+                    pos += toCopy;
+                    offset += toCopy;
+                    remaining -= toCopy;
+                    if (pos == ChunkSize)
+                    {
+                        Flush();
+                    }
+                }
+
+                node = node.Next;
+            }
+
+            Flush();
+
+            _head = compacted._head;
+            _tail = compacted._tail;
+            Count = compacted.Count;
+            return this;
+
+            void Flush()
+            {
+                if (pos is not 0)
+                {
+                    string chunk = new string(buffer, 0, pos);
+                    compacted.Append(chunk);
+                    pos = 0;
+                }
+            }
+        }
+        finally
+        {
+            pool.Return(buffer);
+        }
+    }
 
     /// <summary>
     /// Computes the total length of the resulting string value
@@ -195,32 +528,47 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <summary>
     /// Computes the <see cref="string"/> value.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The computed <see cref="string"/>.</returns>
     public string ToStringValue()
     {
-        StringBuilder sb = new();
-        StringSegmentNode current = _head;
-        while (current is not null)
+        int total = GetTotalLength();
+        string result = string.Empty;
+
+        if (total is not 0)
         {
-            ReadOnlyMemory<char> segment = current.Value;
-            sb.Append(segment.Span);
-            current = current.Next;
+#if NETSTANDARD2_0
+            System.Text.StringBuilder sb = new (total);
+            StringSegmentNode current = _head;
+            do
+            {
+                ReadOnlySpan<char> span = current.Value.Span;
+                sb.Append(span.ToString());
+                current = current.Next;
+            } while (current is not null);
+
+#else
+            result = string.Create(total, _head, static (dest, head) =>
+            {
+                int offset = 0;
+                StringSegmentNode current = head;
+                while (current is not null)
+                {
+                    ReadOnlySpan<char> span = current.Value.Span;
+                    span.CopyTo(dest[offset..]);
+                    offset += span.Length;
+                    current = current.Next;
+                }
+            });
+#endif
         }
 
-        return sb.ToString();
+        return result;
     }
 
     /// <inheritdoc />
     public IEnumerator<ReadOnlyMemory<char>> GetEnumerator()
     {
-        if (_head.Equals(EmptyNode))
-        {
-            yield break;
-        }
-
-        yield return _head.Value;
-
-        StringSegmentNode current = _head.Next;
+        StringSegmentNode current = _head;
         while (current is not null)
         {
             yield return current.Value;
@@ -238,9 +586,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <param name="newChar"><see langword="character"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
-    /// This method does its best to never allocate.
-    /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
-    /// the current instance.
+    /// The returned <see cref="StringSegmentLinkedList"/>'s <see cref="Count">node count</see> may differ from the original instance's.
     /// </remarks>
     public StringSegmentLinkedList Replace(char oldChar, char newChar) => Replace(oldChar, [newChar]);
 
@@ -251,9 +597,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <param name="newChar"><see langword="character"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
-    /// This method does its best to never allocated.
-    /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
-    /// the current instance.
+    /// The returned <see cref="StringSegmentLinkedList"/>'s <see cref="Count">node count</see> may differ from the original instance's.
     /// </remarks>
     public StringSegmentLinkedList Replace(Func<char, bool> oldChar, char newChar) => Replace(oldChar, [newChar]);
 
@@ -264,9 +608,7 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// <param name="replacement"><see langword="string"/> that will replace <paramref name="oldChar"/>.</param>
     /// <returns>The current list where all characters were replaced.</returns>
     /// <remarks>
-    /// This method does its best to never allocate.
-    /// Also, beware that the returned <see cref="StringSegmentLinkedList"/> may have more <see cref="StringSegmentNode">nodes</see> than
-    /// the current instance.
+    /// The returned <see cref="StringSegmentLinkedList"/>'s <see cref="Count">node count</see> may differ from the original instance's.
     /// </remarks>
     public StringSegmentLinkedList Replace(char oldChar, ReadOnlySpan<char> replacement)
         => Replace(chr => chr == oldChar, replacement);
@@ -281,10 +623,19 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// The <see cref="StringSegmentLinkedList"/> where each <see langword="char"/> that matches <paramref name="predicate"/>
     /// has been replaced with <paramref name="replacement"/>.
     /// </returns>
+    /// <remarks>
+    /// The returned <see cref="StringSegmentLinkedList"/>'s <see cref="Count">node count</see> may differ from the original instance's.
+    /// </remarks>
     public StringSegmentLinkedList Replace(Func<char, bool> predicate, ReadOnlySpan<char> replacement)
     {
-        StringSegmentLinkedList replacementList = [];
+        if (predicate is null)
+        {
+            throw new ArgumentNullException(nameof(predicate));
+        }
+
+        StringSegmentLinkedList replacementList = new();
         StringSegmentNode current = _head;
+        bool anyReplacement = false;
 
         while (current is not null)
         {
@@ -293,11 +644,11 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
 
             if (indexOfOldChar >= 0)
             {
-                ReadOnlySpan<char> valueToKeep;
+                anyReplacement = true;
+
                 if (indexOfOldChar > 0)
                 {
-                    valueToKeep = current.Value[..indexOfOldChar].Span;
-                    replacementList = replacementList.Append(valueToKeep);
+                    replacementList = replacementList.Append(current.Value[..indexOfOldChar]);
                 }
 
                 replacementList = replacementList.Append(replacement);
@@ -307,32 +658,27 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
                 {
                     if (index < occurrence)
                     {
-                        valueToKeep = current.Value.Span.Slice(index, occurrence - index);
-                        replacementList = replacementList.Append(valueToKeep);
+                        replacementList = replacementList.Append(current.Value.Slice(index, occurrence - index));
                     }
 
                     replacementList = replacementList.Append(replacement);
-
-                    // move the cursor right after the current occurrence
                     index = occurrence + 1;
                 }
 
-                // we did all substitutions, but we did not reach the end of the original input
-                // => copy all remaining original chars starting at the "index" position
                 if (index < current.Value.Length)
                 {
-                    replacementList = replacementList.Append(current.Value[index..].Span);
+                    replacementList = replacementList.Append(current.Value[index..]);
                 }
             }
             else
             {
-                replacementList = replacementList.Append(current.Value.Span);
+                replacementList = replacementList.Append(current.Value);
             }
 
             current = current.Next;
         }
 
-        return replacementList;
+        return anyReplacement ? replacementList : this;
     }
 
     /// <summary>
@@ -357,10 +703,21 @@ public class StringSegmentLinkedList : IEnumerable<ReadOnlyMemory<char>>, IEquat
     /// // `list` will have 'a' replaced with "alpha" and 'b' with "beta"
     /// </code>
     /// </example>
-public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> replacements)
+    public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDictionary<char, ReadOnlyMemory<char>> replacements)
     {
-        StringSegmentLinkedList replacementList = [];
+        if (predicate is null)
+        {
+            throw new ArgumentNullException(nameof(predicate));
+        }
+
+        if (replacements is null)
+        {
+            throw new ArgumentNullException(nameof(replacements));
+        }
+
+        StringSegmentLinkedList replacementList = new();
         StringSegmentNode current = _head;
+        bool anyReplacement = false;
 
         while (current is not null)
         {
@@ -369,22 +726,19 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
 
             if (indexOfOldChar >= 0)
             {
+                anyReplacement = true;
+
                 if (!replacements.TryGetValue(current.Value.Span[indexOfOldChar], out ReadOnlyMemory<char> replacement))
                 {
                     replacement = ReadOnlyMemory<char>.Empty;
                 }
 
-                ReadOnlyMemory<char> value;
-                if (indexOfOldChar is 0)
+                if (indexOfOldChar > 0)
                 {
-                    value = replacement;
-                    replacementList = replacementList.Append(value.Span);
+                    replacementList = replacementList.Append(current.Value[..indexOfOldChar]);
                 }
-                else
-                {
-                    value = current.Value[..indexOfOldChar];
-                    replacementList = replacementList.Append(value.Span).Append(replacement.Span);
-                }
+
+                replacementList = replacementList.Append(replacement);
 
                 int index = indexOfOldChar;
                 foreach (int occurrence in occurrences.Skip(1))
@@ -396,34 +750,32 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
 
                     if (index < occurrence)
                     {
-                        ReadOnlyMemory<char> valueToKeep = current.Value[( index + 1 ) .. occurrence];
-                        replacementList = replacementList.Append(valueToKeep.Span)
-                            .Append(replacement.Span);
+                        ReadOnlyMemory<char> valueToKeep = current.Value[(index + 1) .. occurrence];
+                        replacementList = replacementList.Append(valueToKeep)
+                            .Append(replacement);
                     }
                     else
                     {
-                        replacementList = replacementList.Append(replacement.Span);
+                        replacementList = replacementList.Append(replacement);
                     }
 
                     index = occurrence;
                 }
 
-                // we did all substitutions, but we did not reach the end of the original input
-                // => copy all remaining original chars starting at the index position
                 if (index < current.Value.Length)
                 {
-                    replacementList = replacementList.Append(current.Value[( index + 1 )..].Span);
+                    replacementList = replacementList.Append(current.Value[(index + 1)..]);
                 }
             }
             else
             {
-                replacementList = replacementList.Append(current.Value.Span);
+                replacementList = replacementList.Append(current.Value);
             }
 
             current = current.Next;
         }
 
-        return replacementList;
+        return anyReplacement ? replacementList : this;
     }
 
     /// <summary>
@@ -439,28 +791,38 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
     /// </remarks>
     public StringSegmentLinkedList Replace(in ReadOnlySpan<char> oldValue, in ReadOnlySpan<char> newValue)
     {
-        StringSegmentLinkedList replacementList = [];
+        StringSegmentLinkedList replacementList = new();
         StringSegmentNode current = _head;
         int oldStringLength = oldValue.Length;
+        bool anyReplacement = false;
 
         while (current is not null)
         {
             ReadOnlySpan<char> subject = current.Value.Span;
-            int index = subject.IndexOf(oldValue[0]);
+            int index = subject.IndexOf(oldValue.Length > 0 ? oldValue[0] : '\0');
 
-            // no match in the current node
-            if (index is -1)
+            if (oldStringLength == 0)
             {
-                replacementList = replacementList.Append(subject);
+                // Nothing to replace
+                replacementList = replacementList.Append(current.Value);
+            }
+            else if (index is -1)
+            {
+                replacementList = replacementList.Append(current.Value);
             }
             else
             {
                 int previousIndex = 0;
                 do
                 {
-                    replacementList = replacementList.Append(subject[..index]);
+                    if (index > 0)
+                    {
+                        replacementList = replacementList.Append(subject[..index]);
+                    }
+
                     int offset = 0;
                     bool mismatchFound;
+                    int startIndex = index;
                     do
                     {
                         mismatchFound = subject[index] != oldValue[offset];
@@ -468,16 +830,19 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
                         offset++;
                     } while (offset < oldStringLength && index < subject.Length && !mismatchFound);
 
-                    replacementList = mismatchFound switch
+                    if (mismatchFound)
                     {
-                        // a mismatch was found: we need to rewind and copy from the previous index up to the current one
-                        true => replacementList.Append(subject[(previousIndex + 1)..index]),
-                        // we looped through the whole span and, up to here, everything matches => we just append newValue
-                        _ => replacementList.Append(newValue)
-                    };
+                        // rewind and copy from previousIndex+1 to index
+                        replacementList = replacementList.Append(subject[(previousIndex + 1)..index]);
+                    }
+                    else
+                    {
+                        replacementList = replacementList.Append(newValue);
+                        anyReplacement = true;
+                    }
 
                     subject = subject[index..];
-                    previousIndex = index;
+                    previousIndex = startIndex;
                     index = subject.IndexOf(oldValue[0]);
                 } while (index != -1 && subject.Length > 0);
 
@@ -490,9 +855,16 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
             current = current.Next;
         }
 
-        _head = replacementList._head;
+        if (anyReplacement)
+        {
+            _head = replacementList._head;
+            _tail = replacementList._tail;
+            Count = replacementList.Count;
+        }
 
-        return this;
+        return anyReplacement
+                   ? replacementList
+                   : this; // no-op when none replaced
     }
 
     /// <summary>
@@ -502,25 +874,48 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
     /// <returns>A new <see cref="StringSegmentLinkedList"/> where all candidates <paramref name="predicate"/> were removed.</returns>
     public StringSegmentLinkedList RemoveBy(Func<ReadOnlyMemory<char>, bool> predicate)
     {
+        if (predicate is null)
+        {
+            throw new ArgumentNullException(nameof(predicate));
+        }
+
         StringSegmentNode current = _head;
         StringSegmentNode previous = null;
+        int newCount = 0;
+
         while (current is not null)
         {
             if (predicate(current.Value))
             {
+                // remove current
                 if (previous is not null)
                 {
                     previous.Next = current.Next;
                 }
                 else
                 {
-                    Debug.Assert(_head.Equals(current));
-                    _head = _tail;
+                    _head = current.Next;
+                }
+
+                if (current.Next is null)
+                {
+                    _tail = previous;
                 }
             }
+            else
+            {
+                // keep current
+                previous = current;
+                newCount++;
+            }
 
-            previous = current;
             current = current.Next;
+        }
+
+        Count = newCount;
+        if (Count is 0)
+        {
+            _head = _tail = null;
         }
 
         return this;
@@ -539,31 +934,19 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
             throw new ArgumentNullException(nameof(other));
         }
 
-        StringSegmentLinkedList result = [];
+        StringSegmentLinkedList result = new();
         StringSegmentNode current = _head;
-        if (!current.Equals(EmptyNode))
+        while (current is not null)
         {
-            while (current is not null)
-            {
-                result = result.Append(current.Value.Span);
-                current = current.Next;
-            }
+            result = result.Append(current.Value);
+            current = current.Next;
         }
 
         current = other._head;
-        if (!current.Equals(EmptyNode))
+        while (current is not null)
         {
-            if (result.Count is 0)
-            {
-                result = new StringSegmentLinkedList(current.Value.Span);
-                current = current.Next;
-            }
-
-            while (current is not null)
-            {
-                result = result.Append(current.Value.Span);
-                current = current.Next;
-            }
+            result = result.Append(current.Value);
+            current = current.Next;
         }
 
         return result;
@@ -573,6 +956,21 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
     public override bool Equals(object obj) => obj is StringSegmentLinkedList other && Equals(other, CharComparer.InvariantCultureIgnoreCase);
 
     /// <inheritdoc />
+#if NETSTANDARD2_0
+    public override int GetHashCode()
+    {
+        int hashCode = 17;
+
+        using IEnumerator<ReadOnlyMemory<char>> enumerator = GetEnumerator();
+
+        while (enumerator.MoveNext())
+        {
+            hashCode = hashCode * 31 + enumerator.Current.GetHashCode();
+        }
+
+        return hashCode;
+    }
+#else
     public override int GetHashCode()
     {
         HashCode hashCode = new();
@@ -586,6 +984,7 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
 
         return hashCode.ToHashCode();
     }
+#endif
 
     /// <summary>
     /// Determines whether the current <see cref="StringSegmentLinkedList"/> is equal to another <see cref="StringSegmentLinkedList"/>.
@@ -761,7 +1160,7 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
             int searchIndex = 0;
             while (currentNode is not null && !found)
             {
-                var valueSpan = currentNode.Value.Span;
+                ReadOnlySpan<char> valueSpan = currentNode.Value.Span;
 
                 for (int i = 0; i < valueSpan.Length && !found; i++)
                 {
@@ -809,7 +1208,7 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
 
         if (search.IsEmpty)
         {
-            startsWith = EmptyNode.Equals(_head);
+            startsWith = true;
         }
         else
         {
@@ -850,6 +1249,7 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
                     {
                         offset += current.Value.Length;
                     }
+
                     current = current.Next;
                 } while (offset <= search.Length && !mismatchFound && current is not null);
 
@@ -860,4 +1260,72 @@ public StringSegmentLinkedList Replace(Func<char, bool> predicate, IReadOnlyDict
 
         return startsWith;
     }
+
+    /// <summary>
+    /// Checks if the current instance ends with <paramref name="search"/>.
+    /// </summary>
+    /// <param name="search">The value to search in the current instance.</param>
+    /// <param name="comparer">The comparer to use when comparing each <see cref="char"/> from <paramref name="search"/>.</param>
+    /// <returns><see langword="true"/> if the current instance ends with the specified <paramref name="search"/> and <see langword="false"/> otherwise.</returns>
+    public bool EndsWith(ReadOnlySpan<char> search, IEqualityComparer<char> comparer = null)
+{
+    IEqualityComparer<char> localComparer = comparer ?? EqualityComparer<char>.Default;
+
+    bool result = false;
+
+    if (!search.IsEmpty)
+    {
+        if (_head is not null)
+        {
+            int totalLength = GetTotalLength();
+            if (search.Length <= totalLength)
+            {
+                int skip = totalLength - search.Length;
+                StringSegmentNode current = _head;
+
+                // Skip nodes until we reach the position where the search should start
+                while (current is not null && skip >= current.Value.Length)
+                {
+                    skip -= current.Value.Length;
+                    current = current.Next;
+                }
+
+                if (current is not null)
+                {
+                    int indexInNode = skip;
+                    int searchIndex = 0;
+                    bool mismatchFound = false;
+
+                    // Compare characters from the current position to the end
+                    while (current is not null && searchIndex < search.Length && !mismatchFound)
+                    {
+                        ReadOnlySpan<char> span = current.Value.Span;
+                        for (int i = indexInNode; i < span.Length && searchIndex < search.Length && !mismatchFound; i++)
+                        {
+                            if (!localComparer.Equals(span[i], search[searchIndex]))
+                            {
+                                mismatchFound = true;
+                            }
+                            else
+                            {
+                                searchIndex++;
+                            }
+                        }
+
+                        current = current.Next;
+                        indexInNode = 0;
+                    }
+
+                    result = searchIndex == search.Length && !mismatchFound;
+                }
+            }
+        }
+    }
+    else
+    {
+        result = true;
+    }
+
+    return result;
+}
 }

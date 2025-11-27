@@ -61,7 +61,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
         "LICENSE"
     ],
     InvokedTargets = [
-        nameof(IMutationTest.MutationTests),
+        nameof(Tests),
         nameof(IPushNugetPackages.Pack)
     ],
     CacheKeyFiles =
@@ -85,7 +85,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     FetchDepth = 0,
     On = [GitHubActionsTrigger.WorkflowDispatch],
     InvokedTargets = [
-        nameof(IMutationTest.MutationTests),
+        nameof(Tests),
         nameof(IPushNugetPackages.Pack)
     ],
     CacheKeyFiles =
@@ -158,12 +158,14 @@ public class Pipelines : EnhancedNukeBuild,
     IUnitTest,
     IBenchmark,
     IHaveGitVersion,
-    IMutationTest,
+    // TODO reintroduce mutation tests once https://github.com/stryker-mutator/issues/318 is resolved.
+    //IMutationTest,
     IReportUnitTestCoverage,
     IPack,
     IPushNugetPackages,
     ICreateGithubRelease,
-    IGitFlowWithPullRequest
+    IGitFlowWithPullRequest,
+    ICanRegenerateGitHubWorkflows
 {
     [Required]
     [Solution]
@@ -217,18 +219,19 @@ public class Pipelines : EnhancedNukeBuild,
                                                                     )
                                                      );
 
-    ///<inheritdoc/>
-    IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects =>
-    [
-        .. s_projects.Select(projectName => new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
-                                         this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests"),
-                                         (this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json") switch
-                                         {
-                                             var configFilePath when configFilePath.FileExists() => configFilePath,
-                                             _ => null
-                                         }))
-            .Where(mutationTest => mutationTest.ConfigurationFile is not null)
-    ];
+    // TODO reintroduce mutation tests once https://github.com/stryker-mutator/issues/318 is resolved.
+    // ///<inheritdoc/>
+    // IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects =>
+    // [
+    //     .. s_projects.Select(projectName => new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
+    //                                      this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests"),
+    //                                      (this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json") switch
+    //                                      {
+    //                                          var configFilePath when configFilePath.FileExists() => configFilePath,
+    //                                          _ => null
+    //                                      }))
+    //         .Where(mutationTest => mutationTest.ConfigurationFile is not null)
+    // ];
 
     ///<inheritdoc/>
     IEnumerable<AbsolutePath> IPack.PackableProjects => this.Get<IHaveSourceDirectory>().SourceDirectory.GlobFiles("**/*.csproj");
@@ -249,7 +252,7 @@ public class Pipelines : EnhancedNukeBuild,
 
     public Target Tests => _ => _
         .TryDependsOn<IUnitTest>(x => x.UnitTests)
-        .TryDependsOn<IMutationTest>(x => x.MutationTests)
+        //.TryDependsOn<IMutationTest>(x => x.MutationTests)
         .Description("Run both unit and mutation tests");
 
     ///<inheritdoc/>
@@ -258,9 +261,9 @@ public class Pipelines : EnhancedNukeBuild,
     ///<inheritdoc/>
     Configure<CodecovSettings> IReportUnitTestCoverage.CodecovSettings => _ => _.SetFramework("netcoreapp3.1");
 
-    /// <inheritdoc />
-    Configure<StrykerSettings> IMutationTest.StrykerArgumentsSettings => options => options
-                                                                             .When(_ => IsLocalBuild, settings => settings.SetReporters(StrykerReporter.Html));
+    // /// <inheritdoc />
+    // Configure<StrykerSettings> IMutationTest.StrykerArgumentsSettings => options => options
+    //                                                                          .When(_ => IsLocalBuild, settings => settings.SetReporters(StrykerReporter.Html));
 
     protected override void OnBuildCreated()
     {
