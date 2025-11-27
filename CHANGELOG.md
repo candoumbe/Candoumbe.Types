@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.5.0] / 2025-11-27
 ### 🚀 New features
 - Added `net10.0` TFM support ([#346](https://github.com/candoumbe/candoumbe.types/issues/346))
 - Added `netstandard2.0` TFM support ([#355](https://github.com/candoumbe/candoumbe.types/issues/355))
@@ -23,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🐛 Fixes
 - Add missing `Parse` and `TryParse` methods for `NonNegativeInteger` and `PositiveInteger` types.
 - Add mising `PositiveInteger.ToString()` to better display positive integer values in logs.
-
+- Updated all dependencies to their latest versions.
 
 ## [0.4.1] / 2025-08-12
 ### 🐛 Fixes
@@ -134,7 +136,8 @@ which is now redundant
 ## [0.1.0] / 2023-01-29
 - Initial release
 
-[Unreleased]: https://github.com/candoumbe/Candoumbe.Types/compare/0.4.2...HEAD
+[Unreleased]: https://github.com/candoumbe/Candoumbe.Types/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/candoumbe/Candoumbe.Types/compare/0.4.2...0.5.0
 [0.4.2]: https://github.com/candoumbe/Candoumbe.Types/compare/0.4.1...0.4.2
 [0.4.1]: https://github.com/candoumbe/Candoumbe.Types/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/candoumbe/Candoumbe.Types/compare/0.3.1...0.4.0
