@@ -61,7 +61,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
         "LICENSE"
     ],
     InvokedTargets = [
-        nameof(Tests),
+        nameof(IMutationTest.MutationTests),
         nameof(IPushNugetPackages.Pack)
     ],
     CacheKeyFiles =
@@ -85,7 +85,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     FetchDepth = 0,
     On = [GitHubActionsTrigger.WorkflowDispatch],
     InvokedTargets = [
-        nameof(Tests),
+        nameof(IMutationTest.MutationTests),
         nameof(IPushNugetPackages.Pack)
     ],
     CacheKeyFiles =
@@ -158,8 +158,7 @@ public class Pipelines : EnhancedNukeBuild,
     IUnitTest,
     IBenchmark,
     IHaveGitVersion,
-    // TODO reintroduce mutation tests once https://github.com/stryker-mutator/issues/318 is resolved.
-    //IMutationTest,
+    IMutationTest,
     IReportUnitTestCoverage,
     IPack,
     IPushNugetPackages,
@@ -219,19 +218,18 @@ public class Pipelines : EnhancedNukeBuild,
                                                                     )
                                                      );
 
-    // TODO reintroduce mutation tests once https://github.com/stryker-mutator/issues/318 is resolved.
-    // ///<inheritdoc/>
-    // IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects =>
-    // [
-    //     .. s_projects.Select(projectName => new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
-    //                                      this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests"),
-    //                                      (this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json") switch
-    //                                      {
-    //                                          var configFilePath when configFilePath.FileExists() => configFilePath,
-    //                                          _ => null
-    //                                      }))
-    //         .Where(mutationTest => mutationTest.ConfigurationFile is not null)
-    // ];
+    ///<inheritdoc/>
+    IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects =>
+    [
+        .. s_projects.Select(projectName => new MutationProjectConfiguration(Solution.AllProjects.Single(project => string.Equals(project.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
+                                         this.Get<IHaveSolution>().Solution.GetAllProjects("*.UnitTests"),
+                                         (this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json") switch
+                                         {
+                                             var configFilePath when configFilePath.FileExists() => configFilePath,
+                                             _ => null
+                                         }))
+            .Where(mutationTest => mutationTest.ConfigurationFile is not null)
+    ];
 
     ///<inheritdoc/>
     IEnumerable<AbsolutePath> IPack.PackableProjects => this.Get<IHaveSourceDirectory>().SourceDirectory.GlobFiles("**/*.csproj");
