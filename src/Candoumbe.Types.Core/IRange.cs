@@ -1,6 +1,6 @@
 using System;
 
-namespace Candoumbe.Types;
+namespace Candoumbe.Types.Core;
 
 /// <summary>
 /// It's quite common to see comparisons where a value is checked against an interval of values. Ranges are most of the time handled by a pair of values,

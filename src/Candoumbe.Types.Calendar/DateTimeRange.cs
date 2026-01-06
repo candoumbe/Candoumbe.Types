@@ -2,6 +2,7 @@
 // Licenced under GNU General Public Licence, version 3.0"
 
 using System;
+using Candoumbe.Types.Core;
 
 #if NET7_0_OR_GREATER
 using System.Numerics;
@@ -64,8 +65,8 @@ public record DateTimeRange : Range<DateTime>, IFormattable
         null => -1,
         _ => Start.CompareTo(other.Start) switch
         {
-            int and 0 => End.CompareTo(other.End),
-            int value => value
+            0 => End.CompareTo(other.End),
+            var value => value
         }
     };
 
@@ -107,7 +108,7 @@ public record DateTimeRange : Range<DateTime>, IFormattable
 #if NET5_0_OR_GREATER
             result = this with { Start = GetMinimum(Start, other.Start), End = GetMaximum(other.End, End) };
 #else
-            result = new(GetMinimum(Start, other.Start), GetMaximum(other.End, End));
+            result = new DateTimeRange(GetMinimum(Start, other.Start), GetMaximum(other.End, End));
 #endif
         }
         else

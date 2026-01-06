@@ -5,6 +5,7 @@ using ArchUnitNET.Fluent.Conditions;
 using ArchUnitNET.Loader;
 using ArchUnitNET.xUnitV3;
 using Candoumbe.Types.Calendar;
+using Candoumbe.Types.Core;
 using Candoumbe.Types.Numerics;
 using Candoumbe.Types.Strings;
 using Architecture = ArchUnitNET.Domain.Architecture;

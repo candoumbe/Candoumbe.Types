@@ -1,6 +1,6 @@
 using System;
 
-namespace Candoumbe.Types;
+namespace Candoumbe.Types.Core;
 
 /// <summary>
 /// Marker interface for intervals that can represent an interval in such way that, for any given <typeparamref name="TBound"/> value,
