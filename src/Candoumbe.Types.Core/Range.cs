@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Candoumbe.Types;
+namespace Candoumbe.Types.Core;
 
 #if !NET5_0_OR_GREATER
 /// <summary>

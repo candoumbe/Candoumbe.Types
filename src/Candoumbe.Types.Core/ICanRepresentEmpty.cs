@@ -1,6 +1,6 @@
 using System;
 
-namespace Candoumbe.Types;
+namespace Candoumbe.Types.Core;
 
 /// <summary>
 /// Defines contract for intervals that can be empty.

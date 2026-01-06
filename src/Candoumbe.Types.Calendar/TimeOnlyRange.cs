@@ -4,6 +4,7 @@
 #if NET6_0_OR_GREATER
 using System;
 using System.Diagnostics;
+using Candoumbe.Types.Core;
 #if NET7_0_OR_GREATER
 using System.Numerics;
 #endif

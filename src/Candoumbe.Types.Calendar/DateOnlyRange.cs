@@ -4,6 +4,7 @@
 
 using System;
 using System.Numerics;
+using Candoumbe.Types.Core;
 
 namespace Candoumbe.Types.Calendar;
 
