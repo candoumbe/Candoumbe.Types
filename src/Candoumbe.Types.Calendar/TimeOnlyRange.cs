@@ -299,7 +299,7 @@ public record TimeOnlyRange : Range<TimeOnly>
             _ => Start.CompareTo(other.Start) switch
             {
                 0 => End.CompareTo(other.End),
-                int value => value
+                var value => value
             }
         };
 }

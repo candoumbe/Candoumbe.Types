@@ -2,6 +2,7 @@
 // Licenced under GNU General Public Licence, version 3.0"
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Candoumbe.Types.Core;
 
 #if NET7_0_OR_GREATER
@@ -19,7 +20,7 @@ public class DateTimeRange : Range<DateTime>, IFormattable
     , ICanRepresentEmpty<DateTimeRange, DateTime>
     , IRange<DateTimeRange, DateTime>
 #else
-public record DateTimeRange : Range<DateTime>, IFormattable
+public record DateTimeRange : Range<DateTime>, IFormattable, IComparable<DateTimeRange>
 #endif
 #if NET7_0_OR_GREATER
     , IAdditionOperators<DateTimeRange, DateTimeRange, DateTimeRange>
@@ -27,7 +28,7 @@ public record DateTimeRange : Range<DateTime>, IFormattable
 #endif
 {
     /// <summary>
-    /// A <see cref="DateTimeRange"/> that cannot contains other <see cref="DateTimeRange"/> range.
+    /// A <see cref="DateTimeRange"/> that cannot contain other <see cref="DateTimeRange"/> range.
     /// </summary>
     public static DateTimeRange Empty => new(DateTime.MinValue, DateTime.MinValue);
 
@@ -71,7 +72,11 @@ public record DateTimeRange : Range<DateTime>, IFormattable
     };
 
     ///<inheritdoc/>
+#if NET
+    public string ToString([StringSyntax(StringSyntaxAttribute.DateTimeFormat)] string format, IFormatProvider provider)
+#else
     public string ToString(string format, IFormatProvider provider)
+#endif
         => (Start == End)
             ? Start.ToString(format, provider)
             :$"{Start.ToString(format, provider)} - {End.ToString(format, provider)}";
@@ -98,18 +103,14 @@ public record DateTimeRange : Range<DateTime>, IFormattable
     /// <exception cref="InvalidOperationException">if current instance does not overlap or is not continuous with <paramref name="other"/>.</exception>
     public DateTimeRange Merge(DateTimeRange other)
     {
-        DateTimeRange result = Empty;
+        DateTimeRange result;
         if (other.IsEmpty())
         {
             result = this;
         }
         else if (Overlaps(other) || IsContiguousWith(other))
         {
-#if NET5_0_OR_GREATER
-            result = this with { Start = GetMinimum(Start, other.Start), End = GetMaximum(other.End, End) };
-#else
             result = new DateTimeRange(GetMinimum(Start, other.Start), GetMaximum(other.End, End));
-#endif
         }
         else
         {
@@ -119,7 +120,16 @@ public record DateTimeRange : Range<DateTime>, IFormattable
         return result;
     }
 
+#if !NET8_0_OR_GREATER
+    ///<summary>
+    /// Adds two <see cref="DateTimeRange"/> together and computes their sum
+    ///</summary>
+    ///<param name="left">Left operand</param>
+    ///<param name="right">Right operand</param>
+    ///<returns>A new <see cref="DateTimeRange"/> that spans over both <paramref name="left"/> and <paramref name="right"/>.</returns>
+#else
     ///<inheritdoc/>
+#endif
     public static DateTimeRange operator +(DateTimeRange left, DateTimeRange right) => left?.Merge(right);
 
     /// <summary>
@@ -148,7 +158,7 @@ public record DateTimeRange : Range<DateTime>, IFormattable
     /// Computes  <see cref="DateTimeRange"/> value that is common between the current instance and <paramref name="other"/>.
     /// </summary>
     /// <remarks>
-    /// This methods relies on <see cref="Range{T}.Overlaps(Range{T})"/> to see if there can be a intersection with <paramref name="other"/>.
+    /// This method relies on <see cref="Range{T}.Overlaps(Range{T})"/> to see if there can be an intersection with <paramref name="other"/>.
     /// </remarks>
     /// <param name="other">The other instance to test</param>
     /// <returns>a <see cref="DateTimeRange"/> that represent the overlap between the current instance and <paramref name="other"/> or <see cref="Empty"/> when no intersection found.</returns>
@@ -158,11 +168,7 @@ public record DateTimeRange : Range<DateTime>, IFormattable
 
         if (Overlaps(other))
         {
-#if NET5_0_OR_GREATER
-            result = this with { Start = GetMaximum(Start, other.Start), End = GetMinimum(End, other.End) };
-#else
-            result = new(GetMaximum(Start, other.Start), GetMinimum(End, other.End));
-#endif
+            result = new DateTimeRange(GetMaximum(Start, other.Start), GetMinimum(End, other.End));
         }
 
         return result;
@@ -192,14 +198,23 @@ public record DateTimeRange : Range<DateTime>, IFormattable
     public static bool operator !=(DateTimeRange left, DateTimeRange right) => !(left == right);
 #endif
 
-    ///<inheritdoc/>
-    public bool Overlaps(DateTimeRange other)
+    /// <summary>
+    /// Checks if the current instance overlaps with <paramref name="other"/>.
+    /// </summary>
+    /// <remarks>
+    /// This method extends <see cref="Range{T}.Overlaps(Range{T})"/> to take into account <see cref="Infinite"/> and <see cref="Empty"/> ranges.
+    /// </remarks>
+    /// <param name="other"></param>
+    /// <returns><see langword="true"/> if the current instance overlaps <paramref name="other"/> and <see langword="false"/> otherwise.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="other"/> is <see langword="null"/>.</exception>
+    public virtual bool Overlaps(DateTimeRange other)
         => (IsInfinite() && other.IsEmpty())
            || (IsEmpty() && other.IsInfinite())
            || base.Overlaps(other);
 
     /// <inheritdoc />
-    public bool Overlaps(DateTime other) => Start <= other && other <= End;
+    public override bool Overlaps(DateTime other) => Start <= other && other <= End;
+
 
 #if !NET5_0_OR_GREATER
     ///<inheritdoc/>
@@ -222,7 +237,6 @@ public record DateTimeRange : Range<DateTime>, IFormattable
 
     ///<inheritdoc/>
     public virtual bool Equals(DateTimeRange other) => other is not null &&
-               base.Equals(other) &&
                Start == other.Start &&
                End == other.End;
 }
