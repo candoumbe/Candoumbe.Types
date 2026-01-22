@@ -2,8 +2,10 @@
 // Licenced under GNU General Public Licence, version 3.0"
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Bogus;
-using Candoumbe.Types.Calendar.UnitTests.Generators;
+using Candoumbe.Types.Calendar.UnitTests.Helpers;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using FsCheck;
@@ -18,7 +20,7 @@ namespace Candoumbe.Types.Calendar.UnitTests;
 [UnitTest]
 public class DateTimeRangeTests(ITestOutputHelper outputHelper)
 {
-    private static readonly Faker Faker = new();
+    private static readonly Faker s_faker = new();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_start_gt_end_Constructor_should_feed_Properties_accordingly(DateTime start)
@@ -37,7 +39,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
     public void Given_start_and_end_Constructor_should_feed_Properties_accordingly(DateTime start)
     {
         // Arrange
-        DateTime end = Faker.Date.Future(refDate: start);
+        DateTime end = s_faker.Date.Future(refDate: start);
 
         // Act
         DateTimeRange range = new(start, end);
@@ -52,7 +54,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
     {
         // Arrange
         DateTime end = reference;
-        DateTime start = Faker.Date.Recent(refDate: reference);
+        DateTime start = s_faker.Date.Recent(refDate: reference);
 
         DateTimeRange first = new(start, end);
         DateTimeRange other = new(start, end);
@@ -105,7 +107,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
     public void Given_two_non_empty_DateTimeRange_instances_when_first_ends_where_other_starts_Abuts_should_return_true(DateTime reference)
     {
         // Arrange
-        DateTime start = Faker.Date.Recent(refDate: reference);
+        DateTime start = s_faker.Date.Recent(refDate: reference);
         DateTime end = reference;
 
         DateTimeRange current = new(start, reference);
@@ -120,7 +122,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public Property Given_two_DateTimeRange_instances_IsContiguous_should_be_symetric(DateTimeRange left, DateTimeRange right)
+    public Property Given_two_DateTimeRange_instances_IsContiguous_should_be_symmetric(DateTimeRange left, DateTimeRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
         outputHelper.WriteLine($"{nameof(right)}: {right}");
@@ -181,7 +183,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
         // Assert
         action.Should()
               .Throw<InvalidOperationException>("the two dates do not overlap").Which.Message
-              .Should().NotBeNullOrEmpty("the message can be usefull for troubleshooting purposes");
+              .Should().NotBeNullOrEmpty("the message can be useful for troubleshooting purposes");
     }
 
     public static TheoryData<DateTimeRange, DateTimeRange, bool> OverlapsCases
@@ -283,7 +285,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
     public void Given_a_range_When_a_datetime_value_is_between_start_and_end_Then_Overlaps_should_return_true(DateTimeRange range)
     {
         // Arrange
-        DateTime value = Faker.Date.Between(range.Start, range.End);
+        DateTime value = s_faker.Date.Between(range.Start, range.End);
 
         // Act
         bool actual = range.Overlaps(value);
@@ -295,6 +297,10 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public Property Overlaps_should_be_symmetric(DateTimeRange left, DateTimeRange right)
         => (left.Overlaps(right) == right.Overlaps(left)).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Overlaps_should_be_reflexive(DateTimeRange range)
+        => range.Overlaps(range).ToProperty();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_AllTime_when_testing_overlap_with_any_other_DateTimeRange_Overlaps_should_be_true(DateTimeRange other)
@@ -477,7 +483,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public Property Intersect_should_be_symetric(DateTimeRange left, DateTimeRange right)
+    public Property Intersect_should_be_symmetric(DateTimeRange left, DateTimeRange right)
         => (left.Intersect(right) == right.Intersect(left)).ToProperty();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
@@ -522,7 +528,7 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
     {
         // Arrange
         DateTimeRange range = rangeGenerator.Item;
-        DateTime value = Faker.Date.Between(range.Start, range.Start);
+        DateTime value = s_faker.Date.Between(range.Start, range.Start);
 
         // Assert
         return range.Overlaps(value).ToProperty();
@@ -537,10 +543,10 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
 
         DateTimeRange dateRange = new(start, end);
 
-        DateTime value = Faker.PickRandom(Faker.Date.Recent(refDate: start.AddDays(-1)),
-                                          Faker.Date.Past(refDate: start.AddDays(-1)),
-                                          Faker.Date.Soon(refDate: end.AddDays(1)),
-                                          Faker.Date.Future(refDate: end.AddDays(1)));
+        DateTime value = s_faker.PickRandom(s_faker.Date.Recent(refDate: start.AddDays(-1)),
+                                          s_faker.Date.Past(refDate: start.AddDays(-1)),
+                                          s_faker.Date.Soon(refDate: end.AddDays(1)),
+                                          s_faker.Date.Future(refDate: end.AddDays(1)));
 
         // Act
         bool actual = dateRange.Overlaps(value);
@@ -561,5 +567,105 @@ public class DateTimeRangeTests(ITestOutputHelper outputHelper)
         // Assert
         actual.Should().Be(range);
 
+    }
+
+    public static TheoryData<DateTimeRange, DateTimeRange, bool, string> EqualsCases
+    {
+        get
+        {
+            TheoryData<DateTimeRange, DateTimeRange, bool, string> cases = new ()
+            {
+                {
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    true,
+                    "Left and right represents the same value"
+                },
+                {
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    new DateTimeRange(1.January(1990), 7.January(1990)),
+                    false,
+                    "Different end date"
+                },
+                {
+                    DateTimeRange.Empty,
+                    DateTimeRange.Infinite,
+                    false,
+                    "Left is empty and right is infinite"
+                },
+                {
+                    new DateTimeRange(1.January(1990), 6.January(1990)),
+                    new DateTimeRange(6.January(1990), 7.January(1990)),
+                    false,
+                    "Left date abuts right date"
+                },
+                {
+                    new DateTimeRange(1.January(1990), 7.January(1990)),
+                    new DateTimeRange(6.January(1990), 8.January(1990)),
+                    false,
+                    "Left date overlaps right date"
+                },
+                {
+                    new DateTimeRange(1.January(1990), 7.January(1990)),
+                    null,
+                    false,
+                    "Comparing to null should return false"
+                }
+            };
+
+            return cases;
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(EqualsCases))]
+    public void Equals_should_behave_as_expected(DateTimeRange left, DateTimeRange other, bool expected, string reason)
+    {
+        // Arrange
+
+        // Act
+        bool actual = left.Equals(other);
+
+        // Assert
+        actual.Should().Be(expected, reason);
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Equals_should_be_symmetric(DateTimeRange left, DateTimeRange right)
+    {
+        outputHelper.WriteLine($"{nameof(left)}: {left}");
+        outputHelper.WriteLine($"{nameof(right)}: {right}");
+
+        // Act and Assert
+        return (left.Equals(right) == right.Equals(left)).ToProperty();
+    }
+
+    public static TheoryData<DateTimeRange, string, IFormatProvider, string> ToStringCases
+    {
+        get
+        {
+            TheoryData<DateTimeRange, string, IFormatProvider, string> cases = new();
+            {
+                const string format = "yyyy-MM-dd";
+
+                {
+                    DateTimeRange range = new (1.January(1990).Add(12.Hours()), 6.January(1990).Add(13.Hours()));
+                    cases.Add(range, format, CultureInfo.GetCultureInfo("fr"), "1990-01-01 - 1990-01-06");
+                }
+            }
+
+            return cases;
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(ToStringCases))]
+    public void Produces_expected_string_when_using_ToString_with_a_format(DateTimeRange range, [StringSyntax(StringSyntaxAttribute.DateTimeFormat)]string format, IFormatProvider formatProvider, string expected)
+    {
+        // Act
+        string actual = range.ToString(format, formatProvider);
+
+        // Assert
+        actual.Should().Be(expected);
     }
 }

@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Bogus;
-using Candoumbe.Types.Calendar.UnitTests.Generators;
+using Candoumbe.Types.Calendar.UnitTests.Helpers;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using FsCheck;
@@ -18,7 +18,7 @@ namespace Candoumbe.Types.Calendar.UnitTests;
 [UnitTest]
 public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
 {
-    private static readonly Faker Faker = new();
+    private static readonly Faker s_faker = new();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_start_gt_end_Constructor_should_feed_Properties_accordingly(DateOnly start)
@@ -39,7 +39,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
     public void Given_start_and_end_Constructor_should_feed_Properties_accordingly(DateOnly start)
     {
         // Arrange
-        DateOnly end = Faker.Date.FutureDateOnly(refDate: start);
+        DateOnly end = s_faker.Date.FutureDateOnly(refDate: start);
 
         // Act
         DateOnlyRange range = new(start, end);
@@ -54,7 +54,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
     {
         // Arrange
         DateOnly end = reference;
-        DateOnly start = Faker.Date.RecentDateOnly(refDate: reference);
+        DateOnly start = s_faker.Date.RecentDateOnly(refDate: reference);
 
         DateOnlyRange first = new(start, end);
         DateOnlyRange other = new(start, end);
@@ -232,7 +232,7 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
     {
         // Arrange
         DateOnlyRange range = rangeGenerator.Item;
-        DateOnly value = Faker.Date.BetweenDateOnly(range.Start, range.Start);
+        DateOnly value = s_faker.Date.BetweenDateOnly(range.Start, range.Start);
 
         // Assert
         return range.Overlaps(value).ToProperty();
@@ -339,8 +339,8 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
     public void Given_non_empty_TimeOnlyRange_When_merging_with_an_other_TimeOnlyRange_that_does_not_overlaps_nor_is_contiguous_Merge_should_throw_InvalidOperationException(DateOnly date)
     {
         // Arrange
-        DateOnlyRange left = new(date.AddDays(1), Faker.Date.FutureDateOnly(refDate: date.AddDays(2)));
-        DateOnlyRange right = new(Faker.Date.RecentDateOnly(refDate: date.AddDays(-2)), date.AddDays(-1));
+        DateOnlyRange left = new(date.AddDays(1), s_faker.Date.FutureDateOnly(refDate: date.AddDays(2)));
+        DateOnlyRange right = new(s_faker.Date.RecentDateOnly(refDate: date.AddDays(-2)), date.AddDays(-1));
 
         outputHelper.WriteLine($"{nameof(left)} : {left}");
         outputHelper.WriteLine($"{nameof(right)} : {right}");
@@ -488,11 +488,11 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
     public void Given_DateOnlyRange_is_not_empty_and_not_infinite_When_value_is_between_Start_and_End_Then_Contains_should_returns_true(DateOnly date)
     {
         // Arrange
-        DateOnly start = Faker.PickRandom(Faker.Date.RecentDateOnly(refDate: date),
-                                          Faker.Date.PastDateOnly(refDate: date));
+        DateOnly start = s_faker.PickRandom(s_faker.Date.RecentDateOnly(refDate: date),
+                                          s_faker.Date.PastDateOnly(refDate: date));
 
-        DateOnly end = Faker.PickRandom(Faker.Date.SoonDateOnly(refDate: date),
-                                        Faker.Date.FutureDateOnly(refDate: date));
+        DateOnly end = s_faker.PickRandom(s_faker.Date.SoonDateOnly(refDate: date),
+                                        s_faker.Date.FutureDateOnly(refDate: date));
 
         DateOnlyRange dateRange = (start == end) switch
         {
@@ -516,10 +516,10 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
 
         DateOnlyRange dateRange = new(start, end);
 
-        DateOnly value = Faker.PickRandom(Faker.Date.RecentDateOnly(refDate: start.AddDays(-1)),
-                                          Faker.Date.PastDateOnly(refDate: start.AddDays(-1)),
-                                          Faker.Date.SoonDateOnly(refDate: end.AddDays(1)),
-                                          Faker.Date.FutureDateOnly(refDate: end.AddDays(1)));
+        DateOnly value = s_faker.PickRandom(s_faker.Date.RecentDateOnly(refDate: start.AddDays(-1)),
+                                          s_faker.Date.PastDateOnly(refDate: start.AddDays(-1)),
+                                          s_faker.Date.SoonDateOnly(refDate: end.AddDays(1)),
+                                          s_faker.Date.FutureDateOnly(refDate: end.AddDays(1)));
 
         // Act
         bool actual = dateRange.Overlaps(value);
@@ -558,11 +558,11 @@ public class DateOnlyRangeTests(ITestOutputHelper outputHelper)
     public void Given_two_ranges_non_null_left_and_right_When_left_is_before_right_Then_Compare_should_return_minus_one()
     {
         // Arrange
-        DateOnly reference = Faker.Date.FutureDateOnly();
-        DateOnlyRange left = new(Faker.Date.PastDateOnly(refDate: reference), Faker.Date.FutureDateOnly(refDate: reference));
+        DateOnly reference = s_faker.Date.FutureDateOnly();
+        DateOnlyRange left = new(s_faker.Date.PastDateOnly(refDate: reference), s_faker.Date.FutureDateOnly(refDate: reference));
 
-        DateOnly rightStart = Faker.Date.FutureDateOnly(refDate: reference);
-        DateOnlyRange right = new(rightStart, Faker.Date.FutureDateOnly(refDate: rightStart));
+        DateOnly rightStart = s_faker.Date.FutureDateOnly(refDate: reference);
+        DateOnlyRange right = new(rightStart, s_faker.Date.FutureDateOnly(refDate: rightStart));
 
         outputHelper.WriteLine($"left is {left}");
         outputHelper.WriteLine($"right is {right}");

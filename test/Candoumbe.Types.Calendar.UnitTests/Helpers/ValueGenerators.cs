@@ -5,7 +5,7 @@ using System;
 using FsCheck;
 using FsCheck.Fluent;
 
-namespace Candoumbe.Types.Calendar.UnitTests.Generators;
+namespace Candoumbe.Types.Calendar.UnitTests.Helpers;
 
 /// <summary>
 /// Utility class for generating custom <see cref="Arbitrary{T}"/> used by property based tests.

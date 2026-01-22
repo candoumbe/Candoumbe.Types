@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Bogus;
-using Candoumbe.Types.Calendar.UnitTests.Generators;
+using Candoumbe.Types.Calendar.UnitTests.Helpers;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using FsCheck;
@@ -19,7 +19,7 @@ namespace Candoumbe.Types.Calendar.UnitTests;
 [UnitTest]
 public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
 {
-    private static readonly Faker Faker = new();
+    private static readonly Faker s_faker = new();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_start_and_end_Constructor_should_feed_Properties_accordingly(TimeOnly start, TimeOnly end)
@@ -37,7 +37,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
     {
         // Arrange
         TimeOnly end = reference;
-        TimeOnly start = Faker.Date.RecentTimeOnly(mins: (int)(reference - TimeOnly.MinValue).TotalMinutes, refTime: reference);
+        TimeOnly start = s_faker.Date.RecentTimeOnly(mins: (int)(reference - TimeOnly.MinValue).TotalMinutes, refTime: reference);
 
         TimeOnlyRange first = new(start, end);
 
@@ -60,7 +60,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public Property Given_two_TimeOnlyRange_instances_Overlaps_should_be_symetric(TimeOnlyRange left, TimeOnlyRange right)
+    public Property Given_two_TimeOnlyRange_instances_Overlaps_should_be_symmetric(TimeOnlyRange left, TimeOnlyRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
         outputHelper.WriteLine($"{nameof(right)}: {right}");
@@ -84,7 +84,7 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
     }
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
-    public Property Given_two_TimeOnlyRange_instances_IsContiguous_should_be_symetric(TimeOnlyRange left, TimeOnlyRange right)
+    public Property Given_two_TimeOnlyRange_instances_IsContiguous_should_be_symmetric(TimeOnlyRange left, TimeOnlyRange right)
     {
         outputHelper.WriteLine($"{nameof(left)}: {left}");
         outputHelper.WriteLine($"{nameof(right)}: {right}");
@@ -560,8 +560,8 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
     public void Given_TimeOnlyRange_is_not_empty_and_not_infinite_When_value_is_between_Start_and_End_Overlaps_should_returns_Yes(TimeOnly value)
     {
         // Arrange
-        TimeOnly start = Faker.Date.RecentTimeOnly(refTime: value);
-        TimeOnly end = Faker.Date.SoonTimeOnly(refTime: value);
+        TimeOnly start = s_faker.Date.RecentTimeOnly(refTime: value);
+        TimeOnly end = s_faker.Date.SoonTimeOnly(refTime: value);
 
         TimeOnlyRange timeRange = (start == end) switch
         {
@@ -586,8 +586,8 @@ public class TimeOnlyRangeTests(ITestOutputHelper outputHelper)
 
         TimeOnlyRange timeRange = new(start, end);
 
-        TimeOnly value = Faker.PickRandom(Faker.Date.RecentTimeOnly(refTime: start.AddMinutes(-1)),
-                                          Faker.Date.SoonTimeOnly(refTime: end.AddMinutes(1)));
+        TimeOnly value = s_faker.PickRandom(s_faker.Date.RecentTimeOnly(refTime: start.AddMinutes(-1)),
+                                          s_faker.Date.SoonTimeOnly(refTime: end.AddMinutes(1)));
 
         // Act
         bool result = timeRange.Overlaps(value);

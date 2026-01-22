@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Candoumbe.Types.Calendar.UnitTests.Generators;
+using Candoumbe.Types.Calendar.UnitTests.Helpers;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using FsCheck;
@@ -125,8 +125,8 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
                         new TimeOnlyRange(TimeOnly.FromTimeSpan(09.Hours()), TimeOnly.FromTimeSpan(14.Hours())),
                         new TimeOnlyRange(TimeOnly.FromTimeSpan(12.Hours()), TimeOnly.FromTimeSpan(18.Hours())),
                     ],
-                    ranges => ranges.Once()
-                              && ranges.Once(range => range == new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()),
+                    ranges => ranges.Once() &&
+                              ranges.Once(range => range == new TimeOnlyRange(TimeOnly.FromTimeSpan(5.Hours()),
                                   TimeOnly.FromTimeSpan(18.Hours())))
 
                 }
@@ -174,8 +174,8 @@ public class MultiTimeOnlyRangeTests(ITestOutputHelper outputHelper)
                                     .BeEmpty("Both left and right ranges are empty"),
             _ => range.Should()
                        .HaveCount(2).And
-                       .ContainSingle(range => range == right).And
-                       .ContainSingle(range => range == left)
+                       .ContainSingle(item => item == right).And
+                       .ContainSingle(item => item == left)
         };
     }
 
