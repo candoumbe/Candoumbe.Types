@@ -15,16 +15,10 @@ namespace Candoumbe.Types.Numerics.UnitTests;
 
 [UnitTest]
 [Feature(nameof(Numerics))]
-public class NonNegativeLongTests
+public class NonNegativeLongTests(ITestOutputHelper outputHelper)
 {
-    private static readonly Faker Faker = new();
-    private readonly ITestOutputHelper _outputHelper;
-    private static readonly string[] StandardNumericFormats = ["c", "d", "e", "f", "g", "n", "p", "r", "x"];
-
-    public NonNegativeLongTests(ITestOutputHelper outputHelper)
-    {
-        _outputHelper = outputHelper;
-    }
+    private static readonly Faker s_faker = new();
+    private static readonly string[] s_standardNumericFormats = ["c", "d", "e", "f", "g", "n", "p", "r", "x"];
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public void Given_default_instance_Then_underlying_should_be_zero(NonNegativeLong initial)
@@ -73,7 +67,7 @@ public class NonNegativeLongTests
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public Property Given_any_NonNegativeLong_When_adding_AdditiveIdentity_Then_result_should_be_initial_value(NonNegativeLong initial)
-        => ((initial + NonNegativeLong.AdditiveIdentity) == initial).ToProperty();
+        => (initial + NonNegativeLong.AdditiveIdentity == initial).ToProperty();
 
     [Property]
     public void Given_two_NonNegativeLong_When_adding_them_together_Then_result_should_be_their_sum(NonNegativeInt leftValueGenerator, NonNegativeInt rightValueGenerator)
@@ -106,12 +100,12 @@ public class NonNegativeLongTests
         _ = (left.Value + right) switch
         {
             < 0 => result.Value.Should().Be(0),
-            long actual => result.Value.Should().Be(actual)
+            var actual => result.Value.Should().Be(actual)
         };
     }
 
     [Property]
-    public void Given_left_and_right_NonNegativeLong_When_substracting_right_from_left_Then_result_should_be_their_difference(NonNegativeInt leftValueGenerator, NonNegativeInt rightValueGenerator)
+    public void Given_left_and_right_NonNegativeLong_When_subtracting_right_from_left_Then_result_should_be_their_difference(NonNegativeInt leftValueGenerator, NonNegativeInt rightValueGenerator)
     {
         // Arrange
         NonNegativeLong left = NonNegativeLong.From(leftValueGenerator.Item);
@@ -124,12 +118,12 @@ public class NonNegativeLongTests
         _ = (left.Value - right.Value) switch
         {
             < 0 => result.Value.Should().Be(0),
-            long actual => result.Value.Should().Be(actual)
+            var actual => result.Value.Should().Be(actual)
         };
     }
 
     [Property]
-    public void Given_left_NonNegativeLong_and_right_is_an_integer_When_substracting_right_from_left_Then_result_should_be_NonNegativeLong(NonNegativeInt leftValueGenerator, long right)
+    public void Given_left_NonNegativeLong_and_right_is_an_integer_When_subtracting_right_from_left_Then_result_should_be_NonNegativeLong(NonNegativeInt leftValueGenerator, long right)
     {
         // Arrange
         NonNegativeLong left = NonNegativeLong.From(leftValueGenerator.Item);
@@ -141,7 +135,7 @@ public class NonNegativeLongTests
         _ = (left.Value - right) switch
         {
             < 0 => result.Value.Should().Be(0),
-            long actual => result.Value.Should().Be(actual)
+            var actual => result.Value.Should().Be(actual)
         };
     }
 
@@ -201,7 +195,7 @@ public class NonNegativeLongTests
         actual.Value.Should().Be(initialValue.Value switch
         {
             long.MaxValue => long.MaxValue,
-            long value => value + 1
+            var value => value + 1
         });
     }
 
@@ -218,7 +212,7 @@ public class NonNegativeLongTests
         actual.Value.Should().Be(left.Value switch
         {
             0 => 0,
-            long value => value - 1
+            var value => value - 1
         });
     }
 
@@ -533,11 +527,11 @@ public class NonNegativeLongTests
     public void Given_a_string_representing_a_value_outside_NonNegativeLong_Ranges_When_calling_Parse_Then_OverflowException_should_be_thrown(CultureInfo culture)
     {
         // Arrange
-        long value = Faker.Random.Long(max: ((long)NonNegativeLong.MinValue) - 1);
+        long value = s_faker.Random.Long(max: (long)NonNegativeLong.MinValue - 1);
 
         string initial = value.ToString(culture.NumberFormat);
 
-        _outputHelper.WriteLine($"{nameof(initial)} : '{initial}'");
+        outputHelper.WriteLine($"{nameof(initial)} : '{initial}'");
 
         // Act
         Action parsingValueThatIsOutsideNonNegativeLongRange = () => NonNegativeLong.Parse(initial, culture.NumberFormat);
@@ -551,11 +545,11 @@ public class NonNegativeLongTests
     public void Given_a_string_representing_a_value_outside_range_of_NonNegativeLong_values_When_calling_TryParse_Then_should_be_false(CultureInfo culture)
     {
         // Arrange
-        long value = Faker.Random.Long(max: ((long)NonNegativeLong.MinValue) - 1);
+        long value = s_faker.Random.Long(max: (long)NonNegativeLong.MinValue - 1);
 
         string initial = value.ToString(culture.NumberFormat);
 
-        _outputHelper.WriteLine($"{nameof(initial)} : '{initial}'");
+        outputHelper.WriteLine($"{nameof(initial)} : '{initial}'");
 
         // Act
         bool actual = NonNegativeLong.TryParse(initial, culture.NumberFormat, out _);
@@ -568,11 +562,11 @@ public class NonNegativeLongTests
     public void Given_a_string_representing_a_value_inside_range_of_NonNegativeLong_values_When_calling_TryParse_Then_should_be_true(CultureInfo culture)
     {
         // Arrange
-        long value = Faker.PickRandom(NonNegativeLong.MinValue, NonNegativeLong.MaxValue);
+        long value = s_faker.PickRandom(NonNegativeLong.MinValue, NonNegativeLong.MaxValue);
 
         string initial = value.ToString(culture.NumberFormat);
 
-        _outputHelper.WriteLine($"{nameof(initial)} : '{initial}'");
+        outputHelper.WriteLine($"{nameof(initial)} : '{initial}'");
 
         // Act
         bool actual = NonNegativeLong.TryParse(initial, culture.NumberFormat, out _);
@@ -586,11 +580,11 @@ public class NonNegativeLongTests
     public void Given_a_ReadOnlySpan_representing_a_value_outside_range_of_NonNegativeLong_values_When_calling_TryParse_Then_should_be_false(CultureInfo culture)
     {
         // Arrange
-        long value = Faker.Random.Long(max: ((long)NonNegativeLong.MinValue) - 1);
+        long value = s_faker.Random.Long(max: (long)NonNegativeLong.MinValue - 1);
 
         ReadOnlySpan<char> initial = value.ToString(culture.NumberFormat).AsSpan();
 
-        _outputHelper.WriteLine($"{nameof(initial)} : '{initial}'");
+        outputHelper.WriteLine($"{nameof(initial)} : '{initial}'");
 
         // Act
         bool actual = NonNegativeLong.TryParse(initial, culture.NumberFormat, out _);
@@ -603,12 +597,12 @@ public class NonNegativeLongTests
     public void Given_a_ReadOnlySpan_representing_a_value_outside_range_of_NonNegativeLong_values_When_calling_TryParse_Then_should_be_true(CultureInfo culture)
     {
         // Arrange
-        string format = $"{Faker.PickRandom(StandardNumericFormats)}{Faker.PickRandom(1, 9)}";
+        string format = $"{s_faker.PickRandom(s_standardNumericFormats)}{s_faker.PickRandom(1, 9)}";
         const ulong value = ulong.MaxValue;
 
         ReadOnlySpan<char> initial = value.ToString(culture.NumberFormat).AsSpan();
 
-        _outputHelper.WriteLine($"{nameof(initial)} : '{initial}'");
+        outputHelper.WriteLine($"{nameof(initial)} : '{initial}'");
 
         // Act
         bool actual = NonNegativeLong.TryParse(initial, culture.NumberFormat, out _);
@@ -620,11 +614,11 @@ public class NonNegativeLongTests
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public Property Given_an_existing_NonNegativeLong_When_multiplying_by_multiplicative_identity_Then_the_result_should_be_equal_to_the_initial_value(NonNegativeLong initial)
-    => ((initial * NonNegativeLong.MultiplicativeIdentity) == initial).ToProperty();
+    => (initial * NonNegativeLong.MultiplicativeIdentity == initial).ToProperty();
 
     [Property(Arbitrary = [typeof(ValueGenerators)])]
     public Property Given_an_existing_NonNegativeLong_When_adding_additive_identity_Then_the_result_should_be_equal_to_the_initial_value(NonNegativeLong initial)
-        => ((initial + NonNegativeLong.AdditiveIdentity) == initial).ToProperty();
+        => (initial + NonNegativeLong.AdditiveIdentity == initial).ToProperty();
 
     [Property]
     public void Given_a_NonNegativeLong_When_implicitly_casting_to_int32_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
@@ -640,7 +634,7 @@ public class NonNegativeLongTests
     }
 
     [Property]
-    public void Given_a_NonNegativeLong_When_implicitely_casting_to_long_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_NonNegativeLong_When_implicitly_casting_to_long_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
     {
         // Arrange
         NonNegativeLong initial = NonNegativeLong.From(initialValueGenerator.Item);
@@ -653,7 +647,7 @@ public class NonNegativeLongTests
     }
 
     [Property]
-    public void Given_a_NonNegativeLong_When_implicitely_casting_to_decimal_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_NonNegativeLong_When_implicitly_casting_to_decimal_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
     {
         // Arrange
         NonNegativeLong initial = NonNegativeLong.From(initialValueGenerator.Item);
@@ -666,7 +660,7 @@ public class NonNegativeLongTests
     }
 
     [Property]
-    public void Given_a_NonNegativeLong_When_implicitely_casting_to_uint_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
+    public void Given_a_NonNegativeLong_When_implicitly_casting_to_uint_Then_result_should_equal_the_original_value(PositiveInt initialValueGenerator)
     {
         // Arrange
         NonNegativeLong initial = NonNegativeLong.From(initialValueGenerator.Item);
@@ -704,5 +698,97 @@ public class NonNegativeLongTests
 
         // Assert
         actual.Should().Be(NonNegativeLong.From(positiveLong.Value * nonNegativeLong.Value));
+    }
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_lt_operator_between_a_NonNegativeLong_and_a_long_value(NonNegativeLong left, long right)
+        => (left < right == left.Value < right).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_gt_operator_between_a_NonNegativeLong_and_a_long_value(NonNegativeLong left, long right)
+        => (left > right == left.Value > right).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_gt_or_eq_operator_between_a_NonNegativeLong_and_a_long_value(NonNegativeLong left, long right)
+        => (left >= right == left.Value >= right).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_lt_or_eq_operator_between_a_NonNegativeLong_and_a_long_value(NonNegativeLong left, long right)
+        => (left <= right == left.Value <= right).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_eq_operator_between_a_NonNegativeLong_and_a_long_value(NonNegativeLong left, long right)
+        => (left == right == (left.Value == right)).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_ne_operator_between_a_NonNegativeLong_and_a_long_value(NonNegativeLong left, long right)
+        => (left != right == (left.Value != right)).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_eq_operator_between_two_NonNegativeLong(NonNegativeLong left, NonNegativeLong right)
+        => (left == right == (left.Value == right.Value)).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_ne_operator_between_two_NonNegativeLong(NonNegativeLong left, NonNegativeLong right)
+        => (left != right == (left.Value != right.Value)).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_lt_operator_between_a_NonNegativeLong_and_an_int_value(NonNegativeLong left, int right)
+        => (left < right == left.Value < right).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_gt_operator_between_a_NonNegativeLong_and_an_int_value(NonNegativeLong left, int right)
+        => (left > right == left.Value > right).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_gt_or_eq_operator_between_a_NonNegativeLong_and_an_int_value(NonNegativeLong left, int right)
+        => (left >= right == left.Value >= right).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_lt_or_eq_operator_between_a_NonNegativeLong_and_an_int_value(NonNegativeLong left, int right)
+        => (left <= right == left.Value <= right).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_eq_operator_between_a_NonNegativeLong_and_an_int_value(NonNegativeLong left, int right)
+        => (left == right == (left.Value == right)).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_ne_operator_between_a_NonNegativeLong_and_int_values(NonNegativeLong left, int right)
+        => (left != right == (left.Value != right)).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_eq_operator_between_a_NonNegativeLong_and_a_PositiveInteger(NonNegativeLong left, PositiveInteger right)
+        => (left == right == (left.Value == right.Value)).ToProperty();
+
+    [Property(Arbitrary = [typeof(ValueGenerators)])]
+    public Property Should_return_consistent_result_for_eq_operator_between_a_NonNegativeLong_and_a_NonNegativeInteger(NonNegativeLong left, NonNegativeInteger right)
+        => (left == right == (left.Value == right.Value)).ToProperty();
+
+    [Property]
+    public void Should_return_true_when_comparing_two_NonNegativeLong_that_are_null()
+    {
+        // Arrange
+        NonNegativeLong left = null;
+        NonNegativeLong right = null;
+
+        // Act
+        bool actual = (left == right);
+
+        // Assert
+        actual.Should().BeTrue();
+    }
+
+    [Property]
+    public void Should_return_true_when_for_eq_between_a_null_NonNegativeLong_and_a_null_NonNegativeInteger()
+    {
+        // Arrange
+        NonNegativeLong left = null;
+        NonNegativeInteger right = null;
+
+        // Act
+        bool actual = left == right;
+
+        // Assert
+        actual.Should().BeTrue();
     }
 }

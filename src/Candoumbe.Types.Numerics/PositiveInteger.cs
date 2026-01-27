@@ -16,8 +16,7 @@ namespace Candoumbe.Types.Numerics;
 /// to integrate with existing ecosystem.
 /// </para>
 /// </summary>
-public record PositiveInteger :
-    PositiveNumberBase<int, PositiveInteger>
+public record PositiveInteger : PositiveNumberBase<int, PositiveInteger>
 #if NET7_0_OR_GREATER
         , IAdditionOperators<PositiveInteger, PositiveInteger, PositiveInteger>
         , IAdditionOperators<PositiveInteger, NonNegativeInteger, PositiveInteger>
@@ -46,14 +45,12 @@ public record PositiveInteger :
     /// </summary>
     public static PositiveInteger One => From(1);
 
-    private PositiveInteger(int value)
+    private PositiveInteger(int value) : base(value)
     {
         if (value < 1)
         {
             throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(value)} must be greater than 1.");
         }
-
-        Value = value;
     }
 
 #if NET7_0_OR_GREATER
@@ -140,7 +137,7 @@ public record PositiveInteger :
     }
 
 #if NET7_0_OR_GREATER
-        ///<inheritdoc/>
+    ///<inheritdoc/>
 #else
     /// <summary>
     /// Adds two values together and computes their sum
@@ -150,7 +147,41 @@ public record PositiveInteger :
     /// <returns>the sum of <paramref name="left"/> and <paramref name="right"/>.</returns>
 #endif
     public static PositiveInteger operator +(PositiveInteger left, NonNegativeInteger right) =>
-        From(left.Value + right.Value);
+        (left, right) switch
+        {
+            (null, _) or (_, null) => null,
+            _ => From(left.Value + right.Value)
+        };
+
+#if NET7_0_OR_GREATER
+
+    ///<inheritdoc/>
+#else
+
+    /// <summary>
+    /// Adds two values together and computes their sum
+    /// </summary>
+    /// <param name="left">The left value</param>
+    /// <param name="right">The right value</param>
+    /// <returns>the sum of <paramref name="left"/> and <paramref name="right"/>.</returns>
+#endif
+    public static PositiveInteger operator checked +(PositiveInteger left, NonNegativeInteger right)
+    {
+        if ((left, right) is (null, _) or (_, null))
+        {
+            return null;
+        }
+
+        try
+        {
+            return From(left.Value + right.Value);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            throw new OverflowException(
+                $@"adding ""{left}"" and ""{right}"" result is outside of {nameof(PositiveInteger)} values");
+        }
+    }
 
 #if NET7_0_OR_GREATER
         ///<inheritdoc/>

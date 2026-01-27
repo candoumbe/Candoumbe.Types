@@ -11,8 +11,7 @@ namespace Candoumbe.Types.Numerics;
 /// <remarks>
 /// This type is fully interoperable with <see cref="long"/> type.
 /// </remarks>
-public record NonNegativeLong :
-    NonNegativeNumberBase<long, NonNegativeLong>
+public record NonNegativeLong : NonNegativeNumberBase<long, NonNegativeLong>
 
 #if NET7_0_OR_GREATER
     , IAdditiveIdentity<NonNegativeLong, NonNegativeLong>
@@ -24,13 +23,14 @@ public record NonNegativeLong :
     , IMultiplyOperators<NonNegativeLong, NonNegativeLong, NonNegativeLong>
     , IMultiplyOperators<NonNegativeLong, PositiveLong, NonNegativeLong>
     , IComparisonOperators<NonNegativeLong, NonNegativeLong, bool>
+    , IComparisonOperators<NonNegativeLong, NonNegativeInteger, bool>
     , IComparisonOperators<NonNegativeLong, long, bool>
+    , IComparisonOperators<NonNegativeLong, int, bool>
     , ISpanParsable<NonNegativeLong>
 #endif
 {
-    private NonNegativeLong(long value)
+    private NonNegativeLong(long value) : base(value)
     {
-        Value = value;
     }
 
     /// <summary>
@@ -40,11 +40,9 @@ public record NonNegativeLong :
     /// <returns>A <see cref="NonNegativeLong"/> which holds the specified <paramref name="value"/>.</returns>
     /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is &lt; <c>0L</c></exception>
     public static NonNegativeLong From(long value)
-    {
-        return value < 0
+        => value < 0
             ? throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(value)} cannot be negative")
             : new NonNegativeLong(value);
-    }
 
     /// <summary>
     /// The zero value of the current type
@@ -80,6 +78,7 @@ public record NonNegativeLong :
 
     /// <inheritdoc/>
     public static NonNegativeLong MultiplicativeIdentity => One;
+
 #if NET7_0_OR_GREATER
     ///<inheritdoc/>
 #else
@@ -171,11 +170,11 @@ public record NonNegativeLong :
 
     ///<inheritdoc/>
     public static bool operator ==(NonNegativeLong left,
-                                   long right) => left.Value == right;
+                                   long right) => left?.Value == right;
 
     ///<inheritdoc/>
     public static bool operator !=(NonNegativeLong left,
-                                   long right) => !( left.Value == right );
+                                   long right) => left?.Value != right;
 
     ///<inheritdoc/>
     public static bool operator <(NonNegativeLong left,
@@ -525,19 +524,196 @@ public record NonNegativeLong :
         }
     }
 
+#if NET
     /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine which is greater.
+    /// </summary>
+    /// <param name="left">The value to compare to <paramref name="right"/>.</param>
+    /// <param name="right">The value to compare to <paramref name="left"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is greater than <paramref name="right"/>; otherwise, <see langword="false"/> otherwizse</returns>
+#endif
     public static bool operator >(NonNegativeLong left,
                                   long right) => left.Value > right;
 
+#if NET
     /// <inheritdoc />
-    public static bool operator >=(NonNegativeLong left,
-                                   long right) => left.Value >= right;
+#else
+    /// <summary>
+    /// Compares two values to determine which is greater or equal.
+    /// </summary>
+    /// <param name="left">The value to compare to <paramref name="right"/>.</param>
+    /// <param name="right">The value to compare to <paramref name="left"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is greater than or equal to <paramref name="left"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator >=(NonNegativeLong left, long right) => left.Value >= right;
 
+#if NET
     /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine which is less.
+    /// </summary>
+    /// <param name="left">The value to compare with <paramref name="left"/>.</param>
+    /// <param name="right">The value to compare with <paramref name="right"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is less than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
     public static bool operator <(NonNegativeLong left,
                                   long right) => left.Value < right;
 
     /// <inheritdoc />
     public static bool operator <=(NonNegativeLong left,
-                                   long right) => left <= right;
+                                   long right) => left.Value <= right;
+
+#if NET
+    /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine inequality.
+    /// </summary>
+    /// <param name="left">The value to compare with <paramref name="left"/>.</param>
+    /// <param name="right">The value to compare with <paramref name="right"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is not equal to <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator !=(NonNegativeLong left, int right) => left is not null && left.Value != right;
+
+#if NET
+    /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine equality.
+    /// </summary>
+    /// <param name="left">The value to compare with <paramref name="left"/>.</param>
+    /// <param name="right">The value to compare with <paramref name="right"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is equal to <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator ==(NonNegativeLong left, int right) => left is not null && left.Value == right;
+
+#if NET
+    /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine which is greater.
+    /// </summary>
+    /// <param name="left">The value to compare with <paramref name="left"/>.</param>
+    /// <param name="right">The value to compare with <paramref name="right"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is greater than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator >(NonNegativeLong left, int right) => left.Value > right;
+
+#if NET
+    /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine which is greater or equal.
+    /// </summary>
+    /// <param name="left">The value to compare with <paramref name="left"/>.</param>
+    /// <param name="right">The value to compare with <paramref name="right"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is greater or equal to <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator >=(NonNegativeLong left, int right) => left.Value >= right;
+
+#if NET
+    /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine which is less.
+    /// </summary>
+    /// <param name="left">The value to compare with <paramref name="left"/>.</param>
+    /// <param name="right">The value to compare with <paramref name="right"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is less than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator <(NonNegativeLong left, int right) => left.Value < right;
+
+#if NET
+    /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine which is less or equal.
+    /// </summary>
+    /// <param name="left">The value to compare with <paramref name="left"/>.</param>
+    /// <param name="right">The value to compare with <paramref name="right"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is less or equal to <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator <=(NonNegativeLong left, int right) => left.Value <= right;
+
+#if NET
+    /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine which is less.
+    /// </summary>
+    /// <param name="left">The value to compare with <paramref name="left"/>.</param>
+    /// <param name="right">The value to compare with <paramref name="right"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is less than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator <(NonNegativeLong left, NonNegativeInteger right) => left.Value < right;
+
+#if NET
+    /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine inequality.
+    /// </summary>
+    /// <param name="left">The value to compare with <paramref name="left"/>.</param>
+    /// <param name="right">The value to compare with <paramref name="right"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is not equal to <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator !=(NonNegativeLong left, NonNegativeInteger right) => left is not null && left.Value != right;
+
+#if NET
+    /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine equality.
+    /// </summary>
+    /// <param name="left">The value to compare with <paramref name="left"/>.</param>
+    /// <param name="right">The value to compare with <paramref name="right"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is equal to <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator ==(NonNegativeLong left, NonNegativeInteger right) => (left, right) switch
+    {
+        (null, _) => right is null,
+        (_, not null) => left.Value == right.Value,
+        _ => false
+
+    };
+
+#if NET8_0
+    /// <inheritdoc />
+#else
+    ///<summary>
+    /// Compares two values to determine which is greater.
+    /// </summary>
+    /// <param name="left">The value to compare to <paramref name="right"/>.</param>
+    /// <param name="right">The value to compare to <paramref name="left"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is greater than <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator >(NonNegativeLong left, NonNegativeInteger right) => left.Value > right;
+
+#if NET
+    /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine which is greater or equal.
+    /// </summary>
+    /// <param name="left">The value to compare to <paramref name="right"/>.</param>
+    /// <param name="right">The value to compare to <paramref name="left"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is greater or equal to <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator >=(NonNegativeLong left, NonNegativeInteger right) => left.Value >= right;
+
+#if NET
+    /// <inheritdoc />
+#else
+    /// <summary>
+    /// Compares two values to determine which is less or equal.
+    /// </summary>
+    /// <param name="left">The value to compare to <paramref name="right"/>.</param>
+    /// <param name="right">The value to compare to <paramref name="left"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is less than or equal to <paramref name="right"/>; otherwise, <see langword="false"/>.</returns>
+#endif
+    public static bool operator <=(NonNegativeLong left, NonNegativeInteger right) => left.Value <= right;
+
 }

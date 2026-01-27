@@ -10,6 +10,10 @@ namespace Candoumbe.Types.Numerics;
 /// </summary>
 /// <typeparam name="TNumber">The numeric type that the current type will restrict values for.</typeparam>
 public abstract record Number<TNumber> : IComparable<Number<TNumber>>
+#if NET7_0_OR_GREATER
+    , IComparisonOperators<Number<TNumber>, TNumber, bool>
+#endif
+
     where TNumber : notnull, IComparable<TNumber>
 {
     /// <summary>
@@ -19,12 +23,7 @@ public abstract record Number<TNumber> : IComparable<Number<TNumber>>
     public TNumber Value
     {
         get;
-#if NET7_0_OR_GREATER
-        protected init;
-#else
-        protected set;
-#endif
-    } = default;
+    }
 
     /// <summary>
     /// Builds a new <see cref="Number{TNumber}"/> that contains the default value of <typeparamref name="TNumber"/>.
@@ -66,4 +65,10 @@ public abstract record Number<TNumber> : IComparable<Number<TNumber>>
     ///<inheritdoc/>
     public static bool operator <=(Number<TNumber> left, TNumber right)
         => left.Value.CompareTo(right) <= 0;
+
+    /// <inheritdoc />
+    public static bool operator ==(Number<TNumber> left, TNumber right) => left?.Value.Equals(right) is true;
+
+    /// <inheritdoc />
+    public static bool operator !=(Number<TNumber> left, TNumber right) => left?.Value.Equals(right) is not true;
 }

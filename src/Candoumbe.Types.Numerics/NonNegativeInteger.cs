@@ -18,17 +18,16 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
     , IAdditionOperators<NonNegativeInteger, int, NonNegativeInteger>
     , ISubtractionOperators<NonNegativeInteger, NonNegativeInteger, NonNegativeInteger>
     , ISubtractionOperators<NonNegativeInteger, int, NonNegativeInteger>
-    , IEqualityOperators<NonNegativeInteger, int, bool>
     , IMultiplyOperators<NonNegativeInteger, NonNegativeInteger, NonNegativeInteger>
     , IMultiplyOperators<NonNegativeInteger, PositiveInteger, NonNegativeInteger>
     , IComparisonOperators<NonNegativeInteger, NonNegativeInteger, bool>
+    , IComparisonOperators<NonNegativeInteger, int, bool>
     , ISpanParsable<NonNegativeInteger>
     , ISpanFormattable
 #endif
 {
-    private NonNegativeInteger(int value)
+    private NonNegativeInteger(int value) : base(value)
     {
-        Value = value;
     }
 
     /// <summary>
@@ -38,11 +37,9 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is &lt; 0</exception>
     public static NonNegativeInteger From(int value)
-    {
-        return value < 0
+        => value < 0
             ? throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(value)} cannot be negative")
             : new NonNegativeInteger(value);
-    }
 
     /// <summary>
     /// The zero
@@ -538,5 +535,29 @@ public record NonNegativeInteger : NonNegativeNumberBase<int, NonNegativeInteger
         }
 
         return parsingDone;
+    }
+
+    /// <inheritdoc />
+    public static bool operator >(NonNegativeInteger left, int right)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc />
+    public static bool operator >=(NonNegativeInteger left, int right)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc />
+    public static bool operator <(NonNegativeInteger left, int right)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc />
+    public static bool operator <=(NonNegativeInteger left, int right)
+    {
+        throw new NotImplementedException();
     }
 }
