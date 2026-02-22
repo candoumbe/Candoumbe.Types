@@ -7,6 +7,8 @@ services:
     container_name: candoumbe-types-dev
     image: candoumbe-types-dev:latest
     working_dir: /workspace
+    env_file:
+      - .env
     volumes:
       - ..:/workspace
       - candoumbe-types-nuget-cache:/home/vscode/.nuget/packages

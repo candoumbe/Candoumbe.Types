@@ -33,6 +33,7 @@
     }
   },
   "remoteUser": "vscode",
+  "initializeCommand": "bash .devcontainer/scripts/select-engine.sh || pwsh -File .devcontainer/scripts/select-engine.ps1 || powershell -ExecutionPolicy Bypass -File .devcontainer/scripts/select-engine.ps1",
   "postCreateCommand": "bash -c 'dotnet restore && dotnet tool restore'",
   "postStartCommand": "dotnet build",
   "forwardPorts": [],
