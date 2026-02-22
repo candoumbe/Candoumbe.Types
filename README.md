@@ -30,6 +30,32 @@ Types
 
 Various custom types that can be useful when doing development.
 
+## Quick Start with Dev Container
+
+This project comes with a **Dev Container** configuration that provides a complete, consistent development environment across Windows, macOS, and Linux.
+
+### 🚀 Get Started in 2 Steps
+
+1. **Install requirements** (one-time setup):
+   - [VS Code](https://code.visualstudio.com/)
+   - [Docker Desktop](https://www.docker.com/products/docker-desktop)
+   - Install the **Remote - Containers** extension in VS Code
+
+2. **Open in container**:
+   - Open this project in VS Code
+   - A notification appears → click **"Reopen in Container"**
+   - Wait for the container to build (5-10 minutes first time)
+   - You're ready! The container has:
+     - ✅ .NET SDK 10.0 (all target frameworks)
+     - ✅ All build tools (Nuke, GitVersion, CodeCov, Stryker)
+     - ✅ Pre-configured VS Code extensions
+     - ✅ Git & GitHub CLI
+     - ✅ Optimized caches for fast builds
+
+**No local .NET installation needed!**
+
+For more details, see [.devcontainer/README.md](.devcontainer/README.md)
+
 ## Disclaimer
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).

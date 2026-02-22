@@ -1,0 +1,52 @@
+{
+  "name": "Candoumbe.Types",
+  "description": "Development container for Candoumbe.Types - Multi-platform .NET library",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:1-10.0-jammy",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "EditorConfig.EditorConfig",
+        "GitHub.copilot",
+        "ms-vscode.makefile-tools",
+        "ms-vscode-remote.remote-containers",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "dotnet.defaultSolutionOrFolder": "${workspaceFolder}",
+        "[csharp]": {
+          "editor.defaultFormatter": "ms-dotnettools.csharp",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.fixAll.csharp": true
+          }
+        },
+        "editor.formatOnSave": true,
+        "omnisharp.enableRoslynAnalyzers": true,
+        "omnisharp.enableEditorConfigSupport": true
+      }
+    }
+  },
+  "remoteUser": "vscode",
+  "postCreateCommand": "bash -c 'dotnet restore && dotnet tool restore'",
+  "postStartCommand": "dotnet build",
+  "forwardPorts": [],
+  "mounts": [
+    "source=candoumbe-types-nuget-cache,target=/home/vscode/.nuget/packages,type=volume",
+    "source=candoumbe-types-dotnet-cache,target=/home/vscode/.dotnet,type=volume"
+  ],
+  "containerEnv": {
+    "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+    "DOTNET_NOLOGO": "1"
+  },
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "4gb",
+    "storage": "10gb"
+  }
+}

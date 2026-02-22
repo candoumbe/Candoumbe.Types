@@ -10,6 +10,35 @@ the developers managing and developing this open source project. In return,
 they should reciprocate that respect in addressing your issue or assessing
 patches and features.
 
+## Development Environment Setup
+
+### 🐳 Recommended: Using Dev Container
+
+The easiest way to contribute is using the **Dev Container** configuration, which provides a complete, consistent environment across all platforms (Windows, macOS, Linux).
+
+#### Prerequisites
+- [VS Code](https://code.visualstudio.com/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- VS Code extension: **Remote - Containers** (`ms-vscode-remote.remote-containers`)
+
+#### Quick Start
+1. Open this project in VS Code
+2. A notification appears → click **"Reopen in Container"**
+3. Wait for the initial build (5-10 minutes)
+4. You're ready to develop!
+
+**That's it!** No need to install .NET SDK, tools, or worry about version conflicts.
+
+For details, see [.devcontainer/README.md](.devcontainer/README.md)
+
+### 💻 Local Setup (Alternative)
+
+If you prefer a local setup:
+
+1. Install [.NET SDK 10.0.103+](https://dotnet.microsoft.com/download)
+2. Clone the repository
+3. Run `dotnet restore` to restore dependencies
+4. Run `dotnet build` to compile
 
 ## Using the issue tracker
 
@@ -201,4 +230,3 @@ public void myMethod()
 ```
 
 A code with one exit point is easier to read as we are assured to not miss it.
-
