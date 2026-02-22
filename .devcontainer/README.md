@@ -1,60 +1,82 @@
 # Dev Container - Candoumbe.Types
-Environnement de développement complet et unifié pour **Candoumbe.Types** qui fonctionne sur Windows, Linux et macOS.
-## 🚀 Démarrage rapide
-### Option 1 : VS Code (Recommandé)
-1. Installez l'extension **Remote - Containers** dans VS Code
-2. Ouvrez le projet Candoumbe.Types
-3. Une notification apparaît : cliquez **"Reopen in Container"**
-4. Attendez la construction (5-10 minutes la première fois)
-### Option 2 : Docker Compose
+
+Complete and unified development environment for **Candoumbe.Types** that works on Windows, Linux, and macOS.
+
+## 🚀 Quick Start
+
+### Option 1: VS Code (Recommended)
+
+1. Install the **Remote - Containers** extension in VS Code
+2. Open the Candoumbe.Types project
+3. A notification appears: click **"Reopen in Container"**
+4. Wait for the build (5-10 minutes the first time)
+
+### Option 2: Docker Compose
+
 ```bash
 cd .devcontainer
 docker-compose up -d
 docker-compose exec dev-container bash
 cd /workspace && dotnet build
 ```
-## 📋 Prérequis
+
+## 📋 Prerequisites
+
 - **VS Code** : https://code.visualstudio.com/
 - **Docker Desktop** :
   - Windows : https://www.docker.com/products/docker-desktop (WSL2)
   - macOS : https://www.docker.com/products/docker-desktop
   - Linux : Docker Engine + Docker Compose
-## 📦 Contenu
+
+## 📦 Contents
+
 - ✅ .NET SDK 10.0 (netstandard2.0, netstandard2.1, net8.0, net9.0, net10.0)
-- ✅ Outils : Nuke, GitVersion, CodeCov, Stryker
-- ✅ Extensions VS Code : C# Dev Kit, EditorConfig, GitLens
-- ✅ CLI : Git, GitHub CLI, PowerShell
-- ✅ Caches optimisés : NuGet, .NET
-## 🔧 Commandes courantes
+- ✅ Tools: Nuke, GitVersion, CodeCov, Stryker
+- ✅ VS Code Extensions: C# Dev Kit, EditorConfig, GitLens
+- ✅ CLI: Git, GitHub CLI, PowerShell
+- ✅ Optimized Caches: NuGet, .NET
+
+## 🔧 Common Commands
+
 ```bash
-dotnet restore        # Restaurer dépendances
-dotnet build          # Compiler
-dotnet test           # Tests
-dotnet clean          # Nettoyer
-dotnet tool restore   # Outils globaux
+dotnet restore        # Restore dependencies
+dotnet build          # Build
+dotnet test           # Run tests
+dotnet clean          # Clean artifacts
+dotnet tool restore   # Global tools
 ```
-## 🛠️ Dépannage
-| Problème | Solution |
-|----------|----------|
-| Docker non trouvé | Installez Docker Desktop |
+
+## 🛠️ Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Docker not found | Install Docker Desktop |
 | Permissions (Linux) | `sudo usermod -aG docker $USER` |
-| NuGet lent | Normal première exécution (cache persistant ensuite) |
-| Extensions VS Code | Attendez la sync, rechargez la fenêtre |
-## 🌍 Plateformes
+| NuGet slow | Normal on first run (persistent cache afterward) |
+| VS Code extensions | Wait for sync, reload window |
+
+## 🌍 Supported Platforms
+
 ✅ Windows (WSL2)  
 ✅ macOS (Intel & Apple Silicon)  
 ✅ Linux
-## 📚 Fichiers
-- `devcontainer.json` : Configuration VS Code Remote Containers
-- `Dockerfile` : Image Docker personnalisée .NET 10.0
-- `docker-compose.yml` : Orchestration Docker
-- `README.md` : Cette documentation
+
+## 📚 Files
+
+- `devcontainer.json` : VS Code Remote Containers configuration
+- `Dockerfile` : Custom .NET 10.0 Docker image
+- `docker-compose.yml` : Docker orchestration
+- `README.md` : This documentation
+
 ## ℹ️ Notes
-- Les volumes nommés optimisent la performance sur macOS/Windows
-- Les variables d'environnement `DOTNET_*` désactivent la télémétrie
-- Allouez min 4 CPU, 8 GB RAM, 10 GB disque
-- Apple Silicon (M1/M2/M3) : Supporté natif via image ARM64
-## 📖 Ressources
+
+- Named volumes optimize performance on macOS/Windows
+- `DOTNET_*` environment variables disable telemetry
+- Allocate minimum 4 CPU, 8 GB RAM, 10 GB disk
+- Apple Silicon (M1/M2/M3): Natively supported via ARM64 image
+
+## 📖 Resources
+
 - [Dev Containers Documentation](https://containers.dev/)
 - [Microsoft Dev Containers for .NET](https://github.com/devcontainers/images/tree/main/src/dotnet)
 - [Candoumbe.Types Repository](https://github.com/candoumbe/Candoumbe.Types)
