@@ -7,7 +7,5 @@ if [ ! -f "Candoumbe.Types.sln" ]; then
     echo "❌ Error: Candoumbe.Types.sln not found!"
     exit 1
 fi
-dotnet clean
-dotnet restore
-dotnet build
+./build.sh compile
 echo "✅ Build completed successfully!"

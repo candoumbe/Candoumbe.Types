@@ -7,5 +7,5 @@ if [ ! -f "Candoumbe.Types.sln" ]; then
     echo "❌ Error: Candoumbe.Types.sln not found!"
     exit 1
 fi
-dotnet test --no-build --verbosity normal
+./build.sh unit-tests
 echo "✅ All tests completed!"
