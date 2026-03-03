@@ -1,7 +1,7 @@
 {
   "name": "Candoumbe.Types",
   "description": "Development container for Candoumbe.Types - Multi-platform .NET library",
-  "image": "mcr.microsoft.com/devcontainers/dotnet:1-10.0-jammy",
+  "dockerFile": "Dockerfile",
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
@@ -23,7 +23,8 @@
           "editor.defaultFormatter": "ms-dotnettools.csharp",
           "editor.formatOnSave": true,
           "editor.codeActionsOnSave": {
-            "source.fixAll.csharp": true
+            "source.fixAll.csharp": "always",
+            "source.organizeLinkDefinitions": "always"
           }
         },
         "editor.formatOnSave": true,
@@ -32,10 +33,9 @@
       }
     }
   },
-  "remoteUser": "vscode",
   "initializeCommand": "bash .devcontainer/scripts/select-engine.sh || pwsh -File .devcontainer/scripts/select-engine.ps1 || powershell -ExecutionPolicy Bypass -File .devcontainer/scripts/select-engine.ps1",
   "postCreateCommand": "bash -c 'dotnet restore && dotnet tool restore'",
-  "postStartCommand": "dotnet build",
+  "postStartCommand": "bash -c 'dotnet build'",
   "forwardPorts": [],
   "mounts": [
     "source=candoumbe-types-nuget-cache,target=/home/vscode/.nuget/packages,type=volume",
