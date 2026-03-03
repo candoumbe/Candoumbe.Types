@@ -31,7 +31,18 @@
         "omnisharp.enableRoslynAnalyzers": true,
         "omnisharp.enableEditorConfigSupport": true
       }
-    }
+    },
+    "jetbrains" : {
+      "settings": {
+        "com.intellij:app:HttpConfigurable.use_proxy_pac": true
+      },
+      "plugins" : [
+        "com.github.copilot",
+        "com.intellij.mermaid"
+        
+      ],
+      "backend" : "Rider"
+    },
   },
   "initializeCommand": "bash .devcontainer/scripts/select-engine.sh || pwsh -File .devcontainer/scripts/select-engine.ps1 || powershell -ExecutionPolicy Bypass -File .devcontainer/scripts/select-engine.ps1",
   "postCreateCommand": "bash -c 'dotnet restore && dotnet tool restore'",
