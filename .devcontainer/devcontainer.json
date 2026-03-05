@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
   "name": "Candoumbe.Types",
   "description": "Development container for Candoumbe.Types - Multi-platform .NET library",
   "dockerFile": "Dockerfile",
@@ -10,12 +11,13 @@
     "vscode": {
       "extensions": [
         "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
         "ms-dotnettools.vscode-dotnet-runtime",
         "EditorConfig.EditorConfig",
         "GitHub.copilot",
         "ms-vscode.makefile-tools",
         "ms-vscode-remote.remote-containers",
-        "eamodio.gitlens"
+        "github.vscode-pull-request-github"
       ],
       "settings": {
         "dotnet.defaultSolutionOrFolder": "${workspaceFolder}",
@@ -32,21 +34,19 @@
         "omnisharp.enableEditorConfigSupport": true
       }
     },
-    "jetbrains" : {
+    "jetbrains": {
       "settings": {
         "com.intellij:app:HttpConfigurable.use_proxy_pac": true
       },
-      "plugins" : [
+      "plugins": [
         "com.github.copilot",
         "com.intellij.mermaid"
-        
       ],
-      "backend" : "Rider"
+      "backend": "Rider"
     },
   },
   "initializeCommand": "bash .devcontainer/scripts/select-engine.sh || pwsh -File .devcontainer/scripts/select-engine.ps1 || powershell -ExecutionPolicy Bypass -File .devcontainer/scripts/select-engine.ps1",
-  "postCreateCommand": "bash -c 'dotnet restore && dotnet tool restore'",
-  "postStartCommand": "bash -c 'dotnet build'",
+  "postCreateCommand": "./devcontainer/scripts/build.sh",
   "forwardPorts": [],
   "mounts": [
     "source=candoumbe-types-nuget-cache,target=/home/vscode/.nuget/packages,type=volume",
