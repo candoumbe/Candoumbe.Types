@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🚀 New features
+- Added Dev Container configuration for consistent development environment
+- Added container engine selection scripts (`select-engine.sh`, `select-engine.ps1`)
+- Added VS Code tasks and launch configuration for building and debugging inside the container
+- Added JetBrains settings and plugins for enhanced development experience
+
+### 📝 Documentation
+- Updated `README.md` with Dev Container quick start guide
+- Updated `CONTRIBUTING.md` with development environment setup instructions
+
+### 🧹 Housekeeping
+- Added Dockerfile and Docker Compose configuration for the Dev Container
+- Added build, clean, and test helper scripts in `.devcontainer/scripts/`
+
 ## [0.5.0] / 2025-11-27
 ### 🚀 New features
 - Added `net10.0` TFM support ([#346](https://github.com/candoumbe/candoumbe.types/issues/346))
