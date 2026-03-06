@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  dev-container:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: candoumbe-types-dev
+    image: candoumbe-types-dev:latest
+    working_dir: /workspace
+    env_file:
+      - .env
+    volumes:
+      - ..:/workspace
+      - candoumbe-types-nuget-cache:/home/vscode/.nuget/packages
+      - candoumbe-types-dotnet-cache:/home/vscode/.dotnet
+    environment:
+      - DOTNET_CLI_TELEMETRY_OPTOUT=1
+      - DOTNET_NOLOGO=1
+    stdin_open: true
+    tty: true
+    command: bash
+volumes:
+  candoumbe-types-nuget-cache:
+  candoumbe-types-dotnet-cache:

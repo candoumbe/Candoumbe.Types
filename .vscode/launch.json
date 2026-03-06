@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // Utiliser IntelliSense pour déterminer quels attributs existent pour le débogage C#
+            // Utiliser le pointage pour la description des attributs existants
+            // Pour plus d’informations, consultez https://github.com/dotnet/vscode-csharp/blob/main/debugger-launchjson.md
+            "name": ".NET Core Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // Si vous avez modifié la version cible de .Net Framework, veillez à mettre à jour le chemin d’accès du programme.
+            "program": "${workspaceFolder}/build/bin/Debug/net8.0/Pipelines.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/build",
+            // Pour plus d’informations sur le champ « console », consultez https://aka.ms/VSCode-CS-LaunchJson-Console
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}

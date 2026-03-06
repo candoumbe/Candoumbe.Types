@@ -1,0 +1,11 @@
+.git
+.gitignore
+.vs
+.vscode
+**/.DS_Store
+**/node_modules
+**/bin
+**/obj
+**/.nuget
+*.log
+.editorconfig
