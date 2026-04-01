@@ -35,35 +35,22 @@ log_info "=========================================="
 log_info "Candoumbe.Types DevContainer Post-Start Setup"
 log_info "=========================================="
 
-# Update package manager
-log_info "Updating package manager..."
-sudo apt-get update > /dev/null 2>&1
-log_success "Package manager updated."
-
-# Install GitHub CLI if not present
-if ! command_exists gh; then
-    log_info "Installing GitHub CLI (gh)..."
-    if sudo apt-get install -y gh > /dev/null 2>&1; then
-        log_success "GitHub CLI installed successfully."
-    else
-        log_error "Failed to install GitHub CLI. Attempting alternative installation..."
-        if curl --proto '=https' --tlsv1.2 -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg > /dev/null 2>&1 && \
-           echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages focal main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
-           sudo apt-get update > /dev/null 2>&1 && \
-           sudo apt-get install -y gh > /dev/null 2>&1; then
-            log_success "GitHub CLI installed successfully (from archive)."
-        else
-            log_warning "Could not install GitHub CLI."
-        fi
-    fi
+# Check GitHub CLI availability (installed via devcontainer feature)
+if command_exists gh; then
+    log_success "GitHub CLI (gh) is available."
 else
-    log_success "GitHub CLI already installed."
+    log_warning "GitHub CLI (gh) is not available. Ensure it is installed via the devcontainer image or postCreate script."
 fi
 
 # Restore NuGet packages and build
 log_info "Restoring NuGet packages and building Candoumbe.Types..."
-./build.sh restore > /dev/null 2>&1
-log_success "NuGet packages restored and build completed."
+if output=$(./build.sh restore 2>&1); then
+    log_success "NuGet packages restored and build completed."
+else
+    log_error "NuGet packages restore/build failed. Output:"
+    echo "$output"
+    exit 1
+fi
 
 # Check GitHub authentication status
 log_info ""

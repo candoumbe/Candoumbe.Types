@@ -5,9 +5,6 @@
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "runArgs": [
-    "--userns=keep-id"
-  ],
   "containerUser": "vscode",
   "updateRemoteUserUID": true,
   "customizations": {
@@ -24,7 +21,7 @@
       }
     }
   },
-  "postCreateCommand": "./.devcontainer/scripts/post-create.sh",
-  "postStartCommand": "./.devcontainer/scripts/post-start.sh",
+  "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
+  "postStartCommand": "bash .devcontainer/scripts/post-start.sh",
   "remoteUser": "vscode"
 }
