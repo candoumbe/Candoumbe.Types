@@ -29,8 +29,6 @@ The easiest way to contribute is using the **Dev Container** configuration, whic
 
 **That's it!** No need to install .NET SDK, tools, or worry about version conflicts.
 
-For details, see [.devcontainer/README.md](.devcontainer/README.md)
-
 ### 💻 Local Setup (Alternative)
 
 If you prefer a local setup:
