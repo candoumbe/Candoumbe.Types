@@ -1,64 +1,27 @@
 {
-  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
   "name": "Candoumbe.Types",
-  "description": "Development container for Candoumbe.Types - Multi-platform .NET library",
-  "dockerFile": "Dockerfile",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:10.0",
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
+  "containerUser": "vscode",
+  "updateRemoteUserUID": true,
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-dotnettools.csharp",
         "ms-dotnettools.csdevkit",
-        "ms-dotnettools.vscode-dotnet-runtime",
-        "EditorConfig.EditorConfig",
+        "ms-dotnettools.csharp",
+        "editorconfig.editorconfig",
         "GitHub.copilot",
-        "ms-vscode.makefile-tools",
-        "ms-vscode-remote.remote-containers",
-        "github.vscode-pull-request-github"
+        "GitHub.vscode-pull-request-github"
       ],
       "settings": {
-        "dotnet.defaultSolutionOrFolder": "${workspaceFolder}",
-        "[csharp]": {
-          "editor.defaultFormatter": "ms-dotnettools.csharp",
-          "editor.formatOnSave": true,
-          "editor.codeActionsOnSave": {
-            "source.fixAll.csharp": "always",
-            "source.organizeLinkDefinitions": "always"
-          }
-        },
-        "editor.formatOnSave": true,
-        "omnisharp.enableRoslynAnalyzers": true,
-        "omnisharp.enableEditorConfigSupport": true
+        "dotnet.defaultSolution": "Candoumbe.Types.sln"
       }
-    },
-    "jetbrains": {
-      "settings": {
-        "com.intellij:app:HttpConfigurable.use_proxy_pac": true
-      },
-      "plugins": [
-        "com.github.copilot",
-        "com.intellij.mermaid"
-      ],
-      "backend": "Rider"
-    },
+    }
   },
-  "initializeCommand": "bash .devcontainer/scripts/select-engine.sh || pwsh -File .devcontainer/scripts/select-engine.ps1 || powershell -ExecutionPolicy Bypass -File .devcontainer/scripts/select-engine.ps1",
-  "postCreateCommand": "./devcontainer/scripts/build.sh",
-  "forwardPorts": [],
-  "mounts": [
-    "source=candoumbe-types-nuget-cache,target=/home/vscode/.nuget/packages,type=volume",
-    "source=candoumbe-types-dotnet-cache,target=/home/vscode/.dotnet,type=volume"
-  ],
-  "containerEnv": {
-    "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
-    "DOTNET_NOLOGO": "1"
-  },
-  "hostRequirements": {
-    "cpus": 2,
-    "memory": "4gb",
-    "storage": "10gb"
-  }
+  "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
+  "postStartCommand": "bash .devcontainer/scripts/post-start.sh",
+  "remoteUser": "vscode"
 }

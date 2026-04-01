@@ -54,8 +54,6 @@ This project comes with a **Dev Container** configuration that provides a comple
 
 **No local .NET installation needed!**
 
-For more details, see [.devcontainer/README.md](.devcontainer/README.md)
-
 ## Disclaimer
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
