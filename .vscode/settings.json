@@ -1,3 +1,4 @@
 {
-    "dotnet.defaultSolution": "Candoumbe.Types.sln"
+    "dotnet.defaultSolution": "Candoumbe.Types.sln",
+    "chat.newSession.defaultMode": "Squad"
 }
