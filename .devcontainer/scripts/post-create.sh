@@ -1,5 +1,5 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
 # Colors for output
 RED='\033[0;31m'
@@ -8,7 +8,6 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Helper function for formatted output
 log_info() {
     echo -e "${BLUE}ℹ️  $1${NC}"
 }
@@ -25,26 +24,18 @@ log_error() {
     echo -e "${RED}❌ $1${NC}"
 }
 
-# Main configuration section
-log_info "=========================================="
-log_info "Candoumbe.Types DevContainer Post-Create Setup"
-log_info "=========================================="
+# # Trust the local development certificate for ASP.NET Core
+# echo "[post-create] Trusting ASP.NET Core development certificate"
+# dotnet dev-certs https --trust
+# echo "[post-create] ASP.NET Core development certificate trusted"
 
-# Update package manager
-log_info "Updating package manager..."
-sudo apt-get update > /dev/null 2>&1
-log_success "Package manager updated."
 
-# Install xdg-utils for opening links in the default browser
-log_info "Installing xdg-utils..."
-sudo apt-get install -y xdg-utils > /dev/null 2>&1
-log_success "xdg-utils installed successfully."
+# Install squad 
+# Install squad CLI globally
+log_info "Installing squad CLI globally..."
+npm install -g @bradygaster/squad-cli > /dev/null 2>&1
+log_success "squad CLI installed successfully."
 
-log_info ""
-log_success "Post-create setup complete!"
-log_info ""
-log_info "Additional setup will run on container start (post-start)."
-log_info "This includes:"
-log_info "  • GitHub CLI configuration"
-log_info "  • Project restoration and build"
-log_info ""
+log_info "Initialize squad configuration..."
+squad init
+log_success "squad CLI initialized successfully."
