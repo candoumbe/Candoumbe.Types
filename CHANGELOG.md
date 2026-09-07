@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 🧹 Housekeeping
+- Removed the tracked devcontainer environment file.
 - Simplified devcontainer implementation to use official .NET 10.0 base image
 - Replaced custom Dockerfile and docker-compose setup with simpler configuration
 - Removed unnecessary devcontainer documentation files
