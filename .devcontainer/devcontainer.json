@@ -6,6 +6,9 @@
     "ghcr.io/devcontainers/features/git:1.3.8": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/copilot-cli:1.1.3": {},
+    "ghcr.io/devcontainers/features/dotnet": {
+      "version": "10.0.400"
+    },
     "ghcr.io/nils-geistmann/devcontainers-features/zsh": {
       "plugins": "git npm gh docker ng"
     },
