@@ -5,10 +5,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace></RootNamespace>
     <NoWarn>CS0649;CS0169</NoWarn>
-    <NukeRootDirectory>..</NukeRootDirectory>
-    <NukeScriptDirectory>..</NukeScriptDirectory>
-    <NukeTelemetryVersion>1</NukeTelemetryVersion>
-  </PropertyGroup>
+    <FalloutRootDirectory>..</FalloutRootDirectory>
+    <FalloutScriptDirectory>..</FalloutScriptDirectory>
+</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Candoumbe.Pipelines" />
@@ -17,8 +16,7 @@
     <PackageReference Include="Microsoft.Build.Tasks.Core" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="All" />
     <PackageReference Include="NuGet.Packaging" PrivateAssets="All" />
-    <PackageReference Include="System.Security.Cryptography.Xml" PrivateAssets="All" />
-  </ItemGroup>
+</ItemGroup>
 
   <ItemGroup>
     <PackageDownload Include="GitVersion.Tool" Version="[6.0.5]" />

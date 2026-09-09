@@ -5,15 +5,15 @@ using Candoumbe.Pipelines.Components;
 using Candoumbe.Pipelines.Components.GitHub;
 using Candoumbe.Pipelines.Components.NuGet;
 using Candoumbe.Pipelines.Tools;
-using Nuke.Common;
-using Nuke.Common.CI.GitHubActions;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.Codecov;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.GitHub;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using Fallout.Common;
+using Fallout.Common.CI.GitHubActions;
+using Fallout.Common.IO;
+using Fallout.Common.ProjectModel;
+using Fallout.Common.Tooling;
+using Fallout.Common.Tools.Codecov;
+using Fallout.Common.Tools.DotNet;
+using Fallout.Common.Tools.GitHub;
+using static Fallout.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions("integration", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
@@ -36,7 +36,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     EnableGitHubToken = true,
     ImportSecrets =
     [
-        nameof(NugetApiKey),
+        nameof(IPushNugetPackages.NuGetApiKey),
         nameof(IReportCoverage.CodecovToken)
     ],
     PublishArtifacts = true,
@@ -74,7 +74,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     EnableGitHubToken = true,
     ImportSecrets =
     [
-        nameof(NugetApiKey),
+        nameof(IPushNugetPackages.NuGetApiKey),
         nameof(IReportCoverage.CodecovToken),
         nameof(IMutationTest.StrykerDashboardApiKey)
     ],
@@ -98,7 +98,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     EnableGitHubToken = true,
     ImportSecrets =
     [
-        nameof(NugetApiKey),
+        nameof(IPushNugetPackages.NuGetApiKey),
         nameof(IReportCoverage.CodecovToken),
         nameof(IMutationTest.StrykerDashboardApiKey)
     ],
@@ -120,7 +120,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     EnableGitHubToken = true,
     ImportSecrets =
     [
-        nameof(NugetApiKey),
+        nameof(IPushNugetPackages.NuGetApiKey),
         nameof(IReportCoverage.CodecovToken)
     ],
     PublishArtifacts = true,
@@ -147,7 +147,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     EnableGitHubToken = true,
     PublishArtifacts = true
 )]
-public class Pipelines : EnhancedNukeBuild,
+public class Pipelines : EnhancedBuild,
     IHaveSolution,
     IHaveSourceDirectory,
     IHaveTestDirectory,
@@ -172,13 +172,6 @@ public class Pipelines : EnhancedNukeBuild,
 
     ///<inheritdoc/>
     Solution IHaveSolution.Solution => Solution;
-
-    /// <summary>
-    /// Token used to interact with GitHub API
-    /// </summary>
-    [Parameter("Token used to interact with Nuget API")]
-    [Secret]
-    public readonly string NugetApiKey;
 
     public static int Main() => Execute<Pipelines>(x => ((ICompile)x).Compile);
 
@@ -238,9 +231,9 @@ public class Pipelines : EnhancedNukeBuild,
     IEnumerable<PushNugetPackageConfiguration> IPushNugetPackages.PublishConfigurations =>
     [
         new NugetPushConfiguration(
-            apiKey: NugetApiKey,
+            apiKey: this.Get<IPushNugetPackages>()?.NuGetApiKey,
             source: new Uri("https://api.nuget.org/v3/index.json"),
-            canBeUsed: () => NugetApiKey is not null
+            canBeUsed: () => this.Get<IPushNugetPackages>()?.NuGetApiKey is not null
         ),
         new GitHubPushNugetConfiguration(
             githubToken: this.Get<ICreateGithubRelease>()?.GitHubToken,
