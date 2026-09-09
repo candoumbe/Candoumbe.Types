@@ -476,7 +476,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 # Nuke temporary directory
-/.nuke/temp
+/.fallout/temp
 .qodo
 
 # Stryker file reports
