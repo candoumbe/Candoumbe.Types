@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed unnecessary devcontainer documentation files
 - Streamlined VS Code extensions to only essential tools for .NET development
 - Added post-create and post-start scripts for container initialization
+- Upgraded Squad automation to 0.13.1 and initialized Squad roles.
+- Added and locked the .NET feature in the devcontainer.
+- Excluded `.env` files from version control.
+- Upgraded `build/Pipelines.csproj` to target `net10.0`.
+- Added private references to secure versions of `Microsoft.Build` (18.6.3), `NuGet.Packaging` (6.14.3), and `System.Security.Cryptography.Xml` (10.0.11) to resolve NU1903 warnings.
+
+### 🐛 Fixes
+- Corrected `DateOnlyRange.Overlaps` and `TimeOnlyRange.Overlaps` to use `override`.
 
 ## [0.5.0] / 2025-11-27
 ### 🚀 New features
