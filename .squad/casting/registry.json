@@ -1,3 +1,12 @@
 {
-  "agents": {}
+  "agents": {
+    "lead": { "persistent_name": "Lead", "universe": "descriptive", "created_at": "2026-09-09T11:13:32+0000", "legacy_named": false, "status": "active" },
+    "build": { "persistent_name": "Build", "universe": "descriptive", "created_at": "2026-09-09T11:13:32+0000", "legacy_named": false, "status": "active" },
+    "tester": { "persistent_name": "Tester", "universe": "descriptive", "created_at": "2026-09-09T11:13:32+0000", "legacy_named": false, "status": "active" },
+    "security": { "persistent_name": "Security", "universe": "descriptive", "created_at": "2026-09-09T11:13:32+0000", "legacy_named": false, "status": "active" },
+    "scribe": { "persistent_name": "Scribe", "universe": "descriptive", "created_at": "2026-09-09T11:13:32+0000", "legacy_named": false, "status": "active" },
+    "ralph": { "persistent_name": "Ralph", "universe": "descriptive", "created_at": "2026-09-09T11:13:32+0000", "legacy_named": false, "status": "active" },
+    "Rai": { "persistent_name": "Rai", "universe": "descriptive", "created_at": "2026-09-09T11:13:32+0000", "legacy_named": false, "status": "active" },
+    "fact-checker": { "persistent_name": "Fact Checker", "universe": "descriptive", "created_at": "2026-09-09T11:13:32+0000", "legacy_named": false, "status": "active" }
+  }
 }
