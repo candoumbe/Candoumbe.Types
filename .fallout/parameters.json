@@ -1,4 +1,5 @@
 {
-  "$schema": "./build.schema.json",
-  "Solution": "Candoumbe.Types.sln"
+  "$schema": "build.schema.json",
+  "Solution": "Candoumbe.Types.sln",
+  "BuildProjectFile": "./build/Pipelines.csproj"
 }
