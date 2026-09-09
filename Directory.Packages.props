@@ -12,7 +12,7 @@
     <PackageVersion Include="FluentAssertions" Version="[7.2.2]" />
     <PackageVersion Include="FluentValidation" Version="11.12.0" />
     <PackageVersion Include="FsCheck.XUnit" Version="3.4.0" />
-    <PackageVersion Include="Microsoft.Bcl.Memory" Version="10.0.4"/>
+    <PackageVersion Include="Microsoft.Bcl.Memory" Version="10.0.12"/>
     <PackageVersion Include="Microsoft.Build" Version="18.9.6" />
     <PackageVersion Include="Microsoft.Build.Framework" Version="18.9.6" />
     <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="18.9.6" />
@@ -23,7 +23,7 @@
     <PackageVersion Include="NuGet.Packaging" Version="6.14.3" />
     <PackageVersion Include="Optional" Version="4.0.0" />
     <PackageVersion Include="Roslynator.Analyzers" Version="4.16.1" />
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.11" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.12" />
     <PackageVersion Include="TngTech.ArchUnitNET.xUnitV3" Version="0.13.4"/>
     <PackageVersion Include="Stateless" Version="5.20.1" />
     <PackageVersion Include="Ultimately" Version="3.0.0" />
