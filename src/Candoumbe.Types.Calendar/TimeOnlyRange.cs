@@ -85,7 +85,7 @@ public record TimeOnlyRange : Range<TimeOnly>
         });
 
     /// <inheritdoc />
-    public bool Overlaps(TimeOnly other) => other.IsBetween(Start, End);
+    public override bool Overlaps(TimeOnly other) => other.IsBetween(Start, End);
 
     ///<inheritdoc/>
     public sealed override string ToString() => $"{Start} - {End}";

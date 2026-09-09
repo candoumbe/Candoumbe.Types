@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace></RootNamespace>
     <NoWarn>CS0649;CS0169</NoWarn>
     <NukeRootDirectory>..</NukeRootDirectory>
@@ -12,6 +12,12 @@
 
   <ItemGroup>
     <PackageReference Include="Candoumbe.Pipelines" />
+    <PackageReference Include="Microsoft.Build" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Build.Framework" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="All" />
+    <PackageReference Include="NuGet.Packaging" PrivateAssets="All" />
+    <PackageReference Include="System.Security.Cryptography.Xml" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
