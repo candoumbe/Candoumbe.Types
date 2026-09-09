@@ -498,3 +498,6 @@ $RECYCLE.BIN/
 .squad-workstream
 
 dotnet/
+
+# Environment files
+**/*/.env
