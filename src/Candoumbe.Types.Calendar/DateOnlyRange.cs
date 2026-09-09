@@ -41,7 +41,7 @@ public record DateOnlyRange : Range<DateOnly>, IRange<DateOnlyRange, DateOnly>, 
     }
 
     /// <inheritdoc/>
-    public bool Overlaps(DateOnly date) => Start <= date && date <= End;
+    public override bool Overlaps(DateOnly date) => Start <= date && date <= End;
 
     /// <summary>
     /// Builds a new <see cref="DateOnlyRange"/> that spans from <see cref="DateOnly.MinValue"/> up to <paramref name="date"/>

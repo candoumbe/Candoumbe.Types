@@ -6,6 +6,10 @@ How to decide who handles what.
 
 | Work Type | Route To | Examples |
 |-----------|----------|----------|
+| Architecture and code review | Lead | Design decisions, API review |
+| .NET build and dependencies | Build | NU warnings, package versions, CI pipelines |
+| Tests and validation | Tester | Unit tests, build verification, regressions |
+| Dependency security | Security | Vulnerability advisories, package audits |
 
 Preset installation adds concrete routes for the configured team. Add or edit rows
 here only when their agent names also exist in the casting registry.
