@@ -2,12 +2,22 @@ using System;
 
 namespace Candoumbe.Types.Core;
 
-/// <summary>
-/// Marker interface for intervals that can represent an interval in such way that, for any given <typeparamref name="TBound"/> value,
-/// <see cref="Infinite"/> overlaps any <typeparamref name="TInterval"/> value.
-/// </summary>
-/// <typeparam name="TInterval">Type of the interval</typeparam>
-/// <typeparam name="TBound">Type of the boundaries of the interval</typeparam>
+#if NET
+    /// <summary>
+    /// Marker interface for intervals that can represent an interval in such way that, for any given <typeparamref name="TBound"/> value,
+    /// For example, if an interval represents a range of numbers, an infinite interval would overlap with any specific number.
+    /// <see cref="Infinite"/> overlaps any <typeparamref name="TInterval"/> value.
+    /// </summary>
+    /// <typeparam name="TInterval">Type of the interval</typeparam>
+    /// <typeparam name="TBound">Type of the boundaries of the interval</typeparam>
+#else
+    /// <summary>
+    /// Marker interface for intervals that can represent an interval in such way that, for any given <typeparamref name="TBound"/> value,
+    /// For example, if an interval represents a range of numbers, an infinite interval would overlap with any specific number.
+    /// </summary>
+    /// <typeparam name="TInterval">Type of the interval</typeparam>
+    /// <typeparam name="TBound">Type of the boundaries of the interval</typeparam>
+#endif
 public interface ICanRepresentInfinite<TInterval, TBound>
     where TInterval : IRange<TInterval, TBound>, IComparable<TInterval> where TBound : IComparable<TBound>
 
