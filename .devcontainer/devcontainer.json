@@ -12,7 +12,7 @@
     "ghcr.io/nils-geistmann/devcontainers-features/zsh": {
       "plugins": "git npm gh docker ng"
     },
-    "ghcr.io/devcontainers/features/node:2.1.0": {
+    "ghcr.io/devcontainers/features/node:2.1.1": {
       "version": "24"
     }
   },
